@@ -196,7 +196,7 @@ function wpgmza_plugin_action_links( $links ) {
 
     if(!$wpgmza->isProVersion()){
         // Only show this link if the user is not a Pro user
-        $proLink = "https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=plugin_link_upgrade";
+        $proLink = "https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=plugin_link_upgrade-v10";
 		if(!$wpgmza->internalEngine->isLegacy()){
             $proLink .= "-atlas-novus";
         }
@@ -855,8 +855,7 @@ function wpgmaps_tag_basic( $atts )
 	if($gutenbergIndex !== false)
 		array_splice($core_dependencies, $gutenbergIndex, 1);
 
-	if(isset($wpgmza_settings['wpgmza_maps_engine']) && $wpgmza_settings['wpgmza_maps_engine'] == 'open-layers')
-	{
+	if(isset($wpgmza_settings['wpgmza_maps_engine']) && $wpgmza_settings['wpgmza_maps_engine'] != 'google-maps') {
 		if($index = array_search('wpgmza-google-vertex-context-menu', $core_dependencies))
 			array_splice($core_dependencies, $index, 1);
 	}
@@ -1035,7 +1034,7 @@ function wpgmza_review_nag() {
                 if ($days_diff >= 10) {
                     $rate_text = sprintf( __( '<h3>We need your love!</h3><p>If you are enjoying our plugin, please consider <a href="%1$s" target="_blank" class="button-border button-border__green">reviewing WP Go Maps</a>. It would mean the world to us! If you are experiencing issues with the plugin, please <a href="%2$s" target="_blank"  class="button-border button-border__green">contact us</a> and we will help you as soon as humanly possible!</p>', 'wp-google-maps' ),
                         esc_attr('https://wordpress.org/support/view/plugin-reviews/wp-google-maps?filter=5'),
-                        esc_attr('http://www.wpgmaps.com/contact-us/')
+                        esc_attr('http://www.wpgmaps.com/contact-us/?utm_source=plugin&amp;utm_medium=link&amp;utm_campaign=review-request-contact-us')
                     );
                     echo "<style>.wpgmza_upgrade_nag { display:none; }</style>";
                     echo "<div class='updated wpgmza_nag_review_div'>".$rate_text."<p><a href='admin.php?page=wp-google-maps-menu&action2=close_review' class='wpgmza_close_review_nag button-border button-border__green' title='".__("We will not nag you again, promise!","wp-google-maps")."'>".__("Close","wp-google-maps")."</a></p></div>";
@@ -1049,7 +1048,7 @@ function wpgmza_map_page() {
     
 
     if (isset($_GET['action2']) && $_GET['action2'] == "close_review") {
-        update_option("wpgmza_review_nag",time());
+        update_option("wpgmza_review_nag",time(), false);
     }
 
     wpgmza_review_nag();    
@@ -1084,7 +1083,7 @@ function wpgmza_map_page() {
     else {
         wpgmza_stats("list_maps_basic");
         echo"<div class=\"wrap\"><h1>".__("My Maps","wp-google-maps")."</h1>";
-        echo"<p class='wpgmza_upgrade_nag'><i><a href='".wpgm_pro_link("https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=mappage_1")."' target=\"_BLANK\" title='".__("Pro Version","wp-google-maps")."'>".__("Create unlimited maps","wp-google-maps")."</a> ".__("with the","wp-google-maps")." <a href='".wpgm_pro_link("https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=mappage_2")."' title='Pro Version'  target=\"_BLANK\">".__("Pro Version","wp-google-maps")."</a> ".__("of WP Go Maps.","wp-google-maps")."</i></p>";
+        echo"<p class='wpgmza_upgrade_nag'><i><a href='".wpgm_pro_link("https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=mappage_1-v10")."' target=\"_BLANK\" title='".__("Pro Version","wp-google-maps")."'>".__("Create unlimited maps","wp-google-maps")."</a> ".__("with the","wp-google-maps")." <a href='".wpgm_pro_link("https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=mappage_2-v10")."' title='Pro Version'  target=\"_BLANK\">".__("Pro Version","wp-google-maps")."</a> ".__("of WP Go Maps.","wp-google-maps")."</i></p>";
 
         $my_theme = wp_get_theme();
 
@@ -1434,7 +1433,7 @@ function wpgmza_stats($sec) {
 
 
     }
-    update_option("wpgmza_stats",$wpgmza_stats);
+    update_option("wpgmza_stats", $wpgmza_stats, false);
 
 }
 
