@@ -33,6 +33,11 @@ class SettingsPage extends Page {
 			$this->form->querySelector('input[name="wpgmza_gdpr_require_consent_before_load"]')->setAttribute('disabled', 'disabled');
 		}
 
+		if(class_exists("WPML_Translation_Management")){
+			$this->form->querySelector('.wpgmza-wpml-notice')->removeClass('wpgmza-hidden');
+			$this->form->querySelector('select[name="locale_override"]')->setAttribute('disabled', 'disabled');
+		}
+
 		/* Tile Server Select */
 		if($tileServerSelectContainer = $this->document->querySelector('[data-tile-server-select-container]')) {
 			$tileServerSelect = new TileServerSelect(array('name' => 'tile_server_url'));
@@ -66,6 +71,10 @@ class SettingsPage extends Page {
 		} else {
 			if(!$this->isNonceValid($this->form, $_POST['nonce']))
 				throw new \Exception("Invalid nonce");
+
+			if(!$wpgmza->isUserAllowedToEdit()){
+				throw new \Exception("You do not have permission to perform this action");
+			}
 			
 			$oldPullMethod	= $wpgmza->settings->wpgmza_settings_marker_pull;
 			
