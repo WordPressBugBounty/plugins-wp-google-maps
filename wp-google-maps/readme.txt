@@ -5,7 +5,7 @@ Tags: google maps, maps, map, leaflet, store locator
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.0
-Stable tag: 10.1.01
+Stable tag: 10.1.02
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -217,6 +217,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
+= 10.1.02 =
+Please update to 10.1.02 or above to ensure you are using the latest security enhancements.
+
 = 10.1.00 =
 Please update to 10.1.00 or above to ensure you are using the latest security enhancements.
 
@@ -230,6 +233,10 @@ Please update to 10.0.08 or above for the latest stability improvements.
 Please update to 10.0.07 or above to ensure you are using the latest architecture, and latest features.
 
 == Changelog ==
+
+= 10.1.02 - 2026-06-15 =
+* Fixed issue where unauthenticated requests could trigger unintended database writes via the DataTables REST endpoint. Security issue, thanks to Thanh Diem (Wordfence)
+* Fixed issue where Datatables language files may not load correctly in some environments due to name case. Fallback system developed to resolve and fail gracefully if unavailable
 
 = 10.1.01 - 2026-06-10 =
 * Added a canonical POT translation template (languages/wp-google-maps.pot) so translators and contributors can generate and maintain language files from a single source rather than reconstructing the template locally each pass
