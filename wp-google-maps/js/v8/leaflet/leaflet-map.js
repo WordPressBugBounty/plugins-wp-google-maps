@@ -356,6 +356,11 @@ jQuery(function($) {
 				/* Remap to zerocost settings */
 				url = WPGMZA.settings.tile_server_url_leaflet_zerocost ? WPGMZA.settings.tile_server_url_leaflet_zerocost : url;
 				break;
+			case 'leaflet-mapiron':
+				/* Remap to MapIron settings */
+				url = WPGMZA.settings.tile_server_url_leaflet_mapiron ? WPGMZA.settings.tile_server_url_leaflet_mapiron : url;
+				tileKey = WPGMZA.settings.wpgmza_leaflet_mapiron_key ? WPGMZA.settings.wpgmza_leaflet_mapiron_key : tileKey;
+				break;
 		}
 
 		const config = this.settings.configureTileServer(url, {

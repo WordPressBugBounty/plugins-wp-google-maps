@@ -27,6 +27,7 @@ jQuery(function($) {
 			case 'leaflet-stadia':
 			case 'leaflet-maptiler':
 			case 'leaflet-locationiq':
+			case 'leaflet-mapiron':
 			case 'leaflet-zerocost':
 				this.element.remove();
 				this.leafletThemeEditor = new WPGMZA.LeafletThemeEditor();

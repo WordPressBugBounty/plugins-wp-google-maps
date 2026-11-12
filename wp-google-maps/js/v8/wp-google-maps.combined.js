@@ -585,6 +585,7 @@ jQuery(function($) {
 				case "leaflet-stadia":
 				case "leaflet-maptiler":
 				case "leaflet-locationiq":
+				case "leaflet-mapiron":
 				case "leaflet-zerocost":
 					/* Leaflet */
 					engine = "Leaflet";
@@ -824,6 +825,22 @@ jQuery(function($) {
 
 		initMaps: function(){
 			$(document.body).find(".wpgmza_map:not(.wpgmza-initialized)").each(function(index, el) {
+				/* Google engine: don't attempt construction until the Maps API is
+				 * actually present. Without this, each 2 second retry runs the full
+				 * Map constructor (pushing a partial map onto WPGMZA.maps and binding
+				 * listeners) before throwing at `new google.maps.Map`, leaving a dead
+				 * entry at WPGMZA.maps[0]. Gating here lets a consent plugin hold back
+				 * only the Google Maps API script and release it on consent: the next
+				 * retry then builds the real map cleanly, with no page reload.
+				 *
+				 * Exception: when our own GDPR setting is holding the API back
+				 * (USER_CONSENT_NOT_GIVEN), the Map constructor still needs to run so it
+				 * can render the consent notice, so we must not skip in that case. */
+				if(WPGMZA.settings && WPGMZA.settings.engine == "google-maps" && (!window.google || !window.google.maps)
+					&& !(WPGMZA.googleAPIStatus && WPGMZA.googleAPIStatus.code == "USER_CONSENT_NOT_GIVEN")){
+					return;
+				}
+
 				if(el.wpgmzaMap) {
 					if(WPGMZA.googleAPIStatus && WPGMZA.googleAPIStatus.code == "USER_CONSENT_NOT_GIVEN"){
 						/* User has not granted access, fail silently */
@@ -6203,6 +6220,7 @@ jQuery(function($) {
                     case 'leaflet-stadia':
                     case 'leaflet-maptiler':
                     case 'leaflet-zerocost':
+                    case 'leaflet-mapiron':
                         /* Nominatim */
                         provider = WPGMZA.Autocomplete.Providers.NOMINATIM;
                         break;
@@ -9008,6 +9026,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				return WPGMZA.LeafletDrawingManager;
 				break;
@@ -9607,6 +9626,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(this.leafletFeature && this.leafletFeature instanceof L.Path){
 					this.leafletFeature.setStyle(WPGMZA.LeafletFeature.getLeafletStyle(props));
@@ -9835,6 +9855,7 @@ jQuery(function($) {
                     case 'leaflet-stadia':
                     case 'leaflet-maptiler':
                     case 'leaflet-zerocost':
+                    case 'leaflet-mapiron':
 						provider = WPGMZA.Geocoder.Providers.LEAFLET;
                         break;
                         break;
@@ -10235,6 +10256,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion())
 					return WPGMZA.LeafletProInfoWindow;
@@ -10835,7 +10857,7 @@ jQuery(function($) {
 
 	WPGMZA.Installer.prototype.hasSatisfiedStepCondition = function(condition){
 		let satisfied = false;
-		let keyEngines = ['google-maps', 'leaflet-azure', 'leaflet-stadia', 'leaflet-maptiler', 'leaflet-locationiq']
+		let keyEngines = ['google-maps', 'leaflet-azure', 'leaflet-stadia', 'leaflet-maptiler', 'leaflet-locationiq', 'leaflet-mapiron']
 		switch(condition){
 			case 'engine-set-up':
 				satisfied = (this.engine && keyEngines.indexOf(this.engine) !== -1) ? (this.apiKey ? true : false) : true 
@@ -13228,6 +13250,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
 					return WPGMZA.LeafletProMap;
@@ -13450,7 +13473,7 @@ jQuery(function($) {
 							$(this.element).css('--wpgmza-ol-tile-filter', tileFilter);
 						}
 					} 
-				} else if(WPGMZA.settings.engine === 'leaflet' || WPGMZA.settings.engine === 'leaflet-azure' || WPGMZA.settings.engine === 'leaflet-stadia' || WPGMZA.settings.engine === 'leaflet-maptiler' || WPGMZA.settings.engine === 'leaflet-locationiq' || WPGMZA.settings.engine === 'leaflet-zerocost'){
+				} else if(WPGMZA.settings.engine === 'leaflet' || WPGMZA.settings.engine === 'leaflet-azure' || WPGMZA.settings.engine === 'leaflet-stadia' || WPGMZA.settings.engine === 'leaflet-maptiler' || WPGMZA.settings.engine === 'leaflet-locationiq' || WPGMZA.settings.engine === 'leaflet-mapiron' || WPGMZA.settings.engine === 'leaflet-zerocost'){
 					if(this.settings.wpgmza_leaflet_tile_filter){
 						let tileFilter = this.settings.wpgmza_leaflet_tile_filter.trim();
 						if(tileFilter){
@@ -14992,6 +15015,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion())
 					return WPGMZA.LeafletProMarker;
@@ -15607,6 +15631,7 @@ jQuery(function($) {
 			case 'leaflet-stadia':
 			case 'leaflet-maptiler':
 			case 'leaflet-locationiq':
+			case 'leaflet-mapiron':
 			case 'leaflet-zerocost':
 				return new WPGMZA.LeafletModernStoreLocatorCircle(map, settings);
 				break;
@@ -16485,6 +16510,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
 					return WPGMZA.LeafletProPointlabel;
@@ -16843,6 +16869,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion())
 					return WPGMZA.LeafletProPolygon;
@@ -16991,6 +17018,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion())
 					return WPGMZA.LeafletProPolyline;
@@ -18226,6 +18254,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
 					constructor = WPGMZA.LeafletProCircle;
@@ -18456,6 +18485,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
 					constructor = WPGMZA.LeafletProRectangle;
@@ -20258,6 +20288,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				return new WPGMZA.LeafletText(options);
 				break;
@@ -20393,6 +20424,7 @@ jQuery(function($) {
 			case 'leaflet-stadia':
 			case 'leaflet-maptiler':
 			case 'leaflet-locationiq':
+			case 'leaflet-mapiron':
 			case 'leaflet-zerocost':
 				this.element.remove();
 				this.leafletThemeEditor = new WPGMZA.LeafletThemeEditor();
@@ -20838,6 +20870,7 @@ jQuery(function($) {
 			case 'leaflet-stadia':
 			case 'leaflet-maptiler':
 			case 'leaflet-locationiq':
+			case 'leaflet-mapiron':
 			case 'leaflet-zerocost':
 				this.element.remove();
 				/* Swap for the Leaflet Theme Panel instead */
@@ -21153,6 +21186,7 @@ jQuery(function($) {
                     tokenFieldName = 'wpgmza_leaflet_maptiler_key';
                     break;
                 case 'leaflet-locationiq':
+                case 'leaflet-mapiron':
                     tokenFieldName = 'wpgmza_leaflet_locationiq_key';
                     break;
             }
@@ -26988,6 +27022,11 @@ jQuery(function($) {
 				/* Remap to zerocost settings */
 				url = WPGMZA.settings.tile_server_url_leaflet_zerocost ? WPGMZA.settings.tile_server_url_leaflet_zerocost : url;
 				break;
+			case 'leaflet-mapiron':
+				/* Remap to MapIron settings */
+				url = WPGMZA.settings.tile_server_url_leaflet_mapiron ? WPGMZA.settings.tile_server_url_leaflet_mapiron : url;
+				tileKey = WPGMZA.settings.wpgmza_leaflet_mapiron_key ? WPGMZA.settings.wpgmza_leaflet_mapiron_key : tileKey;
+				break;
 		}
 
 		const config = this.settings.configureTileServer(url, {
@@ -28322,7 +28361,7 @@ jQuery(function($) {
 
         let labelStyles = [];
         labelStyles.push("width: fit-content");
-        labelStyles.push("font: bold " + this.styleOptions.fontSize + "px \"Open Sans\", \"Arial Unicode MS\", \"sans-serif\"");
+        labelStyles.push("font: bold " + this.styleOptions.fontSize + "px \"Open Sans\", \"Arial Unicode MS\", sans-serif");
         labelStyles.push("color: " + this.styleOptions.fillColor);
         labelStyles.push("z-index: 10");
         labelStyles.push("text-shadow: -1px -1px 0 " + this.styleOptions.strokeColor + ", 1px -1px 0 " + this.styleOptions.strokeColor + ", -1px 1px 0 " + this.styleOptions.strokeColor + ", 1px 1px 0 " + this.styleOptions.strokeColor);
@@ -30470,7 +30509,7 @@ jQuery(function($) {
 			 * stay intact — the emoji is a universal symbol that doesn't
 			 * need translating. Guarded against double-application (rerun)
 			 * via the .data() flag. */
-			var KEYED_ENGINES = ['google-maps', 'leaflet-azure', 'leaflet-stadia', 'leaflet-maptiler', 'leaflet-locationiq'];
+			var KEYED_ENGINES = ['google-maps', 'leaflet-azure', 'leaflet-stadia', 'leaflet-maptiler', 'leaflet-locationiq', 'leaflet-mapiron'];
 			$(document.body).find('.wpgmza-engine-switch-toolbar select option').each(function(){
 				var $opt = $(this);
 				if($opt.data('keyBadgeApplied')) return;
@@ -34546,7 +34585,7 @@ jQuery(function($) {
 
         let labelStyles = [];
         labelStyles.push("width: fit-content");
-        labelStyles.push("font: bold " + this.styleOptions.fontSize + "px \"Open Sans\", \"Arial Unicode MS\", \"sans-serif\"");
+        labelStyles.push("font: bold " + this.styleOptions.fontSize + "px \"Open Sans\", \"Arial Unicode MS\", sans-serif");
         labelStyles.push("color: " + this.styleOptions.fillColor);
         labelStyles.push("z-index: 10");
         labelStyles.push("text-shadow: -1px -1px 0 " + this.styleOptions.strokeColor + ", 1px -1px 0 " + this.styleOptions.strokeColor + ", -1px 1px 0 " + this.styleOptions.strokeColor + ", 1px 1px 0 " + this.styleOptions.strokeColor);

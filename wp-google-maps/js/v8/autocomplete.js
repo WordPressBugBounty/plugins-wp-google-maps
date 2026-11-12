@@ -78,6 +78,7 @@ jQuery(function($) {
                     case 'leaflet-stadia':
                     case 'leaflet-maptiler':
                     case 'leaflet-zerocost':
+                    case 'leaflet-mapiron':
                         /* Nominatim */
                         provider = WPGMZA.Autocomplete.Providers.NOMINATIM;
                         break;

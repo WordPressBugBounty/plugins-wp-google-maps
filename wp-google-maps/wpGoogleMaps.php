@@ -3,7 +3,7 @@
 Plugin Name: WP Go Maps (formerly WP Google Maps)
 Plugin URI: https://www.wpgmaps.com
 Description: The easiest to use Google Maps plugin! Create custom Google Maps or a map block with high quality markers containing locations, descriptions, images and links. Add your customized map to your WordPress posts and/or pages quickly and easily with the supplied shortcode. No fuss.
-Version: 10.1.10
+Version: 10.1.11
 Author: WP Go Maps (formerly WP Google Maps)
 Author URI: https://www.wpgmaps.com
 Text Domain: wp-google-maps
@@ -14,6 +14,14 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 
 /*
+ * 10.1.11 - 2026-11-12
+ * Fixed a stored cross-site scripting (XSS) issue where marker and shape title and link fields could store unsanitised HTML or script. Security issue.
+ * Fixed a stored cross-site scripting (XSS) issue where a Gutenberg block's attributes could inject HTML or script into the page when the map or store locator block was rendered. Security issue, thanks to Khanh Nguyen (Patchstack).
+ * Fixed issue where approving a pending marker, or any partial marker save, could delete the marker's image gallery.
+ * Fixed issue where polygon and point label text overlay labels could display in a serif font on some devices (such as iOS) because the generic sans-serif family was quoted. The label font now falls back correctly.
+ * Improved the Google Maps engine so maps start automatically once the Google Maps API becomes available after the page has loaded, for example when a consent plugin releases it, without requiring a page reload.
+ * Added MapIron as a built-in map engine preset for the Leaflet based engines, with the OpenStreetMap credit set automatically.
+ *
  * 10.1.10 - 2026-09-28
  * Fixed issue where the compressed marker ID buffer could be undersized for certain marker sets, causing the server to reject the request and marker searches to return no results. Thanks to Adamcengel
  * Fixed issue where the compressed marker ID list could be corrupted when a large gap existed between filtered marker. Thanks to Mikael Føyen

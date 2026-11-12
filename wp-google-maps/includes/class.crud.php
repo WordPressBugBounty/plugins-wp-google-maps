@@ -566,9 +566,8 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		$this->assert_not_trashed();
 		
 		if(is_string($arg)){
-			if(is_string($val)){
-				$val = wp_kses_post($val);
-			}
+			// Sanitising happens in __set() (field-typed); don't pre-filter here or
+			// link/title values would be KSES-encoded before __set() can see them.
 			$this->__set($arg, $val);
 		} else if(is_array($arg) || is_object($arg)){
 			foreach($arg as $key => $value){
@@ -576,12 +575,19 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 					throw new \Exception('Property is read only');
 				}
 				
-				if(is_string($value)){
+				// Sanitise by field type. 'link' is a URL and 'title' is plain text,
+				// so each uses the sanitiser matched to it; every other string field
+				// keeps the post-level KSES filter. The previous html_entity_decode()
+				// on link/title was removed because it undid KSES: entity-encoded
+				// markup such as &lt;img onerror=...&gt; was decoded back into live
+				// HTML and stored, producing a stored XSS vector. esc_url_raw() also
+				// strips dangerous link schemes such as javascript:.
+				if($key === 'link'){
+					$value = is_string($value) ? esc_url_raw($value) : $value;
+				} else if($key === 'title'){
+					$value = is_string($value) ? sanitize_text_field($value) : $value;
+				} else if(is_string($value)){
 					$value = wp_kses_post($value);
-				}
-
-				if($key === 'link' || $key === 'title'){
-					$value = html_entity_decode($value);
 				}
 
 				$this->fields[$key] = $value;
@@ -704,11 +710,18 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		if($this->is_read_only($name))
 			throw new \Exception('Property is read only');
 		
-		if(is_string($value)){
-			// $value = htmlspecialchars_decode(wp_kses_post($value));
+		// Sanitise by field type, mirroring set(): 'link' is a URL and 'title' is
+		// plain text, so each uses its matching sanitiser; every other string field
+		// keeps the post-level KSES filter. esc_url_raw() also strips dangerous link
+		// schemes such as javascript:.
+		if($name === 'link'){
+			$value = is_string($value) ? esc_url_raw($value) : $value;
+		} else if($name === 'title'){
+			$value = is_string($value) ? sanitize_text_field($value) : $value;
+		} else if(is_string($value)){
 			$value = wp_kses_post($value);
 		}
-		
+
 		$this->fields[$name] = $value;
 		
 		$columns = $this->get_columns();

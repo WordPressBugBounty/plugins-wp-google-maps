@@ -332,7 +332,7 @@ jQuery(function($) {
 
 	WPGMZA.Installer.prototype.hasSatisfiedStepCondition = function(condition){
 		let satisfied = false;
-		let keyEngines = ['google-maps', 'leaflet-azure', 'leaflet-stadia', 'leaflet-maptiler', 'leaflet-locationiq']
+		let keyEngines = ['google-maps', 'leaflet-azure', 'leaflet-stadia', 'leaflet-maptiler', 'leaflet-locationiq', 'leaflet-mapiron']
 		switch(condition){
 			case 'engine-set-up':
 				satisfied = (this.engine && keyEngines.indexOf(this.engine) !== -1) ? (this.apiKey ? true : false) : true 

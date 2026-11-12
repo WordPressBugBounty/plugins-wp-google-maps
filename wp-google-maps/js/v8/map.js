@@ -164,6 +164,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
 					return WPGMZA.LeafletProMap;
@@ -386,7 +387,7 @@ jQuery(function($) {
 							$(this.element).css('--wpgmza-ol-tile-filter', tileFilter);
 						}
 					} 
-				} else if(WPGMZA.settings.engine === 'leaflet' || WPGMZA.settings.engine === 'leaflet-azure' || WPGMZA.settings.engine === 'leaflet-stadia' || WPGMZA.settings.engine === 'leaflet-maptiler' || WPGMZA.settings.engine === 'leaflet-locationiq' || WPGMZA.settings.engine === 'leaflet-zerocost'){
+				} else if(WPGMZA.settings.engine === 'leaflet' || WPGMZA.settings.engine === 'leaflet-azure' || WPGMZA.settings.engine === 'leaflet-stadia' || WPGMZA.settings.engine === 'leaflet-maptiler' || WPGMZA.settings.engine === 'leaflet-locationiq' || WPGMZA.settings.engine === 'leaflet-mapiron' || WPGMZA.settings.engine === 'leaflet-zerocost'){
 					if(this.settings.wpgmza_leaflet_tile_filter){
 						let tileFilter = this.settings.wpgmza_leaflet_tile_filter.trim();
 						if(tileFilter){

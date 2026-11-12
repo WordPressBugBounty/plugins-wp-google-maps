@@ -381,7 +381,7 @@ class AdminNotices {
 					/* We handle this here for simplicity - but it belongs somewhere else to be honest */
 					global $wpgmza;
 					$switch = !empty($_POST['map_engine']) ? sanitize_text_field($_POST['map_engine']) : false;
-					$valid = array("google-maps", "leaflet-azure", "leaflet-stadia", "leaflet-maptiler", "leaflet-locationiq", "leaflet-zerocost", "leaflet", "open-layers-latest");
+					$valid = array("google-maps", "leaflet-azure", "leaflet-stadia", "leaflet-maptiler", "leaflet-locationiq", "leaflet-mapiron", "leaflet-zerocost", "leaflet", "open-layers-latest");
 					
 					if(in_array($switch, $valid)){
 						/* Valid switch */
@@ -404,6 +404,7 @@ class AdminNotices {
 								}
 								break;
 							case 'leaflet-locationiq':
+							case 'leaflet-mapiron':
 								if(empty($wpgmza->settings->tile_server_url_leaflet_locationiq)){
 									$wpgmza->settings->tile_server_url_leaflet_locationiq = "https://{s}-tiles.locationiq.com/v3/streets/r/{z}/{x}/{y}.png";
 								}

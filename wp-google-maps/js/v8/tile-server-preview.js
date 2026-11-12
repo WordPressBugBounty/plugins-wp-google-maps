@@ -229,6 +229,7 @@ jQuery(function($) {
                     tokenFieldName = 'wpgmza_leaflet_maptiler_key';
                     break;
                 case 'leaflet-locationiq':
+                case 'leaflet-mapiron':
                     tokenFieldName = 'wpgmza_leaflet_locationiq_key';
                     break;
             }

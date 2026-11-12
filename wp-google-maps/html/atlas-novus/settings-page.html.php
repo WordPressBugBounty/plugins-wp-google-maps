@@ -137,7 +137,13 @@
 						<div class="wpgmza-map-engine-item-backdrop"></div>
 						<img src="<?php echo WPGMZA_PLUGIN_DIR_URL; ?>images/location_iq_logo.png" />
 					</label>
-					
+
+					<label class="wpgmza-map-engine-item" title="<?php esc_attr_e('MapIron', 'wp-google-maps'); ?>">
+						<input type="radio" name="wpgmza_maps_engine" value="leaflet-mapiron" class="wpgmza-hidden" />
+						<div class="wpgmza-map-engine-item-backdrop"></div>
+						<img src="<?php echo WPGMZA_PLUGIN_DIR_URL; ?>images/mapiron_logo.png" />
+					</label>
+
 					<label class="wpgmza-map-engine-item" title="<?php esc_attr_e('Zero Cost Mapping Preset', 'wp-google-maps'); ?>">
 						<input type="radio" name="wpgmza_maps_engine" value="leaflet-zerocost" class="wpgmza-hidden" />
 						<div class="wpgmza-map-engine-item-backdrop"></div>
@@ -171,11 +177,12 @@
 				</div>
 
 				<!-- Powered by leaflet notice -->
-				<div class='wpgmza-map-engine-powered-by' data-required-maps-engine="leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost">
+				<div class='wpgmza-map-engine-powered-by' data-required-maps-engine="leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost|leaflet-mapiron">
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-azure"><?php esc_html_e("Microsoft Azure Maps", "wp-google-maps"); ?></span> 
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-stadia"><?php esc_html_e("Stadia Maps", "wp-google-maps"); ?></span> 
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-maptiler"><?php esc_html_e("Maptiler", "wp-google-maps"); ?></span> 
-					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-locationiq"><?php esc_html_e("Location IQ", "wp-google-maps"); ?></span> 
+					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-locationiq"><?php esc_html_e("Location IQ", "wp-google-maps"); ?></span>
+					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-mapiron"><?php esc_html_e("MapIron", "wp-google-maps"); ?></span> 
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-zerocost"><?php esc_html_e("Zero Cost Mapping", "wp-google-maps"); ?></span> 
 					<span><?php esc_html_e("is powered by", "wp-google-maps"); ?></span>
 					<span class='wpgmza-map-engine-powered-by-highlight'>
@@ -225,6 +232,20 @@
 		<div class="tab-row has-hint" data-required-maps-engine="leaflet-locationiq">
 			<div class="title"><?php _e('LocationIQ Access Token (required)', 'wp-google-maps'); ?></div>
 			<input name="wpgmza_leaflet_locationiq_key" id='wpgmza_leaflet_locationiq_key' style='width: 40%;' />
+		</div>
+
+		<!-- MapIron API key -->
+		<div class="tab-row has-hint" data-required-maps-engine="leaflet-mapiron">
+			<div class="title"><?php _e('MapIron Key (required)', 'wp-google-maps'); ?></div>
+			<input name="wpgmza_leaflet_mapiron_key" id='wpgmza_leaflet_mapiron_key' style='width: 40%;' />
+		</div>
+
+		<!-- MapIron key hint -->
+		<div class="tab-row" data-required-maps-engine="leaflet-mapiron">
+			<div class="title"></div>
+			<small class="hint">
+				<?php _e("This key can be obtained from <a href='https://mapiron.com/?r=wpgomaps' target='_BLANK'>MapIron</a>.", "wp-google-maps"); ?>
+			</small>
 		</div>
 
 		<!-- Google API key hint -->
@@ -1893,6 +1914,15 @@
 			</div>
 
 			<!-- TileServerSelect - Filtered LocationIQ -->
+		</div>
+
+		<!-- MapIron Tile Server -->
+		<div class="tab-row" data-required-maps-engine="leaflet-mapiron" data-tile-server-select-container-filtered="MapIron">
+			<div class="title">
+				<?php esc_html_e('Map Style', 'wp-google-maps'); ?>
+			</div>
+
+			<!-- TileServerSelect - Filtered MapIron -->
 		</div>
 
 		<!-- Zero Cost Tile Server -->	

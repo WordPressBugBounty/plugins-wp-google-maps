@@ -683,6 +683,7 @@ class ScriptLoader
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				$loader = LeafletLoader::createInstance();
 				$loader->load($forceLoad);
@@ -736,6 +737,7 @@ class ScriptLoader
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				$loader = LeafletLoader::createInstance();
 				$loader->load();

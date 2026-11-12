@@ -55,7 +55,7 @@ jQuery(function($) {
 
         let labelStyles = [];
         labelStyles.push("width: fit-content");
-        labelStyles.push("font: bold " + this.styleOptions.fontSize + "px \"Open Sans\", \"Arial Unicode MS\", \"sans-serif\"");
+        labelStyles.push("font: bold " + this.styleOptions.fontSize + "px \"Open Sans\", \"Arial Unicode MS\", sans-serif");
         labelStyles.push("color: " + this.styleOptions.fillColor);
         labelStyles.push("z-index: 10");
         labelStyles.push("text-shadow: -1px -1px 0 " + this.styleOptions.strokeColor + ", 1px -1px 0 " + this.styleOptions.strokeColor + ", -1px 1px 0 " + this.styleOptions.strokeColor + ", 1px 1px 0 " + this.styleOptions.strokeColor);

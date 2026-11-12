@@ -130,14 +130,16 @@ class Gutenberg extends \WPGMZA\Factory
 		
 		foreach($attributes as $name => $value)
 		{
+			/* Security: the name is written into the shortcode string unescaped, so skip
+			   any attribute whose name isn't a plain token (blocks name-based injection). */
+			if(!self::isSafeShortcodeAttributeName($name))
+				continue;
+
 			try {
-				if(is_string($value)){
-					$v = addslashes($value);
-				} else if(is_array($value)){
-					$v = implode(',', array_map('addslashes', $value));
+				if(is_array($value)){
+					$v = implode(',', $value);
 				} else if(is_object($value)){
-					$value = (array) $value;
-					$v = implode(',', array_map('addslashes', $value));
+					$v = implode(',', (array) $value);
 				} else {
 					$v = $value;
 				}
@@ -148,13 +150,41 @@ class Gutenberg extends \WPGMZA\Factory
 				/* Skip, it's unlikely this is from us */
 				continue;
 			}
-			
-			$str .= " $name=\"" . addslashes($v) . "\"";
+
+			/* Security: sanitiseShortcodeAttributeValue() strips [ ] < > and quotes so a
+			   value cannot close the shortcode early and inject raw HTML (stored XSS). */
+			$str .= " $name=\"" . self::sanitizeShortcodeAttributeValue($v) . "\"";
 		}
 		
 		$str .= "]";
 		
 		return $str;
+	}
+
+	/**
+	 * Allowlist a shortcode attribute NAME. Block attributes are author-controlled and
+	 * the name is written into the generated [wpgmza ...] string unescaped, so a name
+	 * containing anything but a plain token could break out of the attribute. Returns
+	 * true for a safe name (skip the attribute when false).
+	 *
+	 * @param string $name
+	 * @return bool
+	 */
+	public static function isSafeShortcodeAttributeName($name){
+		return (bool) preg_match('/^[A-Za-z0-9_-]+$/', (string) $name);
+	}
+
+	/**
+	 * Sanitise a shortcode attribute VALUE for safe inclusion in the generated
+	 * [wpgmza attr="..."] string. addslashes() escaped quotes and backslashes but NOT
+	 * ] < >, so a value could close the shortcode early and inject raw HTML (stored
+	 * XSS). Strip the characters that can break out of the attribute or the shortcode.
+	 *
+	 * @param mixed $value
+	 * @return string
+	 */
+	public static function sanitizeShortcodeAttributeValue($value){
+		return str_replace(array('[', ']', '<', '>', '"', "'"), '', (string) $value);
 	}
 
 	/**

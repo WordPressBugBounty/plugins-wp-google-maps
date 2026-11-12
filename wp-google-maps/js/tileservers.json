@@ -6,6 +6,42 @@
         "attribution" : "&copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
 		"type" : "xyz"
     },
+    "mapiron_light" : {
+        "url" : "https://api.mapiron.com/v1/tiles/light/{z}/{x}/{y}.png",
+        "label" : "Light",
+        "provider" : "MapIron",
+        "key_required" : true,
+        "key_field_name" : "key",
+        "attribution" : "&copy; <a href='https://mapiron.com/?r=wpgomaps' target='_blank'>MapIron</a> &copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+        "type" : "xyz"
+    },
+    "mapiron_dark" : {
+        "url" : "https://api.mapiron.com/v1/tiles/dark/{z}/{x}/{y}.png",
+        "label" : "Dark",
+        "provider" : "MapIron",
+        "key_required" : true,
+        "key_field_name" : "key",
+        "attribution" : "&copy; <a href='https://mapiron.com/?r=wpgomaps' target='_blank'>MapIron</a> &copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+        "type" : "xyz"
+    },
+    "mapiron_white" : {
+        "url" : "https://api.mapiron.com/v1/tiles/white/{z}/{x}/{y}.png",
+        "label" : "White",
+        "provider" : "MapIron",
+        "key_required" : true,
+        "key_field_name" : "key",
+        "attribution" : "&copy; <a href='https://mapiron.com/?r=wpgomaps' target='_blank'>MapIron</a> &copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+        "type" : "xyz"
+    },
+    "mapiron_grayscale" : {
+        "url" : "https://api.mapiron.com/v1/tiles/grayscale/{z}/{x}/{y}.png",
+        "label" : "Grayscale",
+        "provider" : "MapIron",
+        "key_required" : true,
+        "key_field_name" : "key",
+        "attribution" : "&copy; <a href='https://mapiron.com/?r=wpgomaps' target='_blank'>MapIron</a> &copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+        "type" : "xyz"
+    },
     "openstreetmap_de" : {
         "url" : "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
         "label" : "DE (German)",

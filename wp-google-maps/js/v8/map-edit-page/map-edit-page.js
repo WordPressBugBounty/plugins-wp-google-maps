@@ -264,7 +264,7 @@ jQuery(function($) {
 			 * stay intact — the emoji is a universal symbol that doesn't
 			 * need translating. Guarded against double-application (rerun)
 			 * via the .data() flag. */
-			var KEYED_ENGINES = ['google-maps', 'leaflet-azure', 'leaflet-stadia', 'leaflet-maptiler', 'leaflet-locationiq'];
+			var KEYED_ENGINES = ['google-maps', 'leaflet-azure', 'leaflet-stadia', 'leaflet-maptiler', 'leaflet-locationiq', 'leaflet-mapiron'];
 			$(document.body).find('.wpgmza-engine-switch-toolbar select option').each(function(){
 				var $opt = $(this);
 				if($opt.data('keyBadgeApplied')) return;

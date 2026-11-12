@@ -185,16 +185,19 @@ class GutenbergExtended extends \WPGMZA\Factory {
         );
                 
         foreach($attr as $name => $value){
-            if(is_string($value)){
-                $value = addslashes($value);
-            } else if(is_array($value)) {
-                $value = implode(',', array_map('addslashes', $value));
+            /* Security: the name is injected unescaped, so skip any non-token name. */
+            if(!Gutenberg::isSafeShortcodeAttributeName($name))
+                continue;
+
+            if(is_array($value)) {
+                $value = implode(',', $value);
             } else if(is_object($value)){
-                $value = (array) $value;
-                $value = implode(',', array_map('addslashes', $value));
+                $value = implode(',', (array) $value);
             }
-            
-            $parts[] = "{$name}=\"" . addslashes($value) . "\"";
+
+            /* Security: strip [ ] < > and quotes so a value cannot close the shortcode
+               early and inject raw HTML (stored XSS). */
+            $parts[] = "{$name}=\"" . Gutenberg::sanitizeShortcodeAttributeValue($value) . "\"";
         }
         
         $parts = implode(" ", $parts);

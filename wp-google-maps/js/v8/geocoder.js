@@ -70,6 +70,7 @@ jQuery(function($) {
                     case 'leaflet-stadia':
                     case 'leaflet-maptiler':
                     case 'leaflet-zerocost':
+                    case 'leaflet-mapiron':
 						provider = WPGMZA.Geocoder.Providers.LEAFLET;
                         break;
                         break;

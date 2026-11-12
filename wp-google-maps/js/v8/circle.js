@@ -128,6 +128,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
 					constructor = WPGMZA.LeafletProCircle;

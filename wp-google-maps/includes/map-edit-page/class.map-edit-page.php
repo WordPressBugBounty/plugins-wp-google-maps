@@ -60,6 +60,7 @@ class MapEditPage extends Page
 						case 'leaflet-stadia':
 						case 'leaflet-maptiler':
 						case 'leaflet-locationiq':
+						case 'leaflet-mapiron':
 						case 'leaflet-zerocost':
 							$themePanel = new LeafletThemePanel($map);
 							$element->import($themePanel);
@@ -287,6 +288,7 @@ class MapEditPage extends Page
 			'leaflet-stadia'     => array('option' => 'wpgmza_leaflet_stadia_key',    'storage' => 'settings', 'name' => 'Stadia Maps'),
 			'leaflet-maptiler'   => array('option' => 'wpgmza_leaflet_maptiler_key',  'storage' => 'settings', 'name' => 'Maptiler'),
 			'leaflet-locationiq' => array('option' => 'wpgmza_leaflet_locationiq_key','storage' => 'settings', 'name' => 'LocationIQ'),
+			'leaflet-mapiron' => array('option' => 'wpgmza_leaflet_mapiron_key','storage' => 'settings', 'name' => 'MapIron'),
 		);
 		$currentEngine = $wpgmza->settings->engine;
 

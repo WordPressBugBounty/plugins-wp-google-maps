@@ -82,6 +82,7 @@ jQuery(function($) {
 			case 'leaflet-stadia':
 			case 'leaflet-maptiler':
 			case 'leaflet-locationiq':
+			case 'leaflet-mapiron':
 			case 'leaflet-zerocost':
 				return new WPGMZA.LeafletModernStoreLocatorCircle(map, settings);
 				break;

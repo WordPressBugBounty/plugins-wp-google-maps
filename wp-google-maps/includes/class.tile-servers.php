@@ -125,6 +125,9 @@ class TileServers {
                 case 'leaflet-zerocost':
 					$tileServer = TileServers::getByUrl(!empty($settings->tile_server_url_leaflet_zerocost) ? $settings->tile_server_url_leaflet_zerocost : false);
 					break;
+                case 'leaflet-mapiron':
+					$tileServer = TileServers::getByUrl(!empty($settings->tile_server_url_leaflet_mapiron) ? $settings->tile_server_url_leaflet_mapiron : false);
+					break;
 			}
 		}
         return $tileServer;

@@ -1,11 +1,11 @@
-=== WP Go Maps - Google Map, OpenStreetMap, Leaflet Map ===
+=== WP Go Maps - Google Map, OpenStreetMap, Leaflet & Store Locator ===
 Contributors: WPGMaps, NickDuncan, CodeCabin_, DylanAuty
 Donate link: https://www.wpgmaps.com
 Tags: google maps, maps, map, leaflet map, store locator
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 10.1.10
+Stable tag: 10.1.11
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -244,6 +244,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
+= 10.1.11 =
+Please update to 10.1.11 or above to ensure you are using the latest security enhancements.
+
 = 10.1.09 =
 Please update to 10.1.09 or above to ensure you are using the latest security enhancements.
 
@@ -272,6 +275,14 @@ Please update to 10.0.08 or above for the latest stability improvements.
 Please update to 10.0.07 or above to ensure you are using the latest architecture, and latest features.
 
 == Changelog ==
+
+= 10.1.11 - 2026-11-12 =
+* Fixed a stored cross-site scripting (XSS) issue where marker and shape title and link fields could store unsanitised HTML or script. Security issue.
+* Fixed a stored cross-site scripting (XSS) issue where a Gutenberg block's attributes could inject HTML or script into the page when the map or store locator block was rendered. Security issue, thanks to Khanh Nguyen (Patchstack).
+* Fixed issue where approving a pending marker, or any partial marker save, could delete the marker's image gallery.
+* Fixed issue where polygon and point label text overlay labels could display in a serif font on some devices (such as iOS) because the generic sans-serif family was quoted. The label font now falls back correctly.
+* Improved the Google Maps engine so maps start automatically once the Google Maps API becomes available after the page has loaded, for example when a consent plugin releases it, without requiring a page reload.
+* Added MapIron as a built-in map engine preset for the Leaflet based engines, with the OpenStreetMap credit set automatically.
 
 = 10.1.10 - 2026-09-28 =
 * Fixed issue where the compressed marker ID buffer could be undersized for certain marker sets, causing the server to reject the request and marker searches to return no results. Thanks to Adamcengel

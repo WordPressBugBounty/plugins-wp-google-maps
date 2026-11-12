@@ -36,6 +36,7 @@ class LeafletThemePanel extends DOMDocument{
 					$authentication->token = !empty($wpgmza->settings->wpgmza_leaflet_maptiler_key) ? $wpgmza->settings->wpgmza_leaflet_maptiler_key : false;
 					break;
 				case 'leaflet-locationiq':
+				case 'leaflet-mapiron':
 					$tileServer = $wpgmza->settings->tile_server_url_leaflet_locationiq;
 					
 					$authentication->token = !empty($wpgmza->settings->wpgmza_leaflet_locationiq_key) ? $wpgmza->settings->wpgmza_leaflet_locationiq_key : false;

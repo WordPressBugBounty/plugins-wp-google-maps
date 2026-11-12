@@ -165,7 +165,7 @@ class Plugin extends Factory
 		if($this->settings->engine == 'open-layers' || $this->settings->engine === 'open-layers-latest' 
 			|| $this->settings->engine === 'leaflet' || $this->settings->engine === 'leaflet-zerocost'
 			|| $this->settings->engine === 'leaflet-azure' || $this->settings->engine === 'leaflet-maptiler'
-			|| $this->settings->engine === 'leaflet-stadia' || $this->settings->engine === 'leaflet-locationiq'){
+			|| $this->settings->engine === 'leaflet-stadia' || $this->settings->engine === 'leaflet-locationiq' || $this->settings->engine === 'leaflet-mapiron'){
 			require_once(plugin_dir_path(__FILE__) . 'open-layers/class.nominatim-geocode-cache.php');
 		}
 

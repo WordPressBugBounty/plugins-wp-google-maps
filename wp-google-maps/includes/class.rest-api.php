@@ -1107,7 +1107,14 @@ class RestAPI extends Factory
 					}
 				}
 
-				if(empty($_POST['gallery']) && !empty($marker->gallery)){
+				// Only clear the gallery when the request explicitly sends a
+				// (possibly empty) gallery field, i.e. the user emptied it in
+				// the editor. A partial POST that omits 'gallery' (e.g. the
+				// approve action, which sends only {approved:1}) must leave the
+				// existing gallery alone. Using empty() here wiped it on every
+				// such POST, deleting the visitor's uploaded image. Full editor
+				// saves always send the key (pro-marker-panel.js).
+				if(array_key_exists('gallery', $_POST) && empty($_POST['gallery']) && !empty($marker->gallery)){
 					$marker->gallery = false;
 				}
 				

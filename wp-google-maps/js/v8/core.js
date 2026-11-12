@@ -583,6 +583,7 @@ jQuery(function($) {
 				case "leaflet-stadia":
 				case "leaflet-maptiler":
 				case "leaflet-locationiq":
+				case "leaflet-mapiron":
 				case "leaflet-zerocost":
 					/* Leaflet */
 					engine = "Leaflet";
@@ -822,6 +823,22 @@ jQuery(function($) {
 
 		initMaps: function(){
 			$(document.body).find(".wpgmza_map:not(.wpgmza-initialized)").each(function(index, el) {
+				/* Google engine: don't attempt construction until the Maps API is
+				 * actually present. Without this, each 2 second retry runs the full
+				 * Map constructor (pushing a partial map onto WPGMZA.maps and binding
+				 * listeners) before throwing at `new google.maps.Map`, leaving a dead
+				 * entry at WPGMZA.maps[0]. Gating here lets a consent plugin hold back
+				 * only the Google Maps API script and release it on consent: the next
+				 * retry then builds the real map cleanly, with no page reload.
+				 *
+				 * Exception: when our own GDPR setting is holding the API back
+				 * (USER_CONSENT_NOT_GIVEN), the Map constructor still needs to run so it
+				 * can render the consent notice, so we must not skip in that case. */
+				if(WPGMZA.settings && WPGMZA.settings.engine == "google-maps" && (!window.google || !window.google.maps)
+					&& !(WPGMZA.googleAPIStatus && WPGMZA.googleAPIStatus.code == "USER_CONSENT_NOT_GIVEN")){
+					return;
+				}
+
 				if(el.wpgmzaMap) {
 					if(WPGMZA.googleAPIStatus && WPGMZA.googleAPIStatus.code == "USER_CONSENT_NOT_GIVEN"){
 						/* User has not granted access, fail silently */
