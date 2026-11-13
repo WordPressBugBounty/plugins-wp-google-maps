@@ -76,7 +76,9 @@ class GoogleMapsAPILoader
 		
 		$scriptArgs = apply_filters('wpgmza-get-scripts-arguments', array());
 
-		wp_enqueue_script('wpgmza_data', plugin_dir_url(__DIR__) . 'wpgmza_data.js', false, false, $scriptArgs);
+		/* Versioned with the plugin (not WordPress) so browsers and caches fetch the new file after an update */
+		global $wpgmza_version;
+		wp_enqueue_script('wpgmza_data', plugin_dir_url(__DIR__) . 'wpgmza_data.js', false, (!empty($wpgmza_version) ? $wpgmza_version : false), $scriptArgs);
 
 		if(!GoogleMapsAPILoader::$apiConsentStatusLocalized){
 			wp_localize_script('wpgmza_data', 'wpgmza_google_api_status', (array)$status);

@@ -5,7 +5,7 @@ Tags: google maps, maps, map, leaflet map, store locator
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 10.1.11
+Stable tag: 10.1.12
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -244,6 +244,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Upgrade Notice ==
 
+= 10.1.12 =
+Fixes Google maps loading without markers on sites with a cookie consent plugin. Includes all 10.1.11 security fixes.
+
 = 10.1.11 =
 Please update to 10.1.11 or above to ensure you are using the latest security enhancements.
 
@@ -275,6 +278,10 @@ Please update to 10.0.08 or above for the latest stability improvements.
 Please update to 10.0.07 or above to ensure you are using the latest architecture, and latest features.
 
 == Changelog ==
+
+= 10.1.12 - 2026-11-13 =
+* Fixed issue where Google maps could load without markers or listings when a consent plugin released the Google Maps API before the page had finished loading (regression in 10.1.11).
+* Fixed issue where the Google Maps start-up script was cached under the WordPress version, so browsers could keep an outdated copy after a plugin update.
 
 = 10.1.11 - 2026-11-12 =
 * Fixed a stored cross-site scripting (XSS) issue where marker and shape title and link fields could store unsanitised HTML or script. Security issue.
