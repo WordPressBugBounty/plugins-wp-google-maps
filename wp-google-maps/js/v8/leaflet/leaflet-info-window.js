@@ -10,8 +10,22 @@ jQuery(function($) {
 	
 	WPGMZA.LeafletInfoWindow = function(feature) {
 		var self = this;
-		
+
 		Parent.call(this, feature);
+
+		/* Content was added after the popup opened (Pro galleries, Gold ratings), so re-measure, reposition
+		 * and pan the popup. Hand Leaflet the existing content element rather than calling update(), which
+		 * would re-render the original HTML and drop whatever was added */
+		this.on("infowindowcontentshift", function(event) {
+			if(!self.leafletPopup || !self.leafletPopup.isOpen()){
+				return;
+			}
+
+			var content = $(self.leafletPopup.getElement()).find('.leaflet-popup-content > .wpgmza-infowindow')[0];
+			if(content){
+				self.leafletPopup.setContent(content);
+			}
+		});
 	}
 	
 	if(WPGMZA.isProVersion())

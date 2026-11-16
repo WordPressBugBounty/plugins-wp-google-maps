@@ -8,6 +8,11 @@
  */
 jQuery(function($) {
 
+	/* Admin UI only: never start outside the plugin's own admin pages. This module is also in the front-end bundle,
+	 * and post content can carry the Atlas Major class */
+	if(WPGMZA.is_admin != 1 || !WPGMZA.getCurrentPage())
+		return;
+
 	if(WPGMZA.currentPage != "map-edit")
 		return;
 
@@ -513,6 +518,17 @@ jQuery(function($) {
 
 			var savedOut = parseInt($hiddenOut.val());
 			var savedIn  = parseInt($hiddenIn.val());
+
+			/* Atlas Novus stores these two fields the other way round (map_max_zoom 21, map_min_zoom 0), and
+			 * the map itself treats them as an unordered range (Math.min/Math.max in MapSettings). Read them
+			 * the same way here, so a map last saved in Novus shows 0 to 21 instead of the out handle being
+			 * dragged down to the in handle by update() and the map being saved locked at zoom 0 */
+			if(!isNaN(savedOut) && !isNaN(savedIn) && savedOut > savedIn){
+				var swap = savedOut;
+				savedOut = savedIn;
+				savedIn = swap;
+			}
+
 			if(!isNaN(savedOut)) $outInput.val(savedOut);
 			if(!isNaN(savedIn))  $inInput.val(savedIn);
 

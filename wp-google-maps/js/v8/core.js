@@ -583,6 +583,7 @@ jQuery(function($) {
 				case "leaflet-stadia":
 				case "leaflet-maptiler":
 				case "leaflet-locationiq":
+				case "leaflet-gotiles":
 				case "leaflet-mapiron":
 				case "leaflet-zerocost":
 					/* Leaflet */

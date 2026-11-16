@@ -71,8 +71,12 @@ class OLLoader {
 		
 		wp_enqueue_script('wpgmza_ol_api_call', $library->js, false, false, $scriptArgs);
 
-		/* Load the vector library for vector style tilesets */
-		wp_enqueue_script('wpgmza-ol-olms', 'https://unpkg.com/ol-mapbox-style@13.0.1/dist/olms.js', false, false, $scriptArgs);
+		/* Load the vector library for vector style tilesets. ol-mapbox-style 13 is built for the latest
+		 * OpenLayers and throws on the legacy build, so it is only loaded with the latest engine. The map
+		 * code checks for olms before using it, so legacy maps simply keep using raster tiles. */
+		if($this->version !== self::VERSION_TYPE_LEGACY){
+			wp_enqueue_script('wpgmza-ol-olms', 'https://unpkg.com/ol-mapbox-style@13.0.1/dist/olms.js', false, false, $scriptArgs);
+		}
 		
 	}
 }

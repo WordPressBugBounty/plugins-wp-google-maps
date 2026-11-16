@@ -3,7 +3,7 @@
 Plugin Name: WP Go Maps (formerly WP Google Maps)
 Plugin URI: https://www.wpgmaps.com
 Description: The easiest to use Google Maps plugin! Create custom Google Maps or a map block with high quality markers containing locations, descriptions, images and links. Add your customized map to your WordPress posts and/or pages quickly and easily with the supplied shortcode. No fuss.
-Version: 10.1.12
+Version: 10.2.00
 Author: WP Go Maps (formerly WP Google Maps)
 Author URI: https://www.wpgmaps.com
 Text Domain: wp-google-maps
@@ -14,6 +14,30 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 
 /*
+ * 10.2.00 - 2026-11-16
+ * Added Go Tiles by WP Go Maps, our own free map tile engine and now the first option in the map engine list. No API key needed: every site gets 10,000 free map tiles a month, in light and dark styles. Site admins are told inside the map if the monthly limit is reached.
+ * Changed new installs to use Go Tiles as the default map engine. Existing sites keep their current engine.
+ * Added an Upgrade to Pro button to the map editor, so Pro can be bought without leaving the plugin. Payment is taken on Stripe's secure checkout page. Once paid, the editor shows the download link and saves the licence key on the site, so Pro is licensed as soon as it is activated (Atlas Major).
+ * Added an External services section to the readme describing each external service the plugin can use (Go Tiles, the WP Go Maps store and Stripe, Google Maps Platform, Nominatim, map tile providers, public CDNs and the WP Go Maps setup service), what data each receives and when.
+ * Fixed issue where the MapIron engine showed another product's logo in the map engine settings.
+ * Improved the map editor's missing API key notice so it offers to switch to Go Tiles instead of OpenLayers, and the engine switcher now suggests Go Tiles when the current engine has no key (Atlas Novus, Atlas Major).
+ * Fixed issue where the engine switcher, the missing API key notice and the Maps API error card overlapped each other in the map editor. They now stack one below the other (Atlas Novus, Atlas Major).
+ * Fixed issue where MapIron was missing from the map editor's engine switcher (Atlas Novus, Atlas Major).
+ * Fixed issue where some Atlas Novus and Atlas Major layout rules for map controls, the map editor and the setup wizard did not apply to the MapIron engine.
+ * Fixed issue where the MapIron engine used the LocationIQ key and style settings in the map editor's style panel, the tile preview and the engine switcher, instead of its own.
+ * Fixed issue where a LocationIQ key entered in the setup wizard was not saved.
+ * Fixed issue where a single marker with invalid coordinates (for example an address saved in the latitude field) stopped the remaining markers and the marker listing from loading. The marker is now skipped and a warning naming it is shown in the browser console.
+ * Fixed issue where clicking a marker on a Leaflet based map inside a scrolling area, such as the Atlas Major map editor's live preview, scrolled the area instead of opening the marker, so the marker had to be clicked twice.
+ * Fixed issue where the Upgrade link on the Plugins page was labelled as Atlas Novus for sites using Atlas Major.
+ * Fixed an issue where the AJAX fallback for the REST API did not enforce each route's allowed request methods, which could let a read-only route handle other requests. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where a user with Contributor access could add markup to a post that ran a script in the browser of an administrator who previewed it. Security issue, thanks to Santh.
+ * Fixed issue where marker titles and descriptions could not be translated with WPML, so translated pages showed them in the default language. Translated values get the same sanitising as a saved marker. Thanks to the WPML compatibility team.
+ * Fixed issue where Leaflet info windows did not resize or move into view when content was added after opening, such as Pro galleries or Gold ratings.
+ * Fixed issue where opening a map last saved in Atlas Novus in the Atlas Major editor could reset its zoom limits to 0, so the map stayed fully zoomed out once saved (Atlas Major).
+ * Fixed issue where the legacy OpenLayers engine loaded a map style library built for the latest OpenLayers, which logged an error on every page. It now loads only with the latest OpenLayers engine.
+ * Fixed issue where the Google Maps logo in the map engine chooser did not load on some servers.
+ * Go Tiles is only offered when WP Go Maps Pro is 10.2.00 or later (or Pro is not installed), as older Pro versions cannot display it. Sites already set to Go Tiles with an older Pro see a notice asking to update Pro.
+ *
  * 10.1.12 - 2026-11-13
  * Fixed issue where Google maps could load without markers or listings when a consent plugin released the Google Maps API before the page had finished loading (regression in 10.1.11).
  * Fixed issue where the Google Maps start-up script was cached under the WordPress version, so browsers could keep an outdated copy after a plugin update.

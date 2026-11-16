@@ -51,7 +51,10 @@ class Plugin extends Factory
 	
 	const MARKER_PULL_DATABASE	= "0";
 	const MARKER_PULL_XML		= "1";
-	
+
+	/* Go Tiles needs this Pro version or later when Pro is active, see isGoTilesAvailable() */
+	const GO_TILES_REQUIRES_PRO	= "10.2.00";
+
 	private static $enqueueScriptActions = array(
 		'wp_enqueue_scripts',
 		'admin_enqueue_scripts',
@@ -165,7 +168,7 @@ class Plugin extends Factory
 		if($this->settings->engine == 'open-layers' || $this->settings->engine === 'open-layers-latest' 
 			|| $this->settings->engine === 'leaflet' || $this->settings->engine === 'leaflet-zerocost'
 			|| $this->settings->engine === 'leaflet-azure' || $this->settings->engine === 'leaflet-maptiler'
-			|| $this->settings->engine === 'leaflet-stadia' || $this->settings->engine === 'leaflet-locationiq' || $this->settings->engine === 'leaflet-mapiron'){
+			|| $this->settings->engine === 'leaflet-stadia' || $this->settings->engine === 'leaflet-locationiq' || $this->settings->engine === 'leaflet-mapiron' || $this->settings->engine === 'leaflet-gotiles'){
 			require_once(plugin_dir_path(__FILE__) . 'open-layers/class.nominatim-geocode-cache.php');
 		}
 
@@ -200,6 +203,12 @@ class Plugin extends Factory
 				
 				add_action('admin_notices', function() {
 					echo '<div class="error"><p>' . __('<strong>WP Go Maps:</strong> Allowed memory size was reached whilst generating XML cache. This has been switched back to the Database method in Maps -> Settings -> Advanced', 'wp-google-maps') . '</p></div>';
+				});
+			}
+
+			if($this->settings->engine === 'leaflet-gotiles' && !$this->isGoTilesAvailable()){
+				add_action('admin_notices', function() {
+					echo '<div class="error"><p>' . sprintf(__('<strong>WP Go Maps:</strong> Go Tiles needs WP Go Maps Pro %s or later. Please update Pro, or choose another map engine in Maps -> Settings.', 'wp-google-maps'), self::GO_TILES_REQUIRES_PRO) . '</p></div>';
 				});
 			}
 
@@ -993,6 +1002,45 @@ class Plugin extends Factory
 		return (empty($this->settings->wpgmza_settings_access_level) ? 'manage_options' : $this->settings->wpgmza_settings_access_level);
 	}
 	
+	/**
+	 * Whether the Go Tiles engine can be used on this site. When Pro is active the browser runs Pro's
+	 * script bundle, which carries its own copy of the map engine code, and bundles older than
+	 * GO_TILES_REQUIRES_PRO do not know Go Tiles (the map would be created as a Google map and stay blank)
+	 *
+	 * @return bool
+	 */
+	public function isGoTilesAvailable()
+	{
+		global $wpgmza_pro_version;
+
+		if(empty($wpgmza_pro_version))
+			return true;
+
+		return version_compare($wpgmza_pro_version, self::GO_TILES_REQUIRES_PRO, '>=');
+	}
+
+	/**
+	 * Removes the Go Tiles choices (engine radio buttons and select options) from a page, used when
+	 * isGoTilesAvailable() is false
+	 *
+	 * @param DOMDocument $document The page document
+	 * @return void
+	 */
+	public function removeGoTilesChoices($document)
+	{
+		foreach($document->querySelectorAll('input[value="leaflet-gotiles"]') as $input){
+			if($label = $input->closest('label')){
+				$label->remove();
+			} else {
+				$input->remove();
+			}
+		}
+
+		foreach($document->querySelectorAll('option[value="leaflet-gotiles"]') as $option){
+			$option->remove();
+		}
+	}
+
 	public function isUserAllowedToEdit()
 	{
 		return current_user_can($this->getAccessCapability());

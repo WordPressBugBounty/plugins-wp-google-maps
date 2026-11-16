@@ -138,7 +138,10 @@ class DynamicTranslations extends Factory{
 
 							$translation = $this->fetch("{$slugPrefix}{$fieldName}_{$instance->id}", $data[$fieldName]);
 							if($translation !== $data[$fieldName]){
-								/* The request applied a translation */
+								/* The request applied a translation. Translations are written in the translation
+								 * plugin (by translator accounts too), not saved through our CRUD layer, so give
+								 * them the same field-typed sanitising a save would */
+								$translation = Crud::sanitizeFieldValue($fieldName, $translation);
 								$data["{$fieldName}_original"] = $data[$fieldName];
 							}
 
@@ -175,7 +178,9 @@ class DynamicTranslations extends Factory{
 			switch($instanceSlug){
 				case 'marker':
 					$fields = array(
-						'address'
+						'address',
+						'title',
+						'description'
 					);
 					break;
 				case 'polygon':

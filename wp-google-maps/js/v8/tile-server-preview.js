@@ -228,8 +228,10 @@ jQuery(function($) {
                 case 'leaflet-maptiler':
                     tokenFieldName = 'wpgmza_leaflet_maptiler_key';
                     break;
-                case 'leaflet-locationiq':
                 case 'leaflet-mapiron':
+                    tokenFieldName = 'wpgmza_leaflet_mapiron_key';
+                    break;
+                case 'leaflet-locationiq':
                     tokenFieldName = 'wpgmza_leaflet_locationiq_key';
                     break;
             }

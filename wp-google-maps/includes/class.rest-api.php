@@ -285,7 +285,7 @@ class RestAPI extends Factory
 		global $wpgmza;
 		
 		$this->registerRoute('/maps(\/\d+)?/', array(
-			'methods'					=> 'GET',
+			'methods'					=> array('GET'),
 			'callback'					=> array($this, 'maps')
 		));
 
@@ -299,6 +299,14 @@ class RestAPI extends Factory
 			'methods'					=> array('POST'),
 			'callback'					=> array($this, 'saveMapSettings'),
 			'permission_callback'		=> array($wpgmza, 'isUserAllowedToEdit')
+		));
+
+		/* In-plugin Pro checkout: stores the licence key from a completed purchase, so Pro picks
+		 * it up as soon as it is installed. Administrators only, it is a site wide setting. */
+		$this->registerRoute('/pro-checkout-licence/', array(
+			'methods'					=> array('POST'),
+			'callback'					=> array($this, 'saveProCheckoutLicence'),
+			'permission_callback'		=> function(){ return current_user_can('manage_options'); }
 		));
 
 		$this->registerRoute('/markers/\d+/', array(
@@ -467,7 +475,20 @@ class RestAPI extends Factory
 				}
 
 
-				if(empty($value['methods']) || (!empty($value['methods']) && is_array($value['methods']) && !in_array($method, $value['methods']))){
+				if(empty($value['methods'])){
+					/* Route has no method definition */
+					continue;
+				}
+
+				/* A route may declare its methods as an array or as a string ('GET', or 'GET, POST' like
+				 * the WP_REST_Server constants). Normalise both to a list so a GET-only route can never
+				 * answer a DELETE or POST meant for a protected route registered after it. Previously a
+				 * string was never checked, so the GET-only /maps route accepted a simulated DELETE and
+				 * shadowed Pro's protected /maps route (anonymous map deletion). */
+				$allowedMethods = is_array($value['methods']) ? $value['methods'] : explode(',', (string) $value['methods']);
+				$allowedMethods = array_map('strtoupper', array_map('trim', $allowedMethods));
+
+				if(!in_array(strtoupper($method), $allowedMethods)){
 					/* Method does not match this routes definition */
 					continue;
 				}
@@ -587,6 +608,39 @@ class RestAPI extends Factory
 				return new \WP_Error('wpgmza_invalid_request_method', 'Invalid request method');
 				break;
 		}
+	}
+
+	/**
+	 * POST /wpgmza/v1/pro-checkout-licence/
+	 *
+	 * Stores the Pro licence key returned by a completed in-plugin checkout as
+	 * license_key_pro, the global setting Pro's LicenseManager reads, so the key is
+	 * already in place when Pro is installed and activated. An existing, different
+	 * key is never replaced. Administrators only (permission_callback on the route),
+	 * plus the REST nonce RestAPI::registerRoute applies to non-GET routes.
+	 *
+	 * Response: { saved: true } | { saved: false, reason: 'existing' } | 400 on an invalid key
+	 */
+	public function saveProCheckoutLicence($request)
+	{
+		global $wpgmza;
+
+		$key = isset($_POST['licence_key']) ? trim(sanitize_text_field(wp_unslash($_POST['licence_key']))) : '';
+
+		/* Licence keys from the store are short alphanumeric codes */
+		if(!preg_match('/^[A-Za-z0-9-]{16,64}$/', $key)){
+			return new \WP_Error('wpgmza_invalid_licence_key', 'Invalid licence key', array('status' => 400));
+		}
+
+		$existing = !empty($wpgmza->settings->license_key_pro) ? trim($wpgmza->settings->license_key_pro) : '';
+
+		if(!empty($existing) && $existing !== $key){
+			return array('saved' => false, 'reason' => 'existing');
+		}
+
+		$wpgmza->settings->license_key_pro = $key;
+
+		return array('saved' => true);
 	}
 
 	/**

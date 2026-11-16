@@ -29,6 +29,16 @@ class InstallerPage extends Page {
 			$tileServerSelectContainerZeroCost->import($tileServerSelectZeroCost);
 		}
 
+		if($tileServerSelectContainerGoTiles = $this->document->querySelector('[data-tile-server-select-container-gotiles]')) {
+			$tileServerSelectGoTiles = new TileServerSelect(array('name' => 'tile_server_url_leaflet_gotiles', 'provider' => 'Go Tiles', 'ignoreCustom' => true));
+			$tileServerSelectContainerGoTiles->import($tileServerSelectGoTiles);
+		}
+
+		/* Go Tiles needs a newer Pro, when an older one is active (see Plugin::isGoTilesAvailable) */
+		if(!$wpgmza->isGoTilesAvailable()){
+			$wpgmza->removeGoTilesChoices($this->document);
+		}
+
 
 		$wrapper->setAttribute('data-redirect', $redirectUrl);
 
@@ -57,7 +67,8 @@ class InstallerPage extends Page {
 			 * which means they came from the welcome/credits page, which is usually right after an installation
 			*/
 			if(empty(get_option('wpgmza-installer-initial-procedure'))){
-				$wrapper->setAttribute('data-auto-onboarding-procedure', 'enging_zc_2025_11');
+				/* New installs default to Go Tiles, or to the previous default (Zero Cost) when an older Pro can't run Go Tiles */
+				$wrapper->setAttribute('data-auto-onboarding-procedure', $wpgmza->isGoTilesAvailable() ? 'engine_gt_2026_11' : 'enging_zc_2025_11');
 			}
 		}
 
@@ -156,7 +167,30 @@ class InstallerPage extends Page {
 					update_option('wpgmza-installer-retrigger-event', 'enging_zc_2025_11', false);
 					update_option('wpgmza-installer-initial-procedure', 'enging_zc_2025_11', false);
 					break;
-				default: 
+				case 'engine_gt_2026_11':
+					/* Procedure: Go Tiles default engine
+					 * Introduced: 2026-11-12
+					 * Goal: Use our own free tile service (Go Tiles) as the primary method, it needs no key
+					*/
+					if(!empty($wpgmza) && !empty($wpgmza->settings)){
+						$wpgmza->settings->set('wpgmza_maps_engine', 'leaflet-gotiles');
+						$wpgmza->settings->set('wpgmza_maps_engine_dialog_done', true);
+
+						/* We need to set the tileserver so that they do not have to save once before editing */
+						$goTiles = TileServers::getBySlug('gotiles_light');
+						if(!empty($goTiles) && !empty($goTiles->url)){
+							$wpgmza->settings->set('tile_server_url_leaflet_gotiles', $goTiles->url);
+						}
+					}
+
+					/* Prevent the system from coming back here in 1 day by mistake */
+					delete_option('wpgmza-installer-paused');
+
+					/* Mark this so that if the user later changes engines, we can gracefully redirect them to setup again */
+					update_option('wpgmza-installer-retrigger-event', 'engine_gt_2026_11', false);
+					update_option('wpgmza-installer-initial-procedure', 'engine_gt_2026_11', false);
+					break;
+				default:
 					/* Procedure is unknown, delay the installer for a day and come back to it then, because we aren't sure what was intended */
 					$nextReminder = date('Y-m-d', strtotime('+1 day'));
 					update_option('wpgmza-installer-paused', $nextReminder, false);
@@ -186,7 +220,7 @@ class InstallerPage extends Page {
 						case 'leaflet-maptiler':
 							$wpgmza->settings->set('wpgmza_leaflet_maptiler_key', $apiKey);
 							break;
-						case 'leaflet-maptiler':
+						case 'leaflet-locationiq':
 							$wpgmza->settings->set('wpgmza_leaflet_locationiq_key', $apiKey);
 							break;
 					}
@@ -199,6 +233,10 @@ class InstallerPage extends Page {
 
 				if(!empty($_POST['tile_server_url_leaflet_zerocost'])){
 					$wpgmza->settings->set('tile_server_url_leaflet_zerocost', sanitize_text_field($_POST['tile_server_url_leaflet_zerocost']));
+				}
+
+				if(!empty($_POST['tile_server_url_leaflet_gotiles'])){
+					$wpgmza->settings->set('tile_server_url_leaflet_gotiles', sanitize_text_field($_POST['tile_server_url_leaflet_gotiles']));
 				}
 
 				delete_option('wpgmza-installer-paused');

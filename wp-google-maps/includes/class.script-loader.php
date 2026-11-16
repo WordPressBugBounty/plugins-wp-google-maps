@@ -683,6 +683,7 @@ class ScriptLoader
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				$loader = LeafletLoader::createInstance();
@@ -737,6 +738,7 @@ class ScriptLoader
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				$loader = LeafletLoader::createInstance();
@@ -826,8 +828,9 @@ class ScriptLoader
 
 		}
 		
-		/* Atlas Major scripts */
-		if($wpgmza->internalEngine->isAtlasMajor()){
+		/* Atlas Major scripts. These drive the admin UI only, so they load on the plugin's own admin pages and never on
+		 * the front end, where they would otherwise start on any markup carrying the Atlas Major class (e.g. post content) */
+		if($wpgmza->internalEngine->isAtlasMajor() && is_admin() && $wpgmza->getCurrentPage()){
 			wp_enqueue_script('wpgmza-atlas-major-tabs', plugin_dir_url(__DIR__) . 'js/v8/atlas-major-tabs.js', array('jquery'), $version_string, $scriptArgs);
 			wp_enqueue_script('wpgmza-atlas-major-marker-list', plugin_dir_url(__DIR__) . 'js/v8/atlas-major-marker-list.js', array('jquery'), $version_string, $scriptArgs);
 			wp_enqueue_script('wpgmza-atlas-major-feature-list', plugin_dir_url(__DIR__) . 'js/v8/atlas-major-feature-list.js', array('jquery'), $version_string, $scriptArgs);

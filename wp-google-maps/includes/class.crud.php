@@ -575,22 +575,11 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 					throw new \Exception('Property is read only');
 				}
 				
-				// Sanitise by field type. 'link' is a URL and 'title' is plain text,
-				// so each uses the sanitiser matched to it; every other string field
-				// keeps the post-level KSES filter. The previous html_entity_decode()
-				// on link/title was removed because it undid KSES: entity-encoded
-				// markup such as &lt;img onerror=...&gt; was decoded back into live
-				// HTML and stored, producing a stored XSS vector. esc_url_raw() also
-				// strips dangerous link schemes such as javascript:.
-				if($key === 'link'){
-					$value = is_string($value) ? esc_url_raw($value) : $value;
-				} else if($key === 'title'){
-					$value = is_string($value) ? sanitize_text_field($value) : $value;
-				} else if(is_string($value)){
-					$value = wp_kses_post($value);
-				}
-
-				$this->fields[$key] = $value;
+				// Sanitise by field type (see sanitizeFieldValue). The previous
+				// html_entity_decode() on link/title was removed because it undid KSES:
+				// entity-encoded markup such as &lt;img onerror=...&gt; was decoded back
+				// into live HTML and stored, producing a stored XSS vector.
+				$this->fields[$key] = static::sanitizeFieldValue($key, $value);
 			}
 			
 			$this->update();
@@ -701,6 +690,33 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 	 * @throws \Exception The specified property is read-only
 	 * @return void
 	 */
+	/**
+	 * Sanitises a value by field type before it is stored or served: 'link' is a URL
+	 * (esc_url_raw, which also strips dangerous schemes such as javascript:), 'title'
+	 * is plain text (sanitize_text_field), and every other string field keeps the
+	 * post-level KSES filter. Non-string values pass through unchanged.
+	 *
+	 * Also used for values that reach the front end without passing through a save,
+	 * such as dynamic (WPML) translations of these fields.
+	 *
+	 * @param string $name The field name
+	 * @param mixed $value The value
+	 * @return mixed The sanitised value
+	 */
+	public static function sanitizeFieldValue($name, $value)
+	{
+		if(!is_string($value))
+			return $value;
+
+		if($name === 'link')
+			return esc_url_raw($value);
+
+		if($name === 'title')
+			return sanitize_text_field($value);
+
+		return wp_kses_post($value);
+	}
+
 	public function __set($name, $value)
 	{
 		global $wpdb;
@@ -710,17 +726,8 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		if($this->is_read_only($name))
 			throw new \Exception('Property is read only');
 		
-		// Sanitise by field type, mirroring set(): 'link' is a URL and 'title' is
-		// plain text, so each uses its matching sanitiser; every other string field
-		// keeps the post-level KSES filter. esc_url_raw() also strips dangerous link
-		// schemes such as javascript:.
-		if($name === 'link'){
-			$value = is_string($value) ? esc_url_raw($value) : $value;
-		} else if($name === 'title'){
-			$value = is_string($value) ? sanitize_text_field($value) : $value;
-		} else if(is_string($value)){
-			$value = wp_kses_post($value);
-		}
+		// Sanitise by field type, mirroring set()
+		$value = static::sanitizeFieldValue($name, $value);
 
 		$this->fields[$name] = $value;
 		

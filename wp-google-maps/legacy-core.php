@@ -197,7 +197,9 @@ function wpgmza_plugin_action_links( $links ) {
     if(!$wpgmza->isProVersion()){
         // Only show this link if the user is not a Pro user
         $proLink = "https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=plugin_link_upgrade-v10";
-		if(!$wpgmza->internalEngine->isLegacy()){
+		if($wpgmza->internalEngine->isAtlasMajor()){
+            $proLink .= "-atlas-major";
+        } else if(!$wpgmza->internalEngine->isLegacy()){
             $proLink .= "-atlas-novus";
         }
 
@@ -1843,6 +1845,20 @@ function wpgmaps_check_if_no_api_key() {
     	$t .= "			data: {\n";
     	$t .= "				action: 'wpgmza_maps_engine_dialog_set_engine',\n";
     	$t .= "				engine: 'open-layers',\n";
+    	$t .= "				nonce: swap_nonce\n";
+    	$t .= "			},\n";
+    	$t .= "			success: function(response, status, xhr) {\n";
+    	$t .= "				window.location.reload();\n";
+    	$t .= "			}\n";
+    	$t .= "		});\n";
+    	$t .= "	});\n";
+    	/* Atlas Novus / Atlas Major notice offers Go Tiles (free, no key) instead */
+    	$t .= "$('#wpgm-swap-to-gotiles').on('click', function(event) {\n";
+    	$t .= "		$.ajax(WPGMZA.ajaxurl, {\n";
+    	$t .= "			method: 'POST',\n";
+    	$t .= "			data: {\n";
+    	$t .= "				action: 'wpgmza_maps_engine_dialog_set_engine',\n";
+    	$t .= "				engine: 'leaflet-gotiles',\n";
     	$t .= "				nonce: swap_nonce\n";
     	$t .= "			},\n";
     	$t .= "			success: function(response, status, xhr) {\n";

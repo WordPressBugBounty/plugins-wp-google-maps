@@ -35,14 +35,21 @@ class LeafletThemePanel extends DOMDocument{
 					
 					$authentication->token = !empty($wpgmza->settings->wpgmza_leaflet_maptiler_key) ? $wpgmza->settings->wpgmza_leaflet_maptiler_key : false;
 					break;
-				case 'leaflet-locationiq':
 				case 'leaflet-mapiron':
+					$tileServer = $wpgmza->settings->tile_server_url_leaflet_mapiron;
+					
+					$authentication->token = !empty($wpgmza->settings->wpgmza_leaflet_mapiron_key) ? $wpgmza->settings->wpgmza_leaflet_mapiron_key : false;
+					break;
+				case 'leaflet-locationiq':
 					$tileServer = $wpgmza->settings->tile_server_url_leaflet_locationiq;
 					
 					$authentication->token = !empty($wpgmza->settings->wpgmza_leaflet_locationiq_key) ? $wpgmza->settings->wpgmza_leaflet_locationiq_key : false;
 					break;
 				case 'leaflet-zerocost':
 					$tileServer = $wpgmza->settings->tile_server_url_leaflet_zerocost;
+					break;
+				case 'leaflet-gotiles':
+					$tileServer = $wpgmza->settings->tile_server_url_leaflet_gotiles;
 					break;
 			}
 		}

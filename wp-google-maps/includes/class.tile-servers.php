@@ -125,6 +125,10 @@ class TileServers {
                 case 'leaflet-zerocost':
 					$tileServer = TileServers::getByUrl(!empty($settings->tile_server_url_leaflet_zerocost) ? $settings->tile_server_url_leaflet_zerocost : false);
 					break;
+                case 'leaflet-gotiles':
+					/* Go Tiles needs no setup, so fall back to the light style (as the map JS does) when nothing is saved yet */
+					$tileServer = !empty($settings->tile_server_url_leaflet_gotiles) ? TileServers::getByUrl($settings->tile_server_url_leaflet_gotiles) : TileServers::getBySlug('gotiles_light');
+					break;
                 case 'leaflet-mapiron':
 					$tileServer = TileServers::getByUrl(!empty($settings->tile_server_url_leaflet_mapiron) ? $settings->tile_server_url_leaflet_mapiron : false);
 					break;

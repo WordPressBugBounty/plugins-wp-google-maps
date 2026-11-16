@@ -229,6 +229,8 @@
 .wpgmza_map[data-maps-engine="leaflet-azure"] .wpgmza-inner-stack.top_left,
 .wpgmza_map[data-maps-engine="leaflet-stadia"] .wpgmza-inner-stack.top_left,
 .wpgmza_map[data-maps-engine="leaflet-maptiler"] .wpgmza-inner-stack.top_left,
+.wpgmza_map[data-maps-engine="leaflet-gotiles"] .wpgmza-inner-stack.top_left,
+.wpgmza_map[data-maps-engine="leaflet-mapiron"] .wpgmza-inner-stack.top_left,
 .wpgmza_map[data-maps-engine="leaflet-zerocost"] .wpgmza-inner-stack.top_left,
 .wpgmza_map[data-maps-engine="leaflet-locationiq"] .wpgmza-inner-stack.top_left {
     top: 0;
@@ -252,6 +254,8 @@
 .wpgmza_map[data-maps-engine="leaflet-azure"] .wpgmza-inner-stack.bottom_left,
 .wpgmza_map[data-maps-engine="leaflet-stadia"] .wpgmza-inner-stack.bottom_left,
 .wpgmza_map[data-maps-engine="leaflet-maptiler"] .wpgmza-inner-stack.bottom_left,
+.wpgmza_map[data-maps-engine="leaflet-gotiles"] .wpgmza-inner-stack.bottom_left,
+.wpgmza_map[data-maps-engine="leaflet-mapiron"] .wpgmza-inner-stack.bottom_left,
 .wpgmza_map[data-maps-engine="leaflet-zerocost"] .wpgmza-inner-stack.bottom_left,
 .wpgmza_map[data-maps-engine="leaflet-locationiq"] .wpgmza-inner-stack.bottom_left {
     bottom: 0;
@@ -270,6 +274,8 @@
 .wpgmza_map[data-maps-engine="leaflet-azure"] .wpgmza-inner-stack.bottom_right,
 .wpgmza_map[data-maps-engine="leaflet-stadia"] .wpgmza-inner-stack.bottom_right,
 .wpgmza_map[data-maps-engine="leaflet-maptiler"] .wpgmza-inner-stack.bottom_right,
+.wpgmza_map[data-maps-engine="leaflet-gotiles"] .wpgmza-inner-stack.bottom_right,
+.wpgmza_map[data-maps-engine="leaflet-mapiron"] .wpgmza-inner-stack.bottom_right,
 .wpgmza_map[data-maps-engine="leaflet-zerocost"] .wpgmza-inner-stack.bottom_right,
 .wpgmza_map[data-maps-engine="leaflet-locationiq"] .wpgmza-inner-stack.bottom_right {
     right: 0;

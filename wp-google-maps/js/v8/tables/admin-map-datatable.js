@@ -156,6 +156,11 @@
 
  	$(document).ready(function(event){
 
+ 		/* The map list table only exists on the plugin's own Maps page in the admin. This module is part of the
+ 		 * front-end bundle too, so never start it on markup elsewhere, such as post content */
+ 		if(WPGMZA.is_admin != 1 || WPGMZA.getCurrentPage() != WPGMZA.PAGE_MAP_LIST)
+ 			return;
+
  		$("[data-wpgmza-admin-map-datatable]").each(function(index, el) {
  			WPGMZA.AdminMapDataTable = new WPGMZA.AdminMapDataTable(el);
  		});

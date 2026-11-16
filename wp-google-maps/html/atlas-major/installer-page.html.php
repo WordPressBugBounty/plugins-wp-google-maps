@@ -17,6 +17,13 @@
 
 			<div class="wpgmza-map-engine-selector">
 				<div class="wpgmza-map-engine-selector-grid">
+					<label class="wpgmza-map-engine-item" title="<?php esc_attr_e('Go Tiles (by WP Go Maps)', 'wp-google-maps'); ?>">
+						<input type="radio" name="wpgmza_maps_engine" value="leaflet-gotiles" class="wpgmza-hidden" />
+						<div class="wpgmza-map-engine-item-backdrop"></div>
+						<span><?php esc_html_e('Go Tiles', 'wp-google-maps'); ?></span>
+						<img src="<?php echo WPGMZA_PLUGIN_DIR_URL; ?>images/wpgomaps-logo.webp" alt="<?php esc_attr_e('WP Go Maps', 'wp-google-maps'); ?>" />
+					</label>
+
 					<label class="wpgmza-map-engine-item" title="<?php esc_attr_e('Google Maps', 'wp-google-maps'); ?>">
 						<input type="radio" name="wpgmza_maps_engine" value="google-maps" class="wpgmza-hidden" />
 						<div class="wpgmza-map-engine-item-backdrop"></div>
@@ -81,10 +88,12 @@
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-maptiler"><?php esc_html_e("Maptiler", "wp-google-maps"); ?></span> 
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-locationiq"><?php esc_html_e("Location IQ", "wp-google-maps"); ?></span> 
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-zerocost"><?php esc_html_e("Zero Cost Mapping", "wp-google-maps"); ?></span> 
+					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-gotiles"><?php esc_html_e("Go Tiles by WP Go Maps", "wp-google-maps"); ?></span> 
 					<span><?php esc_html_e("is powered by", "wp-google-maps"); ?></span>
 					<span class='wpgmza-map-engine-powered-by-highlight'>
 						<?php esc_html_e("Leaflet", "wp-google-maps"); ?>
 						<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-zerocost"><?php esc_html_e("& OpenFreeMap", "wp-google-maps"); ?></span> 
+						<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-gotiles"><?php esc_html_e("& OpenStreetMap", "wp-google-maps"); ?></span> 
 					</span>
 				</div>
 			</div>
@@ -331,6 +340,47 @@
 
 				<div class="wpgmza-margin-t-20">
 					<em><?php _e("Some tile servers do require an API key, however, there are many free options available", "wp-google-maps"); ?></em>
+				</div>
+			</div>
+
+			<!-- Go Tiles Features -->
+			<div class="engine-step" data-engine="leaflet-gotiles">
+				<div class="wpgmza-flex-grid center">
+					<div class="wpgmza-installer-feature-item">
+						<i class="fas fa-unlock"></i>
+						<span>
+							<?php _e("No API keys required", "wp-google-maps"); ?>
+						</span>
+					</div>
+
+					<div class="wpgmza-installer-feature-item">
+						<i class="fas fa-search-plus"></i>
+						<span>
+							<?php _e("Address suggestions", "wp-google-maps"); ?>
+						</span>
+					</div>
+
+					<div class="wpgmza-installer-feature-item">
+						<i class="fas fa-stopwatch"></i>
+						<span>
+							<?php _e("Great performance", "wp-google-maps"); ?>
+						</span>
+					</div>
+
+					<div class="wpgmza-installer-feature-item">
+						<i class="fas fa-wrench"></i>
+						<span>
+							<?php _e("Powerful Features", "wp-google-maps"); ?>
+						</span>
+					</div>
+
+					<div class="wpgmza-installer-feature-item">
+						<i class="fas fa-layer-group"></i>
+						<span>
+							<?php _e("Free map tiles by WP Go Maps", "wp-google-maps"); ?>
+						</span>
+					</div>
+
 				</div>
 			</div>
 
@@ -754,6 +804,17 @@
 				<br><br>
 
 				<em><?php _e("There are more tile servers available within the settings area of the plugin, but they may require additional set up.", "wp-google-maps"); ?></em>
+			</div>
+
+			<!-- Go Tiles Style Setup -->
+			<div class="engine-step" data-engine="leaflet-gotiles">
+				<h1><?php _e("Find a style", "wp-google-maps"); ?></h1>
+				<h2><?php _e("What tile style would you like to use?", "wp-google-maps"); ?></h2>
+				<hr>
+
+				<div class="wpgmza-row align-center" data-tile-server-select-container-gotiles>
+					
+				</div>
 			</div>
 
 			<!-- Tile Server Setup -->

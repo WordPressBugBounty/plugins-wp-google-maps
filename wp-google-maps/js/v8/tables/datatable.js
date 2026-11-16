@@ -39,6 +39,7 @@ jQuery(function($) {
 		this.element = element;
 		this.element.wpgmzaDataTable = this;
 		this.dataTableElement = this.getDataTableElement();
+		this.removeUntrustedTableAttributes();
 
 		var settings = this.getDataTableSettings();
 		
@@ -88,6 +89,29 @@ jQuery(function($) {
 	WPGMZA.DataTable.prototype.getDataTableElement = function()
 	{
 		return $(this.element).find("table");
+	}
+
+	/**
+	 * DataTables options this plugin passes through the data-wpgmza-datatable-options attribute. Anything else in
+	 * that attribute is ignored, in particular the language strings, which DataTables inserts as HTML
+	 */
+	WPGMZA.DataTable.ALLOWED_ATTRIBUTE_OPTIONS = ["pageLength", "order", "lengthChange", "ordering", "paging", "searching", "info", "autoWidth"];
+
+	/**
+	 * DataTables reads settings from data-* attributes on the table and its header cells, and those override the
+	 * settings passed in code (for example data-language replaces the language strings, which are inserted as HTML).
+	 * This plugin's own table markup only uses data-wpgmza-* attributes there, so any other data-* attribute is
+	 * removed before DataTables starts
+	 */
+	WPGMZA.DataTable.prototype.removeUntrustedTableAttributes = function()
+	{
+		$(this.dataTableElement).find("thead th").addBack().each(function(index, el) {
+			for(var i = el.attributes.length - 1; i >= 0; i--){
+				var name = el.attributes[i].name.toLowerCase();
+				if(name.indexOf("data-") === 0 && name.indexOf("data-wpgmza-") !== 0)
+					el.removeAttribute(el.attributes[i].name);
+			}
+		});
 	}
 	
 	/**
@@ -176,9 +200,20 @@ jQuery(function($) {
 		var element = this.element;
 		var options = {};
 		
-		if($(element).attr("data-wpgmza-datatable-options"))
-			options = JSON.parse($(element).attr("data-wpgmza-datatable-options"));
-	
+		if($(element).attr("data-wpgmza-datatable-options")){
+			var attributeOptions = null;
+			try {
+				attributeOptions = JSON.parse($(element).attr("data-wpgmza-datatable-options"));
+			} catch(e) {}
+
+			if(attributeOptions && typeof attributeOptions === "object"){
+				WPGMZA.DataTable.ALLOWED_ATTRIBUTE_OPTIONS.forEach(function(key) {
+					if(Object.prototype.hasOwnProperty.call(attributeOptions, key))
+						options[key] = attributeOptions[key];
+				});
+			}
+		}
+
 		options.deferLoading = true;
 		options.processing = true;
 		options.serverSide = true;

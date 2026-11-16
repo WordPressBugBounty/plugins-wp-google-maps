@@ -16,6 +16,11 @@
  */
 jQuery(function($) {
 
+	/* Admin UI only: never start outside the plugin's own admin pages. This module is also in the front-end bundle,
+	 * and post content can carry the Atlas Major class */
+	if(WPGMZA.is_admin != 1 || !WPGMZA.getCurrentPage())
+		return;
+
 	/**
 	 * Resolve a localized string from WPGMZA.localized_strings, with an
 	 * English fallback for the rare case where the server-side

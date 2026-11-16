@@ -381,8 +381,13 @@ class AdminNotices {
 					/* We handle this here for simplicity - but it belongs somewhere else to be honest */
 					global $wpgmza;
 					$switch = !empty($_POST['map_engine']) ? sanitize_text_field($_POST['map_engine']) : false;
-					$valid = array("google-maps", "leaflet-azure", "leaflet-stadia", "leaflet-maptiler", "leaflet-locationiq", "leaflet-mapiron", "leaflet-zerocost", "leaflet", "open-layers-latest");
-					
+					$valid = array("leaflet-gotiles", "google-maps", "leaflet-azure", "leaflet-stadia", "leaflet-maptiler", "leaflet-locationiq", "leaflet-mapiron", "leaflet-zerocost", "leaflet", "open-layers-latest");
+
+					/* Go Tiles needs a newer Pro, when an older one is active (see Plugin::isGoTilesAvailable) */
+					if(!$wpgmza->isGoTilesAvailable()){
+						$valid = array_diff($valid, array("leaflet-gotiles"));
+					}
+
 					if(in_array($switch, $valid)){
 						/* Valid switch */
 						$wpgmza->settings->wpgmza_maps_engine = $switch;
@@ -404,9 +409,21 @@ class AdminNotices {
 								}
 								break;
 							case 'leaflet-locationiq':
-							case 'leaflet-mapiron':
 								if(empty($wpgmza->settings->tile_server_url_leaflet_locationiq)){
 									$wpgmza->settings->tile_server_url_leaflet_locationiq = "https://{s}-tiles.locationiq.com/v3/streets/r/{z}/{x}/{y}.png";
+								}
+								break;
+							case 'leaflet-mapiron':
+								if(empty($wpgmza->settings->tile_server_url_leaflet_mapiron)){
+									$wpgmza->settings->tile_server_url_leaflet_mapiron = "https://api.mapiron.com/v1/tiles/light/{z}/{x}/{y}.png";
+								}
+								break;
+							case 'leaflet-gotiles':
+								if(empty($wpgmza->settings->tile_server_url_leaflet_gotiles)){
+									$goTiles = TileServers::getBySlug('gotiles_light');
+									if(!empty($goTiles) && !empty($goTiles->url)){
+										$wpgmza->settings->tile_server_url_leaflet_gotiles = $goTiles->url;
+									}
 								}
 								break;
 							case 'leaflet-zerocost':

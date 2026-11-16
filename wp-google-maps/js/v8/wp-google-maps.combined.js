@@ -585,6 +585,7 @@ jQuery(function($) {
 				case "leaflet-stadia":
 				case "leaflet-maptiler":
 				case "leaflet-locationiq":
+				case "leaflet-gotiles":
 				case "leaflet-mapiron":
 				case "leaflet-zerocost":
 					/* Leaflet */
@@ -1275,6 +1276,11 @@ jQuery(function($) {
  */
 jQuery(function($) {
 
+	/* Admin UI only: never start outside the plugin's own admin pages. This module is also in the front-end bundle,
+	 * and post content can carry the Atlas Major class */
+	if(WPGMZA.is_admin != 1 || !WPGMZA.getCurrentPage())
+		return;
+
 	/**
 	 * Resolve a localized string from WPGMZA.localized_strings, with an
 	 * English fallback for the rare case where the server-side
@@ -1895,6 +1901,11 @@ jQuery(function($) {
  */
 jQuery(function($) {
 
+	/* Admin UI only: never start outside the plugin's own admin pages. This module is also in the front-end bundle,
+	 * and post content can carry the Atlas Major class */
+	if(WPGMZA.is_admin != 1 || !WPGMZA.getCurrentPage())
+		return;
+
 	if(!document.querySelector('.wpgmza-atlas-major'))
 		return;
 
@@ -2097,6 +2108,11 @@ jQuery(function($) {
  * Pro components are added by atlas-major-live-preview-pro.js via registerComponent().
  */
 jQuery(function($) {
+
+	/* Admin UI only: never start outside the plugin's own admin pages. This module is also in the front-end bundle,
+	 * and post content can carry the Atlas Major class */
+	if(WPGMZA.is_admin != 1 || !WPGMZA.getCurrentPage())
+		return;
 
 	if(!document.querySelector('.wpgmza-atlas-major'))
 		return;
@@ -3624,6 +3640,9 @@ jQuery(function($) {
 				if(WPGMZA.settings && WPGMZA.settings.engine === 'leaflet-zerocost' && config.url){
 					WPGMZA.settings.tile_server_url_leaflet_zerocost = config.url;
 				}
+				if(WPGMZA.settings && WPGMZA.settings.engine === 'leaflet-gotiles' && config.url){
+					WPGMZA.settings.tile_server_url_leaflet_gotiles = config.url;
+				}
 
 				reloadLiveTileLayer();
 			});
@@ -4105,6 +4124,11 @@ jQuery(function($) {
  * Features: live search filtering, pagination, auto-sync with map events.
  */
 jQuery(function($) {
+
+	/* Admin UI only: never start outside the plugin's own admin pages. This module is also in the front-end bundle,
+	 * and post content can carry the Atlas Major class */
+	if(WPGMZA.is_admin != 1 || !WPGMZA.getCurrentPage())
+		return;
 
 	if(!document.querySelector('.wpgmza-atlas-major'))
 		return;
@@ -5262,6 +5286,11 @@ jQuery(function($) {
  */
 jQuery(function($){
 
+	/* Admin UI only: never start outside the plugin's own admin pages. This module is also in the front-end bundle,
+	 * and post content can carry the Atlas Major class */
+	if(WPGMZA.is_admin != 1 || !WPGMZA.getCurrentPage())
+		return;
+
 	if(!document.querySelector('.wpgmza-atlas-major'))
 		return;
 
@@ -6220,6 +6249,7 @@ jQuery(function($) {
                     case 'leaflet-stadia':
                     case 'leaflet-maptiler':
                     case 'leaflet-zerocost':
+                    case 'leaflet-gotiles':
                     case 'leaflet-mapiron':
                         /* Nominatim */
                         provider = WPGMZA.Autocomplete.Providers.NOMINATIM;
@@ -9026,6 +9056,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				return WPGMZA.LeafletDrawingManager;
@@ -9626,6 +9657,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(this.leafletFeature && this.leafletFeature instanceof L.Path){
@@ -9855,6 +9887,7 @@ jQuery(function($) {
                     case 'leaflet-stadia':
                     case 'leaflet-maptiler':
                     case 'leaflet-zerocost':
+                    case 'leaflet-gotiles':
                     case 'leaflet-mapiron':
 						provider = WPGMZA.Geocoder.Providers.LEAFLET;
                         break;
@@ -9887,6 +9920,7 @@ jQuery(function($) {
 							case 'leaflet-stadia':
 							case 'leaflet-maptiler':
 							case 'leaflet-zerocost':
+							case 'leaflet-gotiles':
 								provider = WPGMZA.Geocoder.Providers.LEAFLET;
 								break;
 						}
@@ -10256,6 +10290,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion())
@@ -13250,6 +13285,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
@@ -13473,7 +13509,7 @@ jQuery(function($) {
 							$(this.element).css('--wpgmza-ol-tile-filter', tileFilter);
 						}
 					} 
-				} else if(WPGMZA.settings.engine === 'leaflet' || WPGMZA.settings.engine === 'leaflet-azure' || WPGMZA.settings.engine === 'leaflet-stadia' || WPGMZA.settings.engine === 'leaflet-maptiler' || WPGMZA.settings.engine === 'leaflet-locationiq' || WPGMZA.settings.engine === 'leaflet-mapiron' || WPGMZA.settings.engine === 'leaflet-zerocost'){
+				} else if(WPGMZA.settings.engine === 'leaflet' || WPGMZA.settings.engine === 'leaflet-azure' || WPGMZA.settings.engine === 'leaflet-stadia' || WPGMZA.settings.engine === 'leaflet-maptiler' || WPGMZA.settings.engine === 'leaflet-locationiq' || WPGMZA.settings.engine === 'leaflet-mapiron' || WPGMZA.settings.engine === 'leaflet-gotiles' || WPGMZA.settings.engine === 'leaflet-zerocost'){
 					if(this.settings.wpgmza_leaflet_tile_filter){
 						let tileFilter = this.settings.wpgmza_leaflet_tile_filter.trim();
 						if(tileFilter){
@@ -13809,6 +13845,14 @@ jQuery(function($) {
 		for(var i = 0; i < data.length; i++)
 		{
 			var obj = data[i];
+
+			/* Skip markers whose stored coordinates are not numbers (e.g. an address saved in the lat field),
+			 * otherwise the position check throws and stops every marker after it, along with listings */
+			if(obj && (("lat" in obj && !WPGMZA.isNumeric(obj.lat)) || ("lng" in obj && !WPGMZA.isNumeric(obj.lng)))){
+				console.warn("WP Go Maps: Marker " + obj.id + " was not placed on map " + this.id + " because its coordinates are not valid numbers (lat: " + obj.lat + ", lng: " + obj.lng + "). Edit the marker and set its location again to fix this.");
+				continue;
+			}
+
 			var marker = WPGMZA.Marker.createInstance(obj);
 			
 			if(startFiltered)
@@ -15015,6 +15059,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion())
@@ -15631,6 +15676,7 @@ jQuery(function($) {
 			case 'leaflet-stadia':
 			case 'leaflet-maptiler':
 			case 'leaflet-locationiq':
+			case 'leaflet-gotiles':
 			case 'leaflet-mapiron':
 			case 'leaflet-zerocost':
 				return new WPGMZA.LeafletModernStoreLocatorCircle(map, settings);
@@ -16510,6 +16556,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
@@ -16869,6 +16916,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion())
@@ -17018,6 +17066,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion())
@@ -18254,6 +18303,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
@@ -18485,6 +18535,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
@@ -18935,6 +18986,11 @@ jQuery(function($) {
  * Tabs carry data-am-group attributes that map to data-group values on groupings.
  */
 jQuery(function($) {
+
+	/* Admin UI only: never start outside the plugin's own admin pages. This module is also in the front-end bundle,
+	 * and post content can carry the Atlas Major class */
+	if(WPGMZA.is_admin != 1 || !WPGMZA.getCurrentPage())
+		return;
 
 	if(WPGMZA.currentPage != "map-edit")
 		return;
@@ -19441,6 +19497,17 @@ jQuery(function($) {
 
 			var savedOut = parseInt($hiddenOut.val());
 			var savedIn  = parseInt($hiddenIn.val());
+
+			/* Atlas Novus stores these two fields the other way round (map_max_zoom 21, map_min_zoom 0), and
+			 * the map itself treats them as an unordered range (Math.min/Math.max in MapSettings). Read them
+			 * the same way here, so a map last saved in Novus shows 0 to 21 instead of the out handle being
+			 * dragged down to the in handle by update() and the map being saved locked at zoom 0 */
+			if(!isNaN(savedOut) && !isNaN(savedIn) && savedOut > savedIn){
+				var swap = savedOut;
+				savedOut = savedIn;
+				savedIn = swap;
+			}
+
 			if(!isNaN(savedOut)) $outInput.val(savedOut);
 			if(!isNaN(savedIn))  $inInput.val(savedIn);
 
@@ -20288,6 +20355,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				return new WPGMZA.LeafletText(options);
@@ -20424,6 +20492,7 @@ jQuery(function($) {
 			case 'leaflet-stadia':
 			case 'leaflet-maptiler':
 			case 'leaflet-locationiq':
+			case 'leaflet-gotiles':
 			case 'leaflet-mapiron':
 			case 'leaflet-zerocost':
 				this.element.remove();
@@ -20870,6 +20939,7 @@ jQuery(function($) {
 			case 'leaflet-stadia':
 			case 'leaflet-maptiler':
 			case 'leaflet-locationiq':
+			case 'leaflet-gotiles':
 			case 'leaflet-mapiron':
 			case 'leaflet-zerocost':
 				this.element.remove();
@@ -21185,8 +21255,10 @@ jQuery(function($) {
                 case 'leaflet-maptiler':
                     tokenFieldName = 'wpgmza_leaflet_maptiler_key';
                     break;
-                case 'leaflet-locationiq':
                 case 'leaflet-mapiron':
+                    tokenFieldName = 'wpgmza_leaflet_mapiron_key';
+                    break;
+                case 'leaflet-locationiq':
                     tokenFieldName = 'wpgmza_leaflet_locationiq_key';
                     break;
             }
@@ -26563,8 +26635,22 @@ jQuery(function($) {
 	
 	WPGMZA.LeafletInfoWindow = function(feature) {
 		var self = this;
-		
+
 		Parent.call(this, feature);
+
+		/* Content was added after the popup opened (Pro galleries, Gold ratings), so re-measure, reposition
+		 * and pan the popup. Hand Leaflet the existing content element rather than calling update(), which
+		 * would re-render the original HTML and drop whatever was added */
+		this.on("infowindowcontentshift", function(event) {
+			if(!self.leafletPopup || !self.leafletPopup.isOpen()){
+				return;
+			}
+
+			var content = $(self.leafletPopup.getElement()).find('.leaflet-popup-content > .wpgmza-infowindow')[0];
+			if(content){
+				self.leafletPopup.setContent(content);
+			}
+		});
 	}
 	
 	if(WPGMZA.isProVersion())
@@ -26714,6 +26800,21 @@ jQuery(function($) {
 		}
 
 		mapOptions = this.extendNativeConfig(mapOptions);
+
+		/*
+		 * Leaflet 1.9 focuses the map container on the first press without preventScroll, then only restores the window scroll.
+		 * When the map sits in a scrolling panel (e.g. the Atlas Major live preview) the panel jumps mid-click and the click is lost.
+		 * Leaflet 2 focuses with preventScroll, so we match that behaviour here (applied once, shared by all maps)
+		*/
+		if(L.Map && L.Map.Keyboard && !L.Map.Keyboard.prototype.wpgmzaFocusWithoutScroll){
+			L.Map.Keyboard.prototype._onMouseDown = function(){
+				if(this._focused){
+					return;
+				}
+				this._map._container.focus({preventScroll: true});
+			};
+			L.Map.Keyboard.prototype.wpgmzaFocusWithoutScroll = true;
+		}
 
         this.leafletMap = L.map($(element)[0], mapOptions);
 
@@ -27022,6 +27123,10 @@ jQuery(function($) {
 				/* Remap to zerocost settings */
 				url = WPGMZA.settings.tile_server_url_leaflet_zerocost ? WPGMZA.settings.tile_server_url_leaflet_zerocost : url;
 				break;
+			case 'leaflet-gotiles':
+				/* Remap to Go Tiles settings: no key needed (free tier), defaults to the light style */
+				url = WPGMZA.settings.tile_server_url_leaflet_gotiles ? WPGMZA.settings.tile_server_url_leaflet_gotiles : "https://tiles.wpgmaps.com/styles/light/{z}/{x}/{y}.png";
+				break;
 			case 'leaflet-mapiron':
 				/* Remap to MapIron settings */
 				url = WPGMZA.settings.tile_server_url_leaflet_mapiron ? WPGMZA.settings.tile_server_url_leaflet_mapiron : url;
@@ -27068,6 +27173,7 @@ jQuery(function($) {
 			}
 
 			layers.push(new L.tileLayer(config.url, config.options ? config.options : {}));
+			this.watchGoTilesLimit(layers);
 			return layers;
 		} 
 
@@ -27075,6 +27181,96 @@ jQuery(function($) {
 		return [new L.tileLayer(url, {})];
 	}
 	
+	/**
+	 * Go Tiles: when a tile fails, check once whether the site has used its free monthly allowance,
+	 * and if so tell site admins inside the map (visitors never see it). No call home: this re-requests
+	 * the same tile URL the map already uses, whose "limit reached" reply carries a short text message.
+	 */
+	WPGMZA.LeafletMap.prototype.watchGoTilesLimit = function(layers){
+		if(WPGMZA.settings.engine !== 'leaflet-gotiles'){
+			return;
+		}
+
+		if(WPGMZA.is_admin != "1" && WPGMZA.userCanAdministrator != "1"){
+			return;
+		}
+
+		const self = this;
+		let checked = false;
+
+		const onTileError = function(event){
+			if(checked || !event || !event.tile || !event.tile.src || typeof fetch !== 'function'){
+				return;
+			}
+			checked = true;
+
+			fetch(event.tile.src, {mode: 'cors', cache: 'no-store'}).then(function(response){
+				if(response.status !== 429){
+					return;
+				}
+
+				return response.text().then(function(text){
+					if(text && text.indexOf('monthly tile limit') !== -1){
+						self.showGoTilesLimitNotice(text.indexOf('for this key') !== -1);
+					}
+				});
+			}).catch(function(){ /* network issue: nothing to report */ });
+		};
+
+		for(let layer of layers){
+			if(layer && layer.on){
+				layer.on('tileerror', onTileError);
+			}
+		}
+	}
+
+	WPGMZA.LeafletMap.prototype.showGoTilesLimitNotice = function(keyed){
+		if(!this.element || this.element.querySelector('.wpgmza-gotiles-limit-notice')){
+			return;
+		}
+
+		const notice = document.createElement('div');
+		notice.className = 'wpgmza-gotiles-limit-notice';
+		notice.setAttribute('role', 'status');
+		notice.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1000;max-width:90%;'
+			+ 'background:#fff;color:#1b2230;border-left:4px solid #e8473f;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.25);'
+			+ 'padding:10px 34px 10px 12px;font:13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;';
+
+		const title = document.createElement('strong');
+		title.textContent = 'Go Tiles: monthly map tile limit reached';
+		notice.appendChild(title);
+
+		const body = document.createElement('div');
+		body.textContent = keyed
+			? 'This site\'s key has used its map tiles for this month, so the map can\'t load more until the 1st.'
+			: 'This site has used its free 10,000 map tiles for this month, so the map can\'t load more until the 1st.';
+		notice.appendChild(body);
+
+		if(!keyed){
+			const link = document.createElement('a');
+			link.href = 'https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit';
+			link.target = '_blank';
+			link.rel = 'noopener';
+			link.textContent = 'Upgrade to Pro for higher limits';
+			notice.appendChild(link);
+		}
+
+		const hint = document.createElement('div');
+		hint.style.cssText = 'color:#5b6678;font-size:12px;margin-top:4px;';
+		hint.textContent = 'Only admins see this message.';
+		notice.appendChild(hint);
+
+		const close = document.createElement('button');
+		close.type = 'button';
+		close.setAttribute('aria-label', 'Dismiss');
+		close.textContent = '×';
+		close.style.cssText = 'position:absolute;top:4px;right:6px;border:0;background:none;font-size:18px;line-height:1;cursor:pointer;color:#5b6678;';
+		close.addEventListener('click', function(){ notice.remove(); });
+		notice.appendChild(close);
+
+		this.element.appendChild(notice);
+	}
+
 	WPGMZA.LeafletMap.prototype.wrapLongitude = function(){
 		let center = this.leafletMap.getCenter();
 		if(center.lng >= -180 && center.lng <= 180){
@@ -31406,6 +31602,526 @@ jQuery(function($) {
 	
 });
 
+// js/v8/map-edit-page/pro-checkout.js
+/**
+ * @namespace WPGMZA
+ * @module ProCheckout
+ * @requires WPGMZA.GenericModal
+ */
+jQuery(function($) {
+
+	/**
+	 * In-plugin Pro checkout (Atlas Major map editor, testing).
+	 *
+	 * Lists the Pro plans from the WP Go Maps store API, opens Stripe's hosted checkout in a new tab
+	 * (no iframe, per the WordPress.org guidelines), then polls the store for the order result and shows
+	 * the licence key and download link. Pro is never installed by this plugin; the user uploads it.
+	 *
+	 * @class WPGMZA.ProCheckout
+	 * @param {HTMLElement} element The .wpgmza-pro-checkout-modal element
+	 */
+	WPGMZA.ProCheckout = function(element){
+		this.element = $(element);
+		this.apiBase = (this.element.attr('data-store-api') || '').replace(/\/?$/, '/');
+
+		/* Closing the dialog does not stop an order check in progress: it keeps checking in the background
+		 * and opens again with the licence key once the payment completes */
+		this.modal = WPGMZA.GenericModal.createInstance(this.element);
+
+		this.plans = [];
+		this.currency = 'usd';
+		this.selectedPlan = false;
+		this.plansLoaded = false;
+		this.pollTimer = false;
+		this.pollStarted = 0;
+		this.sessionId = false;
+
+		this.bindEvents();
+	}
+
+	WPGMZA.ProCheckout.POLL_INTERVAL = 4000;
+	WPGMZA.ProCheckout.POLL_TIMEOUT = 45 * 60 * 1000;
+	WPGMZA.ProCheckout.DEFAULT_PLAN = '5-site';
+
+	WPGMZA.ProCheckout.createInstance = function(element){
+		return new WPGMZA.ProCheckout(element);
+	}
+
+	WPGMZA.ProCheckout.prototype.bindEvents = function(){
+		var self = this;
+
+		$(document.body).on('click', '[data-wpgmza-pro-checkout]', function(event){
+			event.preventDefault();
+			/* Each button that opens the checkout names itself, e.g. data-wpgmza-pro-checkout="editor-toolbar" */
+			self.entryPoint = $(this).attr('data-wpgmza-pro-checkout') || '';
+			self.open();
+		});
+
+		this.element.on('click', '[data-am-checkout-plan]', function(event){
+			event.preventDefault();
+			self.selectPlan($(this).attr('data-am-checkout-plan'));
+		});
+
+		this.element.on('click', '[data-am-checkout-continue]', function(event){
+			event.preventDefault();
+			if(self.selectedPlan){
+				self.buy(self.selectedPlan);
+			}
+		});
+
+		this.element.on('click', '[data-am-checkout-change-plan]', function(event){
+			event.preventDefault();
+			self.changePlan();
+		});
+
+		this.element.on('click', '[data-am-checkout-copy]', function(event){
+			event.preventDefault();
+			self.copyKey($(this));
+		});
+
+		/* Check straight away when the user comes back from the Stripe tab */
+		$(window).on('focus', function(){
+			if(self.pollTimer){
+				self.pollOrder();
+			}
+		});
+	}
+
+	WPGMZA.ProCheckout.prototype.setStep = function(step){
+		this.element.attr('data-am-checkout-state', step);
+		this.element.find('[data-am-checkout-step]').hide();
+		this.element.find('[data-am-checkout-step="' + step + '"]').show();
+	}
+
+	WPGMZA.ProCheckout.prototype.open = function(){
+		this.modal.show();
+
+		if(this.sessionId){
+			/* A checkout is already in progress, keep showing it */
+			this.setStep('waiting');
+			return;
+		}
+
+		if(this.plansLoaded){
+			this.setStep('plans');
+			return;
+		}
+
+		this.loadPlans();
+	}
+
+	WPGMZA.ProCheckout.prototype.request = function(method, endpoint, data){
+		var options = {
+			method: method,
+			url: this.apiBase + endpoint,
+			dataType: 'json',
+			timeout: 20000,
+			xhrFields: { withCredentials: false }
+		};
+
+		if(method === 'POST'){
+			options.contentType = 'application/json';
+			options.data = JSON.stringify(data || {});
+		} else if(data){
+			options.data = data;
+		}
+
+		return $.ajax(options);
+	}
+
+	WPGMZA.ProCheckout.prototype.loadPlans = function(){
+		var self = this;
+
+		this.setStep('loading');
+
+		this.request('GET', 'plans').done(function(response){
+			if(!response || !response.plans || !response.plans.length){
+				self.setStep('error');
+				return;
+			}
+
+			self.plans = response.plans;
+			self.currency = response.currency || 'usd';
+			self.regional = self.parseRegional(response.regional);
+			self.plansLoaded = true;
+			self.renderRegional();
+
+			var preferred = self.getPlan(WPGMZA.ProCheckout.DEFAULT_PLAN) ? WPGMZA.ProCheckout.DEFAULT_PLAN : self.plans[0].id;
+			self.renderPlans();
+			self.selectPlan(preferred);
+			self.setStep('plans');
+		}).fail(function(){
+			self.setStep('error');
+		});
+	}
+
+	WPGMZA.ProCheckout.prototype.getPlan = function(id){
+		for(var i = 0; i < this.plans.length; i++){
+			if(this.plans[i].id === id){
+				return this.plans[i];
+			}
+		}
+		return false;
+	}
+
+	/* Short, translatable card names by plan id (the store's product names are long, e.g. "WP Go Maps v10 - LTD - 1 Site License") */
+	WPGMZA.ProCheckout.prototype.getPlanLabel = function(plan){
+		var labels = {
+			'1-site': WPGMZA.localized_strings.pro_checkout_plan_1site,
+			'5-site': WPGMZA.localized_strings.pro_checkout_plan_5site,
+			'unlimited': WPGMZA.localized_strings.pro_checkout_plan_unlimited
+		};
+		return labels[plan.id] || plan.name || plan.id;
+	}
+
+	/* Regional discount details from the store, only when a discount applies and the flag is a secure link */
+	WPGMZA.ProCheckout.prototype.parseRegional = function(regional){
+		if(!regional || !(parseInt(regional.discount, 10) > 0)){
+			return false;
+		}
+		return {
+			name: String(regional.name || regional.country || ''),
+			discount: parseInt(regional.discount, 10),
+			flag: (regional.flag_url && /^https:\/\//.test(regional.flag_url)) ? regional.flag_url : false
+		};
+	}
+
+	WPGMZA.ProCheckout.prototype.fill = function(template, values){
+		var i = 0;
+		return String(template).replace(/%(\d)\$s|%s/g, function(match, position){
+			return position ? values[parseInt(position, 10) - 1] : values[i++];
+		}).replace(/%%/g, '%');
+	}
+
+	/* Banner at the top of the plans, matching the wpgmaps.com pricing page */
+	WPGMZA.ProCheckout.prototype.renderRegional = function(){
+		var banner = this.element.find('[data-am-checkout-regional]');
+
+		if(!this.regional){
+			banner.prop('hidden', true);
+			return;
+		}
+
+		var flag = banner.find('[data-am-checkout-regional-flag]');
+		if(this.regional.flag){
+			flag.attr({ src: this.regional.flag, alt: this.regional.name }).show().off('error').on('error', function(){ $(this).hide(); });
+		} else {
+			flag.hide();
+		}
+
+		banner.find('[data-am-checkout-regional-title]').text(this.fill(WPGMZA.localized_strings.pro_checkout_regional_title, [this.regional.discount, this.regional.name]));
+		banner.prop('hidden', false);
+	}
+
+	/* The price the customer pays: the regional price when it is lower than the list price */
+	WPGMZA.ProCheckout.prototype.getPayCents = function(plan){
+		var list = parseInt(plan.price_cents, 10) || 0;
+		var regional = parseInt(plan.regional_price_cents, 10) || 0;
+		return (regional && regional < list) ? regional : list;
+	}
+
+	WPGMZA.ProCheckout.prototype.formatPrice = function(cents){
+		var amount = (parseInt(cents, 10) || 0) / 100;
+		try {
+			return new Intl.NumberFormat(undefined, { style: 'currency', currency: (this.currency || 'USD').toUpperCase(), minimumFractionDigits: amount % 1 ? 2 : 0 }).format(amount);
+		} catch(e) {
+			return '$' + amount.toFixed(amount % 1 ? 2 : 0);
+		}
+	}
+
+	/* Line under each price: per-site value for 5 sites, rounded up to a whole amount so it never overstates the saving */
+	WPGMZA.ProCheckout.prototype.getPlanSubtitle = function(plan, payCents){
+		if(plan.id === '5-site' && payCents > 0){
+			return this.fill(WPGMZA.localized_strings.pro_checkout_per_site, [this.formatPrice((Math.floor(payCents / 5 / 100) + 1) * 100)]);
+		}
+		if(plan.id === 'unlimited'){
+			return WPGMZA.localized_strings.pro_checkout_unlimited_sub;
+		}
+		return WPGMZA.ProCheckout.strings.one_off;
+	}
+
+	WPGMZA.ProCheckout.prototype.renderPlans = function(){
+		var self = this;
+		var container = this.element.find('[data-am-checkout-plans]').empty();
+
+		this.plans.forEach(function(plan){
+			var pay = self.getPayCents(plan);
+			var list = parseInt(plan.price_cents, 10) || 0;
+
+			/* Text is set with .text() so nothing from the API is ever treated as HTML */
+			var card = $('<button type="button" role="radio" aria-checked="false" class="am-checkout-plan"></button>').attr('data-am-checkout-plan', plan.id);
+
+			if(plan.id === '5-site'){
+				card.append($('<span class="am-checkout-plan-popular"></span>').text(WPGMZA.localized_strings.pro_checkout_most_popular));
+			}
+
+			var top = $('<span class="am-checkout-plan-top"></span>');
+			top.append($('<span class="am-checkout-plan-name"></span>').text(self.getPlanLabel(plan)));
+			top.append('<span class="am-checkout-plan-dot" aria-hidden="true"></span>');
+			card.append(top);
+
+			var price = $('<span class="am-checkout-plan-price"></span>');
+			if(pay < list){
+				price.append($('<s></s>').text(self.formatPrice(list)));
+				price.append(' ');
+			}
+			price.append($('<span></span>').text(self.formatPrice(pay)));
+			card.append(price);
+
+			card.append($('<span class="am-checkout-plan-billing"></span>').text(self.getPlanSubtitle(plan, pay)));
+
+			/* The banner already names the discount, so each card just says what it saves */
+			if(pay < list){
+				card.append($('<span class="am-checkout-plan-save"></span>').text(self.fill(WPGMZA.localized_strings.pro_checkout_you_save, [self.formatPrice(list - pay)])));
+			}
+
+			container.append(card);
+		});
+	}
+
+	WPGMZA.ProCheckout.prototype.selectPlan = function(id){
+		var plan = this.getPlan(id);
+		if(!plan){
+			return;
+		}
+
+		this.selectedPlan = id;
+
+		this.element.find('[data-am-checkout-plan]').each(function(){
+			var on = $(this).attr('data-am-checkout-plan') === id;
+			$(this).toggleClass('is-selected', on).attr('aria-checked', on ? 'true' : 'false');
+		});
+
+		this.element.find('[data-am-checkout-continue-label]').text(WPGMZA.ProCheckout.strings.continue_to + ' · ' + this.formatPrice(this.getPayCents(plan)));
+		this.element.find('[data-am-checkout-plan-name]').text(WPGMZA.ProCheckout.strings.pro_prefix + ' ' + this.getPlanLabel(plan));
+	}
+
+	WPGMZA.ProCheckout.prototype.buy = function(planId){
+		var self = this;
+
+		/* Open the tab inside the click, so popup blockers allow it, then point it at Stripe once we have the URL */
+		var stripeTab = window.open('', '_blank');
+		var button = this.element.find('[data-am-checkout-continue]').prop('disabled', true);
+
+		this.request('POST', 'checkout', {
+			plan: planId,
+			site_url: window.location.origin,
+			return_url: window.location.href,
+			source_build: this.element.attr('data-source-build') || '',
+			entry_point: this.entryPoint || '',
+			plugin_version: this.element.attr('data-plugin-version') || ''
+		}).done(function(response){
+			if(!response || !response.url || !response.session_id){
+				if(stripeTab){ stripeTab.close(); }
+				self.setStep('error');
+				return;
+			}
+
+			self.sessionId = response.session_id;
+			self.stripeTab = stripeTab;
+			self.element.find('[data-am-checkout-reopen]').attr('href', response.url);
+
+			if(stripeTab){
+				stripeTab.location = response.url;
+			}
+
+			self.setStep('waiting');
+			self.startPolling();
+		}).fail(function(){
+			if(stripeTab){ stripeTab.close(); }
+			self.setStep('error');
+		}).always(function(){
+			button.prop('disabled', false);
+		});
+	}
+
+	/* Leaves the waiting screen so a different plan can be chosen. Checks the order once more first, so a
+	 * payment that has just gone through is shown rather than dropped. An abandoned Stripe checkout simply
+	 * expires on Stripe's side */
+	WPGMZA.ProCheckout.prototype.changePlan = function(){
+		var self = this;
+		var sessionId = this.sessionId;
+		var button = this.element.find('[data-am-checkout-change-plan]').prop('disabled', true);
+
+		var backToPlans = function(){
+			self.stopPolling();
+			self.sessionId = false;
+
+			try {
+				if(self.stripeTab && !self.stripeTab.closed){
+					self.stripeTab.close();
+				}
+			} catch(e) {}
+			self.stripeTab = false;
+
+			self.setStep(self.plansLoaded ? 'plans' : 'loading');
+			if(!self.plansLoaded){
+				self.loadPlans();
+			}
+		};
+
+		if(!sessionId){
+			button.prop('disabled', false);
+			backToPlans();
+			return;
+		}
+
+		this.request('GET', 'order', { session_id: sessionId }).done(function(response){
+			if(response && response.status === 'complete'){
+				self.stopPolling();
+				self.showComplete(response);
+				return;
+			}
+			backToPlans();
+		}).fail(backToPlans).always(function(){
+			button.prop('disabled', false);
+		});
+	}
+
+	WPGMZA.ProCheckout.prototype.startPolling = function(){
+		var self = this;
+		this.stopPolling();
+		this.pollStarted = Date.now();
+		this.pollTimer = setInterval(function(){
+			self.pollOrder();
+		}, WPGMZA.ProCheckout.POLL_INTERVAL);
+	}
+
+	WPGMZA.ProCheckout.prototype.stopPolling = function(){
+		if(this.pollTimer){
+			clearInterval(this.pollTimer);
+			this.pollTimer = false;
+		}
+	}
+
+	WPGMZA.ProCheckout.prototype.pollOrder = function(){
+		var self = this;
+
+		if(!this.sessionId){
+			return;
+		}
+
+		if(Date.now() - this.pollStarted > WPGMZA.ProCheckout.POLL_TIMEOUT){
+			/* Give up quietly, the receipt email still carries the key and download link */
+			this.stopPolling();
+			return;
+		}
+
+		if(this.pollInFlight){
+			return;
+		}
+
+		this.pollInFlight = true;
+
+		this.request('GET', 'order', { session_id: this.sessionId }).done(function(response){
+			if(response && response.status === 'complete'){
+				self.stopPolling();
+				self.showComplete(response);
+			}
+		}).always(function(){
+			self.pollInFlight = false;
+		});
+	}
+
+	WPGMZA.ProCheckout.prototype.showComplete = function(order){
+		var hasKey = !!order.api_key;
+
+		this.element.find('[data-am-checkout-licence]').toggle(hasKey);
+		this.element.find('[data-am-checkout-licence-pending]').toggle(!hasKey);
+		this.element.find('[data-am-checkout-key]').val(hasKey ? order.api_key : '');
+
+		var download = this.element.find('[data-am-checkout-download]');
+		if(order.download_url && /^https:\/\//.test(order.download_url)){
+			download.attr('href', order.download_url).show();
+		} else {
+			download.hide();
+		}
+
+		var account = this.element.find('[data-am-checkout-account]');
+		if(order.my_account_url && /^https:\/\//.test(order.my_account_url)){
+			account.attr('href', order.my_account_url);
+		} else {
+			account.attr('href', 'https://www.wpgmaps.com/my-account/');
+		}
+
+		this.element.find('[data-am-checkout-upload]').attr('href', (WPGMZA.adminurl || '') + 'plugin-install.php?tab=upload');
+
+		this.showLicenceSaved(false);
+		if(hasKey){
+			this.saveLicence(order.api_key);
+		}
+
+		this.sessionId = false;
+		this.setStep('complete');
+		this.modal.show();
+	}
+
+	/* Stores the licence key on this site, so Pro finds it when it is activated. If it can't be
+	 * saved (for example the site already has a different key), the screen keeps asking the
+	 * customer to paste it, exactly as before */
+	WPGMZA.ProCheckout.prototype.saveLicence = function(key){
+		var self = this;
+
+		if(!WPGMZA.restAPI){
+			return;
+		}
+
+		WPGMZA.restAPI.call('/pro-checkout-licence/', {
+			method: 'POST',
+			data: { licence_key: key },
+			success: function(response){
+				self.showLicenceSaved(!!(response && response.saved));
+			},
+			error: function(){
+				self.showLicenceSaved(false);
+			}
+		});
+	}
+
+	WPGMZA.ProCheckout.prototype.showLicenceSaved = function(saved){
+		this.element.find('[data-am-checkout-licence-saved]').prop('hidden', !saved);
+		this.element.find('[data-am-checkout-step-saved]').prop('hidden', !saved);
+		this.element.find('[data-am-checkout-step-paste]').prop('hidden', saved);
+	}
+
+	WPGMZA.ProCheckout.prototype.copyKey = function(button){
+		var input = this.element.find('[data-am-checkout-key]');
+		var label = button.find('[data-am-checkout-copy-label]');
+		var value = input.val();
+		var done = function(){
+			label.text(WPGMZA.ProCheckout.strings.copied);
+			setTimeout(function(){ label.text(WPGMZA.ProCheckout.strings.copy); }, 1500);
+		};
+
+		if(navigator.clipboard && navigator.clipboard.writeText){
+			navigator.clipboard.writeText(value).then(done, function(){
+				input.trigger('select');
+			});
+		} else {
+			input.trigger('select');
+			try { document.execCommand('copy'); done(); } catch(e) {}
+		}
+	}
+
+	/* Translatable UI strings (WPGMZA\Strings) */
+	WPGMZA.ProCheckout.strings = {
+		one_off: WPGMZA.localized_strings.pro_checkout_one_off,
+		continue_to: WPGMZA.localized_strings.pro_checkout_continue,
+		pro_prefix: WPGMZA.localized_strings.pro_checkout_pro_prefix,
+		copy: WPGMZA.localized_strings.pro_checkout_copy,
+		copied: WPGMZA.localized_strings.pro_checkout_copied
+	};
+
+	$(function(){
+		var element = $('.wpgmza-pro-checkout-modal');
+		if(element.length && element.attr('data-store-api')){
+			WPGMZA.proCheckout = WPGMZA.ProCheckout.createInstance(element.get(0));
+		}
+	});
+
+});
+
+
 // js/v8/map-edit-page/rectangle-panel.js
 /**
  * @namespace WPGMZA
@@ -34918,6 +35634,7 @@ jQuery(function($) {
 		this.element = element;
 		this.element.wpgmzaDataTable = this;
 		this.dataTableElement = this.getDataTableElement();
+		this.removeUntrustedTableAttributes();
 
 		var settings = this.getDataTableSettings();
 		
@@ -34967,6 +35684,29 @@ jQuery(function($) {
 	WPGMZA.DataTable.prototype.getDataTableElement = function()
 	{
 		return $(this.element).find("table");
+	}
+
+	/**
+	 * DataTables options this plugin passes through the data-wpgmza-datatable-options attribute. Anything else in
+	 * that attribute is ignored, in particular the language strings, which DataTables inserts as HTML
+	 */
+	WPGMZA.DataTable.ALLOWED_ATTRIBUTE_OPTIONS = ["pageLength", "order", "lengthChange", "ordering", "paging", "searching", "info", "autoWidth"];
+
+	/**
+	 * DataTables reads settings from data-* attributes on the table and its header cells, and those override the
+	 * settings passed in code (for example data-language replaces the language strings, which are inserted as HTML).
+	 * This plugin's own table markup only uses data-wpgmza-* attributes there, so any other data-* attribute is
+	 * removed before DataTables starts
+	 */
+	WPGMZA.DataTable.prototype.removeUntrustedTableAttributes = function()
+	{
+		$(this.dataTableElement).find("thead th").addBack().each(function(index, el) {
+			for(var i = el.attributes.length - 1; i >= 0; i--){
+				var name = el.attributes[i].name.toLowerCase();
+				if(name.indexOf("data-") === 0 && name.indexOf("data-wpgmza-") !== 0)
+					el.removeAttribute(el.attributes[i].name);
+			}
+		});
 	}
 	
 	/**
@@ -35055,9 +35795,20 @@ jQuery(function($) {
 		var element = this.element;
 		var options = {};
 		
-		if($(element).attr("data-wpgmza-datatable-options"))
-			options = JSON.parse($(element).attr("data-wpgmza-datatable-options"));
-	
+		if($(element).attr("data-wpgmza-datatable-options")){
+			var attributeOptions = null;
+			try {
+				attributeOptions = JSON.parse($(element).attr("data-wpgmza-datatable-options"));
+			} catch(e) {}
+
+			if(attributeOptions && typeof attributeOptions === "object"){
+				WPGMZA.DataTable.ALLOWED_ATTRIBUTE_OPTIONS.forEach(function(key) {
+					if(Object.prototype.hasOwnProperty.call(attributeOptions, key))
+						options[key] = attributeOptions[key];
+				});
+			}
+		}
+
 		options.deferLoading = true;
 		options.processing = true;
 		options.serverSide = true;
@@ -35892,6 +36643,11 @@ jQuery(function($) {
 	}
 
  	$(document).ready(function(event){
+
+ 		/* The map list table only exists on the plugin's own Maps page in the admin. This module is part of the
+ 		 * front-end bundle too, so never start it on markup elsewhere, such as post content */
+ 		if(WPGMZA.is_admin != 1 || WPGMZA.getCurrentPage() != WPGMZA.PAGE_MAP_LIST)
+ 			return;
 
  		$("[data-wpgmza-admin-map-datatable]").each(function(index, el) {
  			WPGMZA.AdminMapDataTable = new WPGMZA.AdminMapDataTable(el);

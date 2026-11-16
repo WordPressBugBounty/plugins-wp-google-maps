@@ -1347,7 +1347,7 @@
 							<span><?php _e("Alternatively, switch to Default under Maps > Settings > Markers > Marker Render Mode, to use local map themes.", "wp-google-maps"); ?></span>
 						</div>
 
-						<div class="item caret-right" data-group="map-settings-themes-tileset" data-wpgmza-require-engine="open-layers|open-layers-latest|leaflet|leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost">
+						<div class="item caret-right" data-group="map-settings-themes-tileset" data-wpgmza-require-engine="open-layers|open-layers-latest|leaflet|leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost|leaflet-gotiles">
 							<span class="dashicons dashicons-screenoptions"></span>
 							<?php _e("Tileset", "wp-google-maps"); ?>
 						</div>
@@ -1367,7 +1367,7 @@
 							<?php _e("Theme Data", "wp-google-maps"); ?>
 						</div>
 
-						<div class="item caret-right" data-group="map-settings-themes-custom-tile" data-wpgmza-require-engine="open-layers|open-layers-latest|leaflet|leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost">
+						<div class="item caret-right" data-group="map-settings-themes-custom-tile" data-wpgmza-require-engine="open-layers|open-layers-latest|leaflet|leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost|leaflet-gotiles">
 							<span class="dashicons dashicons-format-image"></span>
 							<?php _e("Custom Image", "wp-google-maps"); ?>
 						</div>
@@ -1545,7 +1545,7 @@
 							</div>
 						</div>
 
-						<div id="wpgmza-leaflet-theme-editor" class="" data-wpgmza-require-engine="leaflet|leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost">
+						<div id="wpgmza-leaflet-theme-editor" class="" data-wpgmza-require-engine="leaflet|leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost|leaflet-gotiles">
 							<fieldset>
 								<input type='text' name='wpgmza_leaflet_tile_filter' class="wpgmza-css-filter-input" />
 							</fieldset>
@@ -4676,7 +4676,7 @@
 				<p class='notice notice-error wpgmza-missing-key-notice wpgmza-hidden wpgmza-shadow wpgmza-card'>
 					<?php
 						echo sprintf(
-							__('Please ensure you <a href="%s">enter a Google Maps API key</a> to continue using Google Maps. Alternatively, swap over to Open Layers by clicking <a id="wpgm-swap-to-open-layers" href="%s">here</a>.', 'wp-google-maps'),
+							__('Please ensure you <a href="%s">enter a Google Maps API key</a> to continue using Google Maps. Alternatively, swap over to Go Tiles, our free map engine, by clicking <a id="wpgm-swap-to-gotiles" href="%s">here</a>.', 'wp-google-maps'),
 							"admin.php?page=wp-google-maps-menu-settings#advanced-settings",
 							"javascript:void(0);"
 						);
@@ -4749,11 +4749,13 @@
 					<div><?php _e('Would you like to try a different map engine?', 'wp-google-maps'); ?></div>
 					<div class="wpgmza-engine-switch-toolbar-inner">
 						<select data-engine-switch-control="engine">
+							<option value="leaflet-gotiles"><?php _e('Go Tiles (by WP Go Maps)', 'wp-google-maps'); ?></option>
 							<option value="google-maps"><?php _e('Google Maps', 'wp-google-maps'); ?></option>
 							<option value="leaflet-azure"><?php _e('Microsoft Azure (Formerly Bing)', 'wp-google-maps'); ?></option>
 							<option value="leaflet-stadia"><?php _e('Stadia Maps', 'wp-google-maps'); ?></option>
 							<option value="leaflet-maptiler"><?php _e('Maptiler', 'wp-google-maps'); ?></option>
 							<option value="leaflet-locationiq"><?php _e('LocationIQ', 'wp-google-maps'); ?></option>
+							<option value="leaflet-mapiron"><?php _e('MapIron', 'wp-google-maps'); ?></option>
 							<option value="leaflet-zerocost"><?php _e('Zero Cost Mapping', 'wp-google-maps'); ?></option>
 							<option value="leaflet"><?php _e('Leaflet', 'wp-google-maps'); ?></option>
 							<option value="open-layers-latest"><?php _e('OpenLayers', 'wp-google-maps'); ?></option>

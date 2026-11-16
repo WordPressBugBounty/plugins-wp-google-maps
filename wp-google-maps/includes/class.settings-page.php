@@ -40,6 +40,11 @@ class SettingsPage extends Page {
 			}
 		}
 
+		/* Go Tiles needs a newer Pro, when an older one is active (see Plugin::isGoTilesAvailable) */
+		if(!$wpgmza->isGoTilesAvailable()){
+			$wpgmza->removeGoTilesChoices($this->document);
+		}
+
 		/* Tile Server Select */
 		if($tileServerSelectContainer = $this->document->querySelector('[data-tile-server-select-container]')) {
 			$tileServerSelect = new TileServerSelect(array('name' => 'tile_server_url'));

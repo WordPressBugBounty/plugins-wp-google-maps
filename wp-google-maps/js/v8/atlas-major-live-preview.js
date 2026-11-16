@@ -9,6 +9,11 @@
  */
 jQuery(function($) {
 
+	/* Admin UI only: never start outside the plugin's own admin pages. This module is also in the front-end bundle,
+	 * and post content can carry the Atlas Major class */
+	if(WPGMZA.is_admin != 1 || !WPGMZA.getCurrentPage())
+		return;
+
 	if(!document.querySelector('.wpgmza-atlas-major'))
 		return;
 
@@ -1534,6 +1539,9 @@ jQuery(function($) {
 				   the right base URL. */
 				if(WPGMZA.settings && WPGMZA.settings.engine === 'leaflet-zerocost' && config.url){
 					WPGMZA.settings.tile_server_url_leaflet_zerocost = config.url;
+				}
+				if(WPGMZA.settings && WPGMZA.settings.engine === 'leaflet-gotiles' && config.url){
+					WPGMZA.settings.tile_server_url_leaflet_gotiles = config.url;
 				}
 
 				reloadLiveTileLayer();

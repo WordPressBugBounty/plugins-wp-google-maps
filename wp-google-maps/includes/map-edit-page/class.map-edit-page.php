@@ -60,6 +60,7 @@ class MapEditPage extends Page
 						case 'leaflet-stadia':
 						case 'leaflet-maptiler':
 						case 'leaflet-locationiq':
+						case 'leaflet-gotiles':
 						case 'leaflet-mapiron':
 						case 'leaflet-zerocost':
 							$themePanel = new LeafletThemePanel($map);
@@ -291,6 +292,7 @@ class MapEditPage extends Page
 			'leaflet-mapiron' => array('option' => 'wpgmza_leaflet_mapiron_key','storage' => 'settings', 'name' => 'MapIron'),
 		);
 		$currentEngine = $wpgmza->settings->engine;
+		$engineMissingKey = false;
 
 		if(isset($keyedEngines[$currentEngine])){
 			$def    = $keyedEngines[$currentEngine];
@@ -299,23 +301,43 @@ class MapEditPage extends Page
 				: !empty($wpgmza->settings->{$def['option']});
 
 			if(!$hasKey){
+				$engineMissingKey = true;
 				$notice = $document->querySelector('.wpgmza-missing-key-notice');
 				if($notice){
 					$notice->removeClass('wpgmza-hidden');
 
 					/* Replace the Google-specific text with a generic
 					 * engine-aware message for the other four engines. */
-					if($currentEngine !== 'google-maps'){
+					if($currentEngine === 'google-maps' && !$wpgmza->isGoTilesAvailable() && !$wpgmza->internalEngine->isLegacy()){
+						/* The template offers Go Tiles, which this site's Pro version can't run, so offer OpenLayers as before */
+						while($notice->firstChild){
+							$notice->removeChild($notice->firstChild);
+						}
+
+						$notice->import(sprintf(
+							__('Please ensure you <a href="%s">enter a Google Maps API key</a> to continue using Google Maps. Alternatively, swap over to Open Layers by clicking <a id="wpgm-swap-to-open-layers" href="%s">here</a>.', 'wp-google-maps'),
+							"admin.php?page=wp-google-maps-menu-settings#advanced-settings",
+							"javascript:void(0);"
+						));
+					} else if($currentEngine !== 'google-maps'){
 						while($notice->firstChild){
 							$notice->removeChild($notice->firstChild);
 						}
 
 						$settingsUrl = 'admin.php?page=wp-google-maps-menu-settings#advanced-settings';
-						$message = sprintf(
-							__('Please ensure you <a href="%1$s">enter your API key</a> in settings to continue using %2$s. Alternatively, switch to a free engine via the dropdown above (Leaflet, OpenLayers, or Zero Cost Mapping).', 'wp-google-maps'),
-							esc_url($settingsUrl),
-							esc_html($def['name'])
-						);
+						if($wpgmza->internalEngine->isLegacy() || !$wpgmza->isGoTilesAvailable()){
+							$message = sprintf(
+								__('Please ensure you <a href="%1$s">enter your API key</a> in settings to continue using %2$s. Alternatively, switch to a free engine via the dropdown above (Leaflet, OpenLayers, or Zero Cost Mapping).', 'wp-google-maps'),
+								esc_url($settingsUrl),
+								esc_html($def['name'])
+							);
+						} else {
+							$message = sprintf(
+								__('Please ensure you <a href="%1$s">enter your API key</a> in settings to continue using %2$s. Alternatively, switch to a free engine such as Go Tiles (by WP Go Maps), which needs no key.', 'wp-google-maps'),
+								esc_url($settingsUrl),
+								esc_html($def['name'])
+							);
+						}
 
 						$notice->import($message);
 					}
@@ -333,6 +355,23 @@ class MapEditPage extends Page
 
 			$bulkMarkerEditorDialog = BulkMarkerEditorDialog::createInstance();
 			@$document->querySelector(".wpgmza-wrap")->import($bulkMarkerEditorDialog->document);
+
+			if($wpgmza->internalEngine->isAtlasMajor() && !$wpgmza->isProVersion()){
+				/* In-plugin Pro checkout (testing, Atlas Major map editor only). Payment happens on Stripe's hosted page,
+				 * the store API on wpgmaps.com creates the checkout and returns the licence key and download link */
+				$proCheckoutDialog = new DOMDocument();
+				$proCheckoutDialog->loadPHPFile($wpgmza->internalEngine->getTemplate("map-edit-page/pro-checkout-dialog.html.php"));
+				if($checkoutModal = $proCheckoutDialog->querySelector('.wpgmza-pro-checkout-modal')){
+					$storeApi = defined('WPGMZA_STORE_API_URL') ? WPGMZA_STORE_API_URL : 'https://www.wpgmaps.com/wp-json/wpgmza-store/v1/';
+					/* Developer Hook (Filter) - Change the store API used by the in-plugin Pro checkout, e.g. to point at a staging store */
+					$checkoutModal->setAttribute('data-store-api', esc_url(apply_filters('wpgmza_store_api_url', $storeApi)));
+
+					/* Sent with the checkout request so orders can be attributed: the UI build actually shown and the Basic version */
+					$checkoutModal->setAttribute('data-source-build', $wpgmza->internalEngine->getEngine());
+					$checkoutModal->setAttribute('data-plugin-version', trim($wpgmza->getBasicVersion()));
+				}
+				@$document->querySelector(".wpgmza-wrap")->import($proCheckoutDialog);
+			}
 
 			$editorTour = new MapEditorTour();
 			if($editorTour->shouldReceiveFTU() && !$wpgmza->internalEngine->isAtlasMajor()){
@@ -355,6 +394,11 @@ class MapEditPage extends Page
 				}
 			}
 
+			/* Go Tiles needs a newer Pro, when an older one is active (see Plugin::isGoTilesAvailable) */
+			if(!$wpgmza->isGoTilesAvailable()){
+				$wpgmza->removeGoTilesChoices($document);
+			}
+
 			/* Load the engine switcher - Dismissable */
 			$engineSwitchToolbarDismissed = get_option('wpgmza-engine-switch-toolbar-dismissed');
 			if($engineSwitchToolbar = $document->querySelector('.wpgmza-engine-switch-toolbar')){
@@ -363,7 +407,11 @@ class MapEditPage extends Page
 					$engineSwitchToolbar->remove();
 				} else {
 					if(!empty($wpgmza->settings->wpgmza_maps_engine)){
-						if($currentEngineOption = $engineSwitchToolbar->querySelector('option[value="' . $wpgmza->settings->wpgmza_maps_engine . '"]')){
+						/* If the current engine is missing its key, suggest Go Tiles (free, no key) instead of re-selecting the engine
+						 * that failed, or OpenLayers when this site's Pro version can't run Go Tiles */
+						$freeEngine = $wpgmza->isGoTilesAvailable() ? 'leaflet-gotiles' : 'open-layers-latest';
+						$suggestEngine = !empty($engineMissingKey) ? $freeEngine : $wpgmza->settings->wpgmza_maps_engine;
+						if($currentEngineOption = $engineSwitchToolbar->querySelector('option[value="' . $suggestEngine . '"]')){
 							$currentEngineOption->setAttribute('selected', 'selected');
 						}
 					}

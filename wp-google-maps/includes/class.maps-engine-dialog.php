@@ -27,9 +27,17 @@ class MapsEngineDialog
 			exit;
 		}
 		
+		$engine = sanitize_text_field($_POST['engine']);
+
+		/* Go Tiles needs a newer Pro, when an older one is active (see Plugin::isGoTilesAvailable) */
+		if($engine === 'leaflet-gotiles' && !$wpgmza->isGoTilesAvailable()){
+			http_response_code(400);
+			exit;
+		}
+
 		$settings = get_option('WPGMZA_OTHER_SETTINGS');
-		
-		$settings['wpgmza_maps_engine'] = sanitize_text_field($_POST['engine']);
+
+		$settings['wpgmza_maps_engine'] = $engine;
 		$settings['wpgmza_maps_engine_dialog_done'] = true;
 		
 		update_option('WPGMZA_OTHER_SETTINGS', $settings, false);
@@ -151,7 +159,7 @@ class MapsEngineDialog
 						<p class="wpgmza-mock-radio wpgmza-centered">
 							<span class="wpgmza-mock-radio-button"></span>
 							<img class="wpgmza-mock-radio-label" 
-								src="<?php echo plugin_dir_url(__DIR__); ?>images/google_maps_logo.png"
+								src="<?php echo plugin_dir_url(__DIR__); ?>images/Google_maps_logo.png"
 								/>
 						</p>
 					</label>

@@ -1670,6 +1670,8 @@
 [data-map-engine="leaflet-stadia"] .quick-actions,
 [data-map-engine="leaflet-maptiler"] .quick-actions,
 [data-map-engine="leaflet-locationiq"] .quick-actions,
+[data-map-engine="leaflet-gotiles"] .quick-actions,
+[data-map-engine="leaflet-mapiron"] .quick-actions,
 [data-map-engine="leaflet-zerocost"] .quick-actions,
 [data-map-engine="open-layers-latest"] .quick-actions {
     top: 80px;
@@ -3020,6 +3022,8 @@
 .wpgmza-wrap .wpgmza-installer-steps[data-engine="leaflet-stadia"] .step .engine-step[data-engine="leaflet-stadia"],
 .wpgmza-wrap .wpgmza-installer-steps[data-engine="leaflet-maptiler"] .step .engine-step[data-engine="leaflet-maptiler"],
 .wpgmza-wrap .wpgmza-installer-steps[data-engine="leaflet-locationiq"] .step .engine-step[data-engine="leaflet-locationiq"],
+.wpgmza-wrap .wpgmza-installer-steps[data-engine="leaflet-gotiles"] .step .engine-step[data-engine="leaflet-gotiles"],
+.wpgmza-wrap .wpgmza-installer-steps[data-engine="leaflet-mapiron"] .step .engine-step[data-engine="leaflet-mapiron"],
 .wpgmza-wrap .wpgmza-installer-steps[data-engine="leaflet-zerocost"] .step .engine-step[data-engine="leaflet-zerocost"],
 .wpgmza-wrap .wpgmza-installer-steps[data-engine="open-layers-latest"] .step .engine-step[data-engine="open-layers-latest"],
 .wpgmza-wrap .wpgmza-installer-steps[data-engine="open-layers"] .step .engine-step[data-engine="open-layers"],
@@ -6479,6 +6483,20 @@
     transform: translateX(-50%);
     z-index: 50;
     
+}
+
+/* When the missing API key notice is showing at the top of the map, sit below it instead of covering it */
+.wpgmza-wrap .wpgmza-editor .map-container-wrap .wpgmza-missing-key-notice:not(.wpgmza-hidden) ~ .wpgmza-engine-switch-toolbar{
+    top: 100px;
+}
+
+/* Stack the Maps API error card below the engine switcher (and the missing key notice) instead of underneath them */
+.wpgmza-wrap .wpgmza-editor .map-container-wrap:has(> .wpgmza-engine-switch-toolbar) .wpgmza-google-maps-api-error-overlay .error-overlay-inner{
+    top: 135px;
+}
+
+.wpgmza-wrap .wpgmza-editor .map-container-wrap:has(> .wpgmza-missing-key-notice:not(.wpgmza-hidden)):has(> .wpgmza-engine-switch-toolbar) .wpgmza-google-maps-api-error-overlay .error-overlay-inner{
+    top: 205px;
 }
 
 .wpgmza-wrap .wpgmza-editor .map-container-wrap .wpgmza-engine-switch-toolbar > div:first-child{

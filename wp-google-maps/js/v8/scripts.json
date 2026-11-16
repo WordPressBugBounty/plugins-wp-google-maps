@@ -839,6 +839,13 @@
             "wpgmza-feature-panel"
         ]
     },
+    "wpgmza-pro-checkout": {
+        "src": "js/v8/map-edit-page/pro-checkout.js",
+        "pro": false,
+        "dependencies": [
+            "wpgmza-generic-modal"
+        ]
+    },
     "wpgmza-rectangle-panel": {
         "src": "js/v8/map-edit-page/rectangle-panel.js",
         "pro": false,

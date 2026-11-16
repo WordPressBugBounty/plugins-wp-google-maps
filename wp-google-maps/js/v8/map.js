@@ -164,6 +164,7 @@ jQuery(function($) {
 			case "leaflet-stadia":
 			case "leaflet-maptiler":
 			case "leaflet-locationiq":
+			case "leaflet-gotiles":
 			case "leaflet-mapiron":
 			case "leaflet-zerocost":
 				if(WPGMZA.isProVersion()){
@@ -387,7 +388,7 @@ jQuery(function($) {
 							$(this.element).css('--wpgmza-ol-tile-filter', tileFilter);
 						}
 					} 
-				} else if(WPGMZA.settings.engine === 'leaflet' || WPGMZA.settings.engine === 'leaflet-azure' || WPGMZA.settings.engine === 'leaflet-stadia' || WPGMZA.settings.engine === 'leaflet-maptiler' || WPGMZA.settings.engine === 'leaflet-locationiq' || WPGMZA.settings.engine === 'leaflet-mapiron' || WPGMZA.settings.engine === 'leaflet-zerocost'){
+				} else if(WPGMZA.settings.engine === 'leaflet' || WPGMZA.settings.engine === 'leaflet-azure' || WPGMZA.settings.engine === 'leaflet-stadia' || WPGMZA.settings.engine === 'leaflet-maptiler' || WPGMZA.settings.engine === 'leaflet-locationiq' || WPGMZA.settings.engine === 'leaflet-mapiron' || WPGMZA.settings.engine === 'leaflet-gotiles' || WPGMZA.settings.engine === 'leaflet-zerocost'){
 					if(this.settings.wpgmza_leaflet_tile_filter){
 						let tileFilter = this.settings.wpgmza_leaflet_tile_filter.trim();
 						if(tileFilter){
@@ -723,6 +724,14 @@ jQuery(function($) {
 		for(var i = 0; i < data.length; i++)
 		{
 			var obj = data[i];
+
+			/* Skip markers whose stored coordinates are not numbers (e.g. an address saved in the lat field),
+			 * otherwise the position check throws and stops every marker after it, along with listings */
+			if(obj && (("lat" in obj && !WPGMZA.isNumeric(obj.lat)) || ("lng" in obj && !WPGMZA.isNumeric(obj.lng)))){
+				console.warn("WP Go Maps: Marker " + obj.id + " was not placed on map " + this.id + " because its coordinates are not valid numbers (lat: " + obj.lat + ", lng: " + obj.lng + "). Edit the marker and set its location again to fix this.");
+				continue;
+			}
+
 			var marker = WPGMZA.Marker.createInstance(obj);
 			
 			if(startFiltered)

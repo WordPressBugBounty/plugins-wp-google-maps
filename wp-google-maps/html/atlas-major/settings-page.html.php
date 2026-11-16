@@ -108,6 +108,13 @@
 			</div>
 			<div class="wpgmza-map-engine-selector">
 				<div class="wpgmza-map-engine-selector-grid">
+					<label class="wpgmza-map-engine-item" title="<?php esc_attr_e('Go Tiles (by WP Go Maps)', 'wp-google-maps'); ?>">
+						<input type="radio" name="wpgmza_maps_engine" value="leaflet-gotiles" class="wpgmza-hidden" />
+						<div class="wpgmza-map-engine-item-backdrop"></div>
+						<span><?php esc_html_e('Go Tiles', 'wp-google-maps'); ?></span>
+						<img src="<?php echo WPGMZA_PLUGIN_DIR_URL; ?>images/wpgomaps-logo.webp" alt="<?php esc_attr_e('WP Go Maps', 'wp-google-maps'); ?>" />
+					</label>
+
 					<label class="wpgmza-map-engine-item" title="<?php esc_attr_e('Google Maps', 'wp-google-maps'); ?>">
 						<input type="radio" name="wpgmza_maps_engine" value="google-maps" class="wpgmza-hidden" />
 						<div class="wpgmza-map-engine-item-backdrop"></div>
@@ -177,20 +184,30 @@
 				</div>
 
 				<!-- Powered by leaflet notice -->
-				<div class='wpgmza-map-engine-powered-by' data-required-maps-engine="leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost|leaflet-mapiron">
+				<div class='wpgmza-map-engine-powered-by' data-required-maps-engine="leaflet-azure|leaflet-stadia|leaflet-maptiler|leaflet-locationiq|leaflet-zerocost|leaflet-gotiles|leaflet-mapiron">
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-azure"><?php esc_html_e("Microsoft Azure Maps", "wp-google-maps"); ?></span> 
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-stadia"><?php esc_html_e("Stadia Maps", "wp-google-maps"); ?></span> 
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-maptiler"><?php esc_html_e("Maptiler", "wp-google-maps"); ?></span> 
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-locationiq"><?php esc_html_e("Location IQ", "wp-google-maps"); ?></span>
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-mapiron"><?php esc_html_e("MapIron", "wp-google-maps"); ?></span> 
 					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-zerocost"><?php esc_html_e("Zero Cost Mapping", "wp-google-maps"); ?></span> 
+					<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-gotiles"><?php esc_html_e("Go Tiles by WP Go Maps", "wp-google-maps"); ?></span> 
 					<span><?php esc_html_e("is powered by", "wp-google-maps"); ?></span>
 					<span class='wpgmza-map-engine-powered-by-highlight'>
 						<?php esc_html_e("Leaflet", "wp-google-maps"); ?>
 						<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-zerocost"><?php esc_html_e("& OpenFreeMap", "wp-google-maps"); ?></span> 
+						<span class='wpgmza-map-engine-powered-by-highlight' data-required-maps-engine="leaflet-gotiles"><?php esc_html_e("& OpenStreetMap", "wp-google-maps"); ?></span> 
 					</span>
 				</div>
 			</div>
+		</div>
+
+		<!-- Go Tiles: free, no key -->
+		<div class="tab-row" data-required-maps-engine="leaflet-gotiles">
+			<div class="title"></div>
+			<small class="hint">
+				<?php _e("Go Tiles by WP Go Maps is free on every site, with no key needed. Each site gets 10,000 map tiles a month (roughly 1,000 map views).", "wp-google-maps"); ?>
+			</small>
 		</div>
 
 		<!-- OpenLayers V6 notice -->
@@ -1910,6 +1927,15 @@
 			<small>* Requires tile server API key, from the associated service provider</small>
 		</div>
 
+		<!-- Go Tiles Tile Server -->
+		<div class="tab-row" data-required-maps-engine="leaflet-gotiles" data-tile-server-select-container-filtered="Go Tiles">
+			<div class="title">
+				<?php esc_html_e('Map Style', 'wp-google-maps'); ?>
+			</div>
+
+			<!-- TileServerSelect - Filtered Go Tiles -->
+		</div>
+
 		<!-- Microsoft Azure Tile Server -->	
 		<div class="tab-row" data-required-maps-engine="leaflet-azure" data-tile-server-select-container-filtered="Microsoft Azure (Bing)">
 			<div class="title">
@@ -2107,13 +2133,13 @@
 		</div>
 
 		<!-- OpenRouteServer Key -->
-		<div class="tab-row has-hint" data-required-maps-engine="open-layers|open-layers-latest|leaflet|leaflet-maptiler|leaflet-stadia|leaflet-zerocost">
+		<div class="tab-row has-hint" data-required-maps-engine="open-layers|open-layers-latest|leaflet|leaflet-maptiler|leaflet-stadia|leaflet-zerocost|leaflet-gotiles">
 			<div class="title wpgmza-pro-feature-hide"><?php esc_html_e('OpenRouteService Key', 'wp-google-maps'); ?></div>
 			<input name='open_route_service_key' class="wpgmza-pro-feature-hide" type='text' style='width: 40%;'/>
 		</div>
 
 		<!-- OpenRouteServer Key hint -->
-		<div class="tab-row" data-required-maps-engine="open-layers|open-layers-latest|leaflet|leaflet-maptiler|leaflet-stadia|leaflet-zerocost">
+		<div class="tab-row" data-required-maps-engine="open-layers|open-layers-latest|leaflet|leaflet-maptiler|leaflet-stadia|leaflet-zerocost|leaflet-gotiles">
 			<div class="title"></div>
 
 			<small class="hint wpgmza-pro-feature-hide">

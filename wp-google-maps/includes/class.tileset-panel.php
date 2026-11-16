@@ -135,8 +135,10 @@ class TilesetPanel extends DOMDocument
                     case 'leaflet-maptiler':
                         $authentication->token = !empty($wpgmza->settings->wpgmza_leaflet_maptiler_key) ? $wpgmza->settings->wpgmza_leaflet_maptiler_key : false;
                         break;
-                    case 'leaflet-locationiq':
                     case 'leaflet-mapiron':
+                        $authentication->token = !empty($wpgmza->settings->wpgmza_leaflet_mapiron_key) ? $wpgmza->settings->wpgmza_leaflet_mapiron_key : false;
+                        break;
+                    case 'leaflet-locationiq':
                         $authentication->token = !empty($wpgmza->settings->wpgmza_leaflet_locationiq_key) ? $wpgmza->settings->wpgmza_leaflet_locationiq_key : false;
                         break;
                 }

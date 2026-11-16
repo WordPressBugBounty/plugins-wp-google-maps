@@ -49,6 +49,21 @@ jQuery(function($) {
 
 		mapOptions = this.extendNativeConfig(mapOptions);
 
+		/*
+		 * Leaflet 1.9 focuses the map container on the first press without preventScroll, then only restores the window scroll.
+		 * When the map sits in a scrolling panel (e.g. the Atlas Major live preview) the panel jumps mid-click and the click is lost.
+		 * Leaflet 2 focuses with preventScroll, so we match that behaviour here (applied once, shared by all maps)
+		*/
+		if(L.Map && L.Map.Keyboard && !L.Map.Keyboard.prototype.wpgmzaFocusWithoutScroll){
+			L.Map.Keyboard.prototype._onMouseDown = function(){
+				if(this._focused){
+					return;
+				}
+				this._map._container.focus({preventScroll: true});
+			};
+			L.Map.Keyboard.prototype.wpgmzaFocusWithoutScroll = true;
+		}
+
         this.leafletMap = L.map($(element)[0], mapOptions);
 
 		function isSettingDisabled(value) {
@@ -356,6 +371,10 @@ jQuery(function($) {
 				/* Remap to zerocost settings */
 				url = WPGMZA.settings.tile_server_url_leaflet_zerocost ? WPGMZA.settings.tile_server_url_leaflet_zerocost : url;
 				break;
+			case 'leaflet-gotiles':
+				/* Remap to Go Tiles settings: no key needed (free tier), defaults to the light style */
+				url = WPGMZA.settings.tile_server_url_leaflet_gotiles ? WPGMZA.settings.tile_server_url_leaflet_gotiles : "https://tiles.wpgmaps.com/styles/light/{z}/{x}/{y}.png";
+				break;
 			case 'leaflet-mapiron':
 				/* Remap to MapIron settings */
 				url = WPGMZA.settings.tile_server_url_leaflet_mapiron ? WPGMZA.settings.tile_server_url_leaflet_mapiron : url;
@@ -402,6 +421,7 @@ jQuery(function($) {
 			}
 
 			layers.push(new L.tileLayer(config.url, config.options ? config.options : {}));
+			this.watchGoTilesLimit(layers);
 			return layers;
 		} 
 
@@ -409,6 +429,96 @@ jQuery(function($) {
 		return [new L.tileLayer(url, {})];
 	}
 	
+	/**
+	 * Go Tiles: when a tile fails, check once whether the site has used its free monthly allowance,
+	 * and if so tell site admins inside the map (visitors never see it). No call home: this re-requests
+	 * the same tile URL the map already uses, whose "limit reached" reply carries a short text message.
+	 */
+	WPGMZA.LeafletMap.prototype.watchGoTilesLimit = function(layers){
+		if(WPGMZA.settings.engine !== 'leaflet-gotiles'){
+			return;
+		}
+
+		if(WPGMZA.is_admin != "1" && WPGMZA.userCanAdministrator != "1"){
+			return;
+		}
+
+		const self = this;
+		let checked = false;
+
+		const onTileError = function(event){
+			if(checked || !event || !event.tile || !event.tile.src || typeof fetch !== 'function'){
+				return;
+			}
+			checked = true;
+
+			fetch(event.tile.src, {mode: 'cors', cache: 'no-store'}).then(function(response){
+				if(response.status !== 429){
+					return;
+				}
+
+				return response.text().then(function(text){
+					if(text && text.indexOf('monthly tile limit') !== -1){
+						self.showGoTilesLimitNotice(text.indexOf('for this key') !== -1);
+					}
+				});
+			}).catch(function(){ /* network issue: nothing to report */ });
+		};
+
+		for(let layer of layers){
+			if(layer && layer.on){
+				layer.on('tileerror', onTileError);
+			}
+		}
+	}
+
+	WPGMZA.LeafletMap.prototype.showGoTilesLimitNotice = function(keyed){
+		if(!this.element || this.element.querySelector('.wpgmza-gotiles-limit-notice')){
+			return;
+		}
+
+		const notice = document.createElement('div');
+		notice.className = 'wpgmza-gotiles-limit-notice';
+		notice.setAttribute('role', 'status');
+		notice.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1000;max-width:90%;'
+			+ 'background:#fff;color:#1b2230;border-left:4px solid #e8473f;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.25);'
+			+ 'padding:10px 34px 10px 12px;font:13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;';
+
+		const title = document.createElement('strong');
+		title.textContent = 'Go Tiles: monthly map tile limit reached';
+		notice.appendChild(title);
+
+		const body = document.createElement('div');
+		body.textContent = keyed
+			? 'This site\'s key has used its map tiles for this month, so the map can\'t load more until the 1st.'
+			: 'This site has used its free 10,000 map tiles for this month, so the map can\'t load more until the 1st.';
+		notice.appendChild(body);
+
+		if(!keyed){
+			const link = document.createElement('a');
+			link.href = 'https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit';
+			link.target = '_blank';
+			link.rel = 'noopener';
+			link.textContent = 'Upgrade to Pro for higher limits';
+			notice.appendChild(link);
+		}
+
+		const hint = document.createElement('div');
+		hint.style.cssText = 'color:#5b6678;font-size:12px;margin-top:4px;';
+		hint.textContent = 'Only admins see this message.';
+		notice.appendChild(hint);
+
+		const close = document.createElement('button');
+		close.type = 'button';
+		close.setAttribute('aria-label', 'Dismiss');
+		close.textContent = '×';
+		close.style.cssText = 'position:absolute;top:4px;right:6px;border:0;background:none;font-size:18px;line-height:1;cursor:pointer;color:#5b6678;';
+		close.addEventListener('click', function(){ notice.remove(); });
+		notice.appendChild(close);
+
+		this.element.appendChild(notice);
+	}
+
 	WPGMZA.LeafletMap.prototype.wrapLongitude = function(){
 		let center = this.leafletMap.getCenter();
 		if(center.lng >= -180 && center.lng <= 180){
