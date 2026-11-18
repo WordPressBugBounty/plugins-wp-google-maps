@@ -13,9 +13,14 @@ jQuery(function($) {
 		var self = this;
 		
 		Parent.call(this, element);
-		
+
+		/* GDPR: the base Map has placed the consent notice in the element and stopped. Stop here too, so the notice is not cleared */
+		if(WPGMZA.googleAPIStatus && WPGMZA.googleAPIStatus.code == "USER_CONSENT_NOT_GIVEN"){
+			return;
+		}
+
 		this.setOptions(options);
-		
+
 		var viewOptions = this.settings.toOLViewOptions();
 		
 		this.mapType = viewOptions.mapType ? viewOptions.mapType : 'roadmap';

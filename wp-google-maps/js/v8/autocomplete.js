@@ -316,30 +316,42 @@ jQuery(function($) {
      * 
      * @return void
      */
+    /**
+     * Escapes text for use in HTML, including inside quoted attributes (geocoder results are third-party data)
+     * 
+     * @param {*} value
+     * 
+     * @return string
+     */
+    WPGMZA.Autocomplete.prototype.escape = function(value){
+        return WPGMZA.escapeHTML(value);
+    }
+
     WPGMZA.Autocomplete.prototype.present = function(){
         if(this.state.items && this.state.items.length){
+            const esc = (value) => this.escape(value);
             let html = '';
 			for(let location of this.state.items){
                 if(location.address){
                     let dataAddress = location.address.replace(/<[^>]*>/g, '');
-                    html += `<div class='wpgmza-internal-autocomplete-location' data-address='${dataAddress}' data-coordinates='${location.coordinates ? location.coordinates : ''}'>`;
+                    html += `<div class='wpgmza-internal-autocomplete-location' data-address='${esc(dataAddress)}' data-coordinates='${esc(location.coordinates ? location.coordinates : '')}'>`;
                     if(location.display){
                         /* Has a different display value */
-                        html += `<strong data-autocomplete-field='display'>${location.display}</strong>`;
-					    html += `<span data-autocomplete-field='adr'>${location.address}</span>`;
+                        html += `<strong data-autocomplete-field='display'>${esc(location.display)}</strong>`;
+					    html += `<span data-autocomplete-field='adr'>${esc(location.address)}</span>`;
                     } else {
                         /* Use address as if it was display */
-                        html += `<strong data-autocomplete-field='display'>${location.address}</strong>`;
+                        html += `<strong data-autocomplete-field='display'>${esc(location.address)}</strong>`;
                     }
 
 					if(location.type || location.country){
 					    html += `<span data-autocomplete-meta-list>`;
                         if(location.type){
-                            html += `<small data-autocomplete-field='type'>${location.type}</small>`;
+                            html += `<small data-autocomplete-field='type'>${esc(location.type)}</small>`;
                         }
 
                         if(location.country){
-                            html += `<small data-autocomplete-field='country'>${location.country}</small>`;
+                            html += `<small data-autocomplete-field='country'>${esc(location.country)}</small>`;
                         }
                         html += `</span>`;
 

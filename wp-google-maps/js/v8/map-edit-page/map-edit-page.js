@@ -74,7 +74,7 @@ jQuery(function($) {
 			var index = jQuery(this).data('id');
 			var lat = jQuery(this).data('lat');
 			var lng = jQuery(this).data('lng');
-			var name = jQuery('#wpgmza_item_address_'+index).html();
+			var name = jQuery('#wpgmza_item_address_'+index).text(); /* plain text, the suggestion HTML is escaped */
 			
 			
 			jQuery("input[name='lat']").val(lat);
@@ -911,7 +911,7 @@ jQuery(function($) {
 									let html = "";
 									
 									for(var i in results){ 
-										html += "<div class='wpgmza_ac_result " + (html === "" ? "" : "border-top") + "' data-id='" + i + "' data-lat='"+results[i]['lat']+"' data-lng='"+results[i]['lng']+"'><div class='wpgmza_ac_container'><div class='wpgmza_ac_icon'><img src='"+results[i]['icon']+"' /></div><div class='wpgmza_ac_item'><span id='wpgmza_item_name_"+i+"' class='wpgmza_item_name'>" + results[i]['place_name'] + "</span><span id='wpgmza_item_address_"+i+"' class='wpgmza_item_address'>" + results[i]['formatted_address'] + "</span></div></div></div>"; 
+										html += "<div class='wpgmza_ac_result " + (html === "" ? "" : "border-top") + "' data-id='" + WPGMZA.escapeHTML(i) + "' data-lat='" + WPGMZA.escapeHTML(results[i]['lat']) + "' data-lng='" + WPGMZA.escapeHTML(results[i]['lng']) + "'><div class='wpgmza_ac_container'><div class='wpgmza_ac_icon'><img src='" + WPGMZA.escapeHTML(results[i]['icon']) + "' /></div><div class='wpgmza_ac_item'><span id='wpgmza_item_name_" + WPGMZA.escapeHTML(i) + "' class='wpgmza_item_name'>" + WPGMZA.escapeHTML(results[i]['place_name']) + "</span><span id='wpgmza_item_address_" + WPGMZA.escapeHTML(i) + "' class='wpgmza_item_address'>" + WPGMZA.escapeHTML(results[i]['formatted_address']) + "</span></div></div></div>"; /* remote data: escaped */
 									}
 									
 									if(!html || html.length <= 0){ 
@@ -936,8 +936,9 @@ jQuery(function($) {
 						}
 					},
 					error : () => {
-						/* Request failed */
-						$('#wpgmza_autocomplete_search_results').hide();
+						/* Request failed. Empty the results box as well as hiding it, so nothing that mirrors it (the Atlas
+						 * Major quick-add bar) keeps showing the "Searching..." placeholder */
+						$('#wpgmza_autocomplete_search_results').html('').hide();
 						
 						/* There is a chance that this was purely a network issue, we should count it, and bail later if need be */
 						enhancedAutocomplete.requestErrorCount ++;
@@ -949,8 +950,8 @@ jQuery(function($) {
 				});
 			}, (enhancedAutocomplete.identifiedTypingSpeed * 2));
 		} else {
-			/* Search is empty, just hide the popup for now */
-			$('#wpgmza_autocomplete_search_results').hide();
+			/* Search is empty, just hide (and empty) the popup for now */
+			$('#wpgmza_autocomplete_search_results').html('').hide();
 		}
 		
 	}
@@ -967,7 +968,9 @@ jQuery(function($) {
 			}
 		}
 		
-		$('#wpgmza_autocomplete_search_results').hide();
+		/* Empty the results box as well as hiding it, so nothing that mirrors it (the Atlas Major quick-add bar)
+		 * keeps showing the "Searching..." placeholder */
+		$('#wpgmza_autocomplete_search_results').html('').hide();
 		$('#wpgmza_autoc_disabled').hide();
 	}
 

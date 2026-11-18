@@ -548,6 +548,24 @@ jQuery(function($) {
 				return m.toUpperCase()
 			});
 		},
+
+		/**
+		 * Escapes text for HTML, including inside quoted attributes. Use for any data that did not come from
+		 * this plugin's own trusted markup (geocoder results, third-party APIs, user content).
+		 * @method escapeHTML
+		 * @static
+		 * @param {*} value
+		 * @return {string}
+		 */
+		escapeHTML: function(value)
+		{
+			return String(value === undefined || value === null ? "" : value)
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#39;");
+		},
 		
 		pluralize: function(string)
 		{
@@ -5228,9 +5246,12 @@ jQuery(function($) {
 	}
 
 	WPGMZA.AtlasMajorMarkerList.prototype.esc = function(str){
+		/* Self-contained on purpose: this file is loaded on its own next to whichever Pro bundle is installed, and
+		 * older Pro bundles carry an older core without WPGMZA.escapeHTML. Also used inside attribute values,
+		 * so quotes are escaped too. */
 		var d = document.createElement('div');
-		d.textContent = str;
-		return d.innerHTML;
+		d.textContent = (str === undefined || str === null) ? '' : str;
+		return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 	}
 
 	/* Init */
@@ -6487,30 +6508,42 @@ jQuery(function($) {
      * 
      * @return void
      */
+    /**
+     * Escapes text for use in HTML, including inside quoted attributes (geocoder results are third-party data)
+     * 
+     * @param {*} value
+     * 
+     * @return string
+     */
+    WPGMZA.Autocomplete.prototype.escape = function(value){
+        return WPGMZA.escapeHTML(value);
+    }
+
     WPGMZA.Autocomplete.prototype.present = function(){
         if(this.state.items && this.state.items.length){
+            const esc = (value) => this.escape(value);
             let html = '';
 			for(let location of this.state.items){
                 if(location.address){
                     let dataAddress = location.address.replace(/<[^>]*>/g, '');
-                    html += `<div class='wpgmza-internal-autocomplete-location' data-address='${dataAddress}' data-coordinates='${location.coordinates ? location.coordinates : ''}'>`;
+                    html += `<div class='wpgmza-internal-autocomplete-location' data-address='${esc(dataAddress)}' data-coordinates='${esc(location.coordinates ? location.coordinates : '')}'>`;
                     if(location.display){
                         /* Has a different display value */
-                        html += `<strong data-autocomplete-field='display'>${location.display}</strong>`;
-					    html += `<span data-autocomplete-field='adr'>${location.address}</span>`;
+                        html += `<strong data-autocomplete-field='display'>${esc(location.display)}</strong>`;
+					    html += `<span data-autocomplete-field='adr'>${esc(location.address)}</span>`;
                     } else {
                         /* Use address as if it was display */
-                        html += `<strong data-autocomplete-field='display'>${location.address}</strong>`;
+                        html += `<strong data-autocomplete-field='display'>${esc(location.address)}</strong>`;
                     }
 
 					if(location.type || location.country){
 					    html += `<span data-autocomplete-meta-list>`;
                         if(location.type){
-                            html += `<small data-autocomplete-field='type'>${location.type}</small>`;
+                            html += `<small data-autocomplete-field='type'>${esc(location.type)}</small>`;
                         }
 
                         if(location.country){
-                            html += `<small data-autocomplete-field='country'>${location.country}</small>`;
+                            html += `<small data-autocomplete-field='country'>${esc(location.country)}</small>`;
                         }
                         html += `</span>`;
 
@@ -19425,7 +19458,7 @@ jQuery(function($) {
 			var index = $(this).data('id');
 			var lat = $(this).data('lat');
 			var lng = $(this).data('lng');
-			var name = $(this).find('[id^="wpgmza_item_address_"]').html() || $(this).text();
+			var name = $(this).find('[id^="wpgmza_item_address_"]').text() || $(this).text(); /* plain text, the suggestion HTML is escaped */
 			quickInput.val(name.trim());
 			resultsContainer.hide();
 		});
@@ -26765,9 +26798,14 @@ jQuery(function($) {
 		var self = this;
 		
 		Parent.call(this, element);
-		
+
+		/* GDPR: the base Map has placed the consent notice in the element and stopped. Stop here too, so the notice is not cleared */
+		if(WPGMZA.googleAPIStatus && WPGMZA.googleAPIStatus.code == "USER_CONSENT_NOT_GIVEN"){
+			return;
+		}
+
 		this.setOptions(options);
-		
+
 		$(this.element).html("");
 
 		let mapOptions = this.settings.toLeafletViewOptions();
@@ -27124,8 +27162,10 @@ jQuery(function($) {
 				url = WPGMZA.settings.tile_server_url_leaflet_zerocost ? WPGMZA.settings.tile_server_url_leaflet_zerocost : url;
 				break;
 			case 'leaflet-gotiles':
-				/* Remap to Go Tiles settings: no key needed (free tier), defaults to the light style */
+				/* Remap to Go Tiles settings, defaults to the light style. The key is optional: without one the site
+				 * uses its free monthly tiles; a licence key (from a Pro licence or pay-as-you-go) adds its allowance. */
 				url = WPGMZA.settings.tile_server_url_leaflet_gotiles ? WPGMZA.settings.tile_server_url_leaflet_gotiles : "https://tiles.wpgmaps.com/styles/light/{z}/{x}/{y}.png";
+				tileKey = WPGMZA.settings.gotiles_key ? WPGMZA.settings.gotiles_key : false;
 				break;
 			case 'leaflet-mapiron':
 				/* Remap to MapIron settings */
@@ -27236,33 +27276,55 @@ jQuery(function($) {
 			+ 'background:#fff;color:#1b2230;border-left:4px solid #e8473f;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.25);'
 			+ 'padding:10px 34px 10px 12px;font:13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;';
 
+		const strings = WPGMZA.localized_strings || {};
+		const text = function(name, fallback){ return strings[name] ? strings[name] : fallback; };
+
 		const title = document.createElement('strong');
-		title.textContent = 'Go Tiles: monthly map tile limit reached';
+		title.textContent = text('gotiles_limit_title', 'Go Tiles: monthly map tile limit reached');
 		notice.appendChild(title);
 
 		const body = document.createElement('div');
 		body.textContent = keyed
-			? 'This site\'s key has used its map tiles for this month, so the map can\'t load more until the 1st.'
-			: 'This site has used its free 10,000 map tiles for this month, so the map can\'t load more until the 1st.';
+			? text('gotiles_limit_keyed', 'This site has used its free tiles for this month, and your Go Tiles allowance or monthly spending limit is used up too. The map can\'t load more until the 1st (UTC).')
+			: text('gotiles_limit_free', 'This site has used its free 15,000 map tiles for this month, so the map can\'t load more until the 1st (UTC).');
 		notice.appendChild(body);
 
-		if(!keyed){
+		const links = document.createElement('div');
+		links.style.cssText = 'margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 14px;';
+		const addLink = function(href, label, newTab){
 			const link = document.createElement('a');
-			link.href = 'https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit';
-			link.target = '_blank';
-			link.rel = 'noopener';
-			link.textContent = 'Upgrade to Pro for higher limits';
-			notice.appendChild(link);
+			link.href = href;
+			link.textContent = label;
+			if(newTab){
+				link.target = '_blank';
+				link.rel = 'noopener';
+			}
+			links.appendChild(link);
+		};
+
+		/* Get more tiles: pay-as-you-go for keyed sites, the Pro allowance claim for unclaimed Pro sites, otherwise the Go Tiles page */
+		if(keyed){
+			addLink('https://www.wpgmaps.com/my-account/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit', text('gotiles_limit_payg', 'Turn on pay-as-you-go or raise your limit'), true);
+		} else if(WPGMZA.isProVersion()){
+			addLink('https://www.wpgmaps.com/my-account/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit', text('gotiles_limit_claim', 'Claim the Go Tiles allowance included with your Pro licence'), true);
+		} else {
+			addLink('https://www.wpgmaps.com/go-tiles/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit', text('gotiles_limit_more', 'Get more map tiles with Go Tiles'), true);
 		}
+
+		/* Go Tiles is optional: point to the map provider setting */
+		if(WPGMZA.adminurl){
+			addLink(WPGMZA.adminurl + 'admin.php?page=wp-google-maps-menu-settings', text('gotiles_limit_switch', 'Choose a different map provider'), false);
+		}
+		notice.appendChild(links);
 
 		const hint = document.createElement('div');
 		hint.style.cssText = 'color:#5b6678;font-size:12px;margin-top:4px;';
-		hint.textContent = 'Only admins see this message.';
+		hint.textContent = text('gotiles_limit_admins', 'Only admins see this message.');
 		notice.appendChild(hint);
 
 		const close = document.createElement('button');
 		close.type = 'button';
-		close.setAttribute('aria-label', 'Dismiss');
+		close.setAttribute('aria-label', text('gotiles_limit_dismiss', 'Dismiss'));
 		close.textContent = '×';
 		close.style.cssText = 'position:absolute;top:4px;right:6px;border:0;background:none;font-size:18px;line-height:1;cursor:pointer;color:#5b6678;';
 		close.addEventListener('click', function(){ notice.remove(); });
@@ -30515,7 +30577,7 @@ jQuery(function($) {
 			var index = jQuery(this).data('id');
 			var lat = jQuery(this).data('lat');
 			var lng = jQuery(this).data('lng');
-			var name = jQuery('#wpgmza_item_address_'+index).html();
+			var name = jQuery('#wpgmza_item_address_'+index).text(); /* plain text, the suggestion HTML is escaped */
 			
 			
 			jQuery("input[name='lat']").val(lat);
@@ -31352,7 +31414,7 @@ jQuery(function($) {
 									let html = "";
 									
 									for(var i in results){ 
-										html += "<div class='wpgmza_ac_result " + (html === "" ? "" : "border-top") + "' data-id='" + i + "' data-lat='"+results[i]['lat']+"' data-lng='"+results[i]['lng']+"'><div class='wpgmza_ac_container'><div class='wpgmza_ac_icon'><img src='"+results[i]['icon']+"' /></div><div class='wpgmza_ac_item'><span id='wpgmza_item_name_"+i+"' class='wpgmza_item_name'>" + results[i]['place_name'] + "</span><span id='wpgmza_item_address_"+i+"' class='wpgmza_item_address'>" + results[i]['formatted_address'] + "</span></div></div></div>"; 
+										html += "<div class='wpgmza_ac_result " + (html === "" ? "" : "border-top") + "' data-id='" + WPGMZA.escapeHTML(i) + "' data-lat='" + WPGMZA.escapeHTML(results[i]['lat']) + "' data-lng='" + WPGMZA.escapeHTML(results[i]['lng']) + "'><div class='wpgmza_ac_container'><div class='wpgmza_ac_icon'><img src='" + WPGMZA.escapeHTML(results[i]['icon']) + "' /></div><div class='wpgmza_ac_item'><span id='wpgmza_item_name_" + WPGMZA.escapeHTML(i) + "' class='wpgmza_item_name'>" + WPGMZA.escapeHTML(results[i]['place_name']) + "</span><span id='wpgmza_item_address_" + WPGMZA.escapeHTML(i) + "' class='wpgmza_item_address'>" + WPGMZA.escapeHTML(results[i]['formatted_address']) + "</span></div></div></div>"; /* remote data: escaped */
 									}
 									
 									if(!html || html.length <= 0){ 
@@ -31377,8 +31439,9 @@ jQuery(function($) {
 						}
 					},
 					error : () => {
-						/* Request failed */
-						$('#wpgmza_autocomplete_search_results').hide();
+						/* Request failed. Empty the results box as well as hiding it, so nothing that mirrors it (the Atlas
+						 * Major quick-add bar) keeps showing the "Searching..." placeholder */
+						$('#wpgmza_autocomplete_search_results').html('').hide();
 						
 						/* There is a chance that this was purely a network issue, we should count it, and bail later if need be */
 						enhancedAutocomplete.requestErrorCount ++;
@@ -31390,8 +31453,8 @@ jQuery(function($) {
 				});
 			}, (enhancedAutocomplete.identifiedTypingSpeed * 2));
 		} else {
-			/* Search is empty, just hide the popup for now */
-			$('#wpgmza_autocomplete_search_results').hide();
+			/* Search is empty, just hide (and empty) the popup for now */
+			$('#wpgmza_autocomplete_search_results').html('').hide();
 		}
 		
 	}
@@ -31408,7 +31471,9 @@ jQuery(function($) {
 			}
 		}
 		
-		$('#wpgmza_autocomplete_search_results').hide();
+		/* Empty the results box as well as hiding it, so nothing that mirrors it (the Atlas Major quick-add bar)
+		 * keeps showing the "Searching..." placeholder */
+		$('#wpgmza_autocomplete_search_results').html('').hide();
 		$('#wpgmza_autoc_disabled').hide();
 	}
 
@@ -31911,7 +31976,8 @@ jQuery(function($) {
 			entry_point: this.entryPoint || '',
 			plugin_version: this.element.attr('data-plugin-version') || ''
 		}).done(function(response){
-			if(!response || !response.url || !response.session_id){
+			/* Only open a secure checkout address (same rule as the download and My Account links) */
+			if(!response || !response.url || !response.session_id || !/^https:\/\//i.test(response.url)){
 				if(stripeTab){ stripeTab.close(); }
 				self.setStep('error');
 				return;
@@ -33275,9 +33341,14 @@ jQuery(function($) {
 		var self = this;
 		
 		Parent.call(this, element);
-		
+
+		/* GDPR: the base Map has placed the consent notice in the element and stopped. Stop here too, so the notice is not cleared */
+		if(WPGMZA.googleAPIStatus && WPGMZA.googleAPIStatus.code == "USER_CONSENT_NOT_GIVEN"){
+			return;
+		}
+
 		this.setOptions(options);
-		
+
 		var viewOptions = this.settings.toOLViewOptions();
 		
 		this.mapType = viewOptions.mapType ? viewOptions.mapType : 'roadmap';

@@ -546,6 +546,24 @@ jQuery(function($) {
 				return m.toUpperCase()
 			});
 		},
+
+		/**
+		 * Escapes text for HTML, including inside quoted attributes. Use for any data that did not come from
+		 * this plugin's own trusted markup (geocoder results, third-party APIs, user content).
+		 * @method escapeHTML
+		 * @static
+		 * @param {*} value
+		 * @return {string}
+		 */
+		escapeHTML: function(value)
+		{
+			return String(value === undefined || value === null ? "" : value)
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#39;");
+		},
 		
 		pluralize: function(string)
 		{

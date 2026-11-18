@@ -328,6 +328,24 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 	}
 	
 	/**
+	 * maybe_unserialize() without object injection: stored data (map settings, marker data) can come from imports
+	 * and other users, so it is never turned into objects of arbitrary classes. Only plain data classes are allowed:
+	 * stdClass, and Pro's marker gallery classes (Pro stores a marker's gallery as serialized MarkerGallery /
+	 * MarkerGalleryItem objects in the marker's other_data; neither has __wakeup, __destruct or other unsafe magic methods).
+	 * @param mixed $data
+	 * @return mixed The unserialized value, or $data unchanged when it is not a serialized string
+	 */
+	public static function safeUnserialize($data)
+	{
+		if(!is_string($data) || !is_serialized($data))
+			return $data;
+
+		$result = @unserialize(trim($data), array('allowed_classes' => array('stdClass', 'WPGMZA\\MarkerGallery', 'WPGMZA\\MarkerGalleryItem')));
+
+		return ($result === false && trim($data) !== 'b:0;') ? $data : $result;
+	}
+
+	/**
 	 * Parses arbitrary data following a DB read, for example by unserializing strings or decoding JSON.
 	 * @return void
 	 */
@@ -336,7 +354,7 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		if(!$this->get_arbitrary_data_column_name())
 			throw new \Exception('No arbitrary data field on this table');
 		
-		$data = maybe_unserialize($data);
+		$data = Crud::safeUnserialize($data);
 		
 		if(!is_object($data) && !is_array($data))
 			return;
@@ -759,7 +777,7 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		$stmt = $wpdb->prepare("SELECT $arbitrary_data_column_name FROM {$this->table_name} WHERE id=%d", array($this->id));
 		
 		$raw = $wpdb->get_var($stmt);
-		$data = maybe_unserialize($raw);
+		$data = Crud::safeUnserialize($raw);
 		
 		if(empty($data))
 			$data = array();

@@ -45,6 +45,10 @@ class Map extends Crud
 			$id_or_fields = $fields;
 		} else if($id_or_fields === -1 || $id_or_fields === null){
 			$id_or_fields = array('store_locator_distance' => 1);
+		} else if(is_string($id_or_fields) && !preg_match('/^\d+$/', trim($id_or_fields))){
+			/* Security: map IDs from requests and shortcodes arrive as strings. Only the integer -1 (internal callers)
+			 * means "create a map", so a string such as "-1" must not create map rows */
+			$id_or_fields = 0;
 		}
 
 		try {
@@ -321,7 +325,7 @@ class Map extends Crud
 				}
 				
 				if($key == "other_data")
-					$value = maybe_unserialize($key);
+					$value = Crud::safeUnserialize($value);
 				
 				if(is_scalar($value))
 					$node->appendText($value);

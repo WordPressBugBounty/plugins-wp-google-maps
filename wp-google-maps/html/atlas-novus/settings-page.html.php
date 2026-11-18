@@ -109,7 +109,7 @@
 			<div class="wpgmza-map-engine-selector">
 				<div class="wpgmza-map-engine-selector-grid">
 					<label class="wpgmza-map-engine-item" title="<?php esc_attr_e('Go Tiles (by WP Go Maps)', 'wp-google-maps'); ?>">
-						<input type="radio" name="wpgmza_maps_engine" value="leaflet-gotiles" class="wpgmza-hidden" />
+						<input type="radio" name="wpgmza_maps_engine" value="leaflet-gotiles" id="wpgmza-maps-engine-gotiles" class="wpgmza-hidden" />
 						<div class="wpgmza-map-engine-item-backdrop"></div>
 						<span><?php esc_html_e('Go Tiles', 'wp-google-maps'); ?></span>
 						<img src="<?php echo WPGMZA_PLUGIN_DIR_URL; ?>images/wpgomaps-logo.webp" alt="<?php esc_attr_e('WP Go Maps', 'wp-google-maps'); ?>" />
@@ -202,11 +202,20 @@
 			</div>
 		</div>
 
-		<!-- Go Tiles: free, no key -->
+		<!-- Go Tiles key (optional): free without a key; a key adds a Pro allowance or pay-as-you-go tiles -->
+		<div class="tab-row has-hint" data-required-maps-engine="leaflet-gotiles">
+			<div class="title"><?php _e('Go Tiles Key (optional)', 'wp-google-maps'); ?></div>
+			<input name="gotiles_key" id="gotiles_key" type="text" style="width: 40%;" autocomplete="off" spellcheck="false" pattern="gt_[A-Za-z0-9_\-]{20,64}" />
+		</div>
+
+		<!-- Go Tiles key hint -->
 		<div class="tab-row" data-required-maps-engine="leaflet-gotiles">
 			<div class="title"></div>
+
 			<small class="hint">
-				<?php _e("Go Tiles by WP Go Maps is free on every site, with no key needed. Each site gets 10,000 map tiles a month (roughly 1,000 map views).", "wp-google-maps"); ?>
+				<?php
+				_e("A key adds more tiles once the free tiles run out. WP Go Maps Pro includes a Go Tiles allowance: claim it in <a href='https://www.wpgmaps.com/my-account/?utm_source=plugin&amp;utm_medium=link&amp;utm_campaign=settings-gotiles-key-atlas-novus-v10' target='_BLANK'>My Account</a> on wpgmaps.com, then save these settings and Pro fills in the key for you. You can also <a href='https://www.wpgmaps.com/go-tiles/?utm_source=plugin&amp;utm_medium=link&amp;utm_campaign=settings-gotiles-key-atlas-novus-v10' target='_BLANK'>get a pay-as-you-go key</a>.", "wp-google-maps");
+				?>
 			</small>
 		</div>
 
@@ -326,6 +335,246 @@
 		</div>
 		
 		
+		<!-- Map engine usage and pricing -->
+		<div class="tab-row" data-required-maps-engine="leaflet-gotiles">
+			<div class="title"></div>
+			<div class="wpgmza-engine-usage wpgmza-engine-usage-featured">
+				<div class="wpgmza-engine-usage-badge"><?php echo esc_html__("Recommended. Free on every site", "wp-google-maps"); ?></div>
+				<table class="wpgmza-engine-usage-table">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__("Free each month", "wp-google-maps"); ?></th><td><?php echo esc_html__("15,000 map tiles (about 750 map views)", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("API key needed", "wp-google-maps"); ?></th><td><?php echo esc_html__("No", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Commercial use", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Paid plans", "wp-google-maps"); ?></th><td><?php echo esc_html__("Pro includes 250,000 to 3 million tiles. Pay as you go: $5 a month includes 100,000 tiles, then $0.05 per 1,000 tiles", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Cost per 1,000 map views", "wp-google-maps"); ?></th><td><?php echo esc_html__("About $1.00 on pay as you go", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Busy sites", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes, with Pro or pay as you go", "wp-google-maps"); ?></td></tr>
+					</tbody>
+				</table>
+				<div class="wpgmza-engine-usage-footer">
+					<a href="https://www.wpgmaps.com/go-tiles/?utm_source=plugin&amp;utm_medium=link&amp;utm_campaign=settings-engine-usage" target="_BLANK"><?php echo esc_html__("About Go Tiles", "wp-google-maps"); ?></a>
+					<span><?php echo esc_html__("Figures as of November 2026 and may change.", "wp-google-maps"); ?></span>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-row" data-required-maps-engine="google-maps">
+			<div class="title"></div>
+			<div class="wpgmza-engine-usage">
+				<table class="wpgmza-engine-usage-table">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__("Free each month", "wp-google-maps"); ?></th><td><?php echo esc_html__("10,000 map loads (about 10,000 map views)", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("API key needed", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes, plus a billing account", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Commercial use", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Paid plans", "wp-google-maps"); ?></th><td><?php echo esc_html__("$7 per 1,000 map loads", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Cost per 1,000 map views", "wp-google-maps"); ?></th><td><?php echo esc_html__("About $7.00", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Busy sites", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+					</tbody>
+				</table>
+				<div class="wpgmza-engine-usage-footer">
+					<a href="https://developers.google.com/maps/billing-and-pricing/pricing" target="_BLANK"><?php echo esc_html__("Google Maps pricing", "wp-google-maps"); ?></a>
+					<span><?php echo esc_html__("Figures as of November 2026 and may change.", "wp-google-maps"); ?></span>
+				</div>
+				<div class="wpgmza-engine-usage-promo">
+					<div class="wpgmza-engine-usage-promo-text">
+						<strong><?php echo esc_html__("Try Go Tiles by WP Go Maps, free on every site.", "wp-google-maps"); ?></strong>
+						<span><?php echo esc_html__("15,000 map tiles a month with no API key, no billing account and no sign-up. Switch any time.", "wp-google-maps"); ?></span>
+					</div>
+					<label for="wpgmza-maps-engine-gotiles" class="wpgmza-button wpgmza-button-primary"><?php echo esc_html__("Switch to Go Tiles", "wp-google-maps"); ?></label>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-row" data-required-maps-engine="leaflet-azure">
+			<div class="title"></div>
+			<div class="wpgmza-engine-usage">
+				<table class="wpgmza-engine-usage-table">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__("Free each month", "wp-google-maps"); ?></th><td><?php echo esc_html__("5,000 tile transactions (about 3,750 map views)", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("API key needed", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Commercial use", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Paid plans", "wp-google-maps"); ?></th><td><?php echo esc_html__("$4.50 per 1,000 transactions", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Cost per 1,000 map views", "wp-google-maps"); ?></th><td><?php echo esc_html__("About $6.00", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Busy sites", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+					</tbody>
+				</table>
+				<div class="wpgmza-engine-usage-footer">
+					<a href="https://azure.microsoft.com/en-us/pricing/details/azure-maps/" target="_BLANK"><?php echo esc_html__("Azure Maps pricing", "wp-google-maps"); ?></a>
+					<span><?php echo esc_html__("Figures as of November 2026 and may change.", "wp-google-maps"); ?></span>
+				</div>
+				<div class="wpgmza-engine-usage-promo">
+					<div class="wpgmza-engine-usage-promo-text">
+						<strong><?php echo esc_html__("Try Go Tiles by WP Go Maps, free on every site.", "wp-google-maps"); ?></strong>
+						<span><?php echo esc_html__("15,000 map tiles a month with no API key, no billing account and no sign-up. Switch any time.", "wp-google-maps"); ?></span>
+					</div>
+					<label for="wpgmza-maps-engine-gotiles" class="wpgmza-button wpgmza-button-primary"><?php echo esc_html__("Switch to Go Tiles", "wp-google-maps"); ?></label>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-row" data-required-maps-engine="leaflet-stadia">
+			<div class="title"></div>
+			<div class="wpgmza-engine-usage">
+				<table class="wpgmza-engine-usage-table">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__("Free each month", "wp-google-maps"); ?></th><td><?php echo esc_html__("200,000 credits (about 10,000 map views)", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("API key needed", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Commercial use", "wp-google-maps"); ?></th><td><?php echo esc_html__("No, non-commercial only", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Paid plans", "wp-google-maps"); ?></th><td><?php echo esc_html__("From $20 a month for 1 million credits", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Cost per 1,000 map views", "wp-google-maps"); ?></th><td><?php echo esc_html__("From about $0.40", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Busy sites", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes, on a paid plan", "wp-google-maps"); ?></td></tr>
+					</tbody>
+				</table>
+				<div class="wpgmza-engine-usage-footer">
+					<a href="https://stadiamaps.com/pricing/" target="_BLANK"><?php echo esc_html__("Stadia Maps pricing", "wp-google-maps"); ?></a>
+					<span><?php echo esc_html__("Figures as of November 2026 and may change. Monthly plan costs assume the whole plan is used.", "wp-google-maps"); ?></span>
+				</div>
+				<div class="wpgmza-engine-usage-promo">
+					<div class="wpgmza-engine-usage-promo-text">
+						<strong><?php echo esc_html__("Try Go Tiles by WP Go Maps, free on every site.", "wp-google-maps"); ?></strong>
+						<span><?php echo esc_html__("15,000 map tiles a month with no API key, no billing account and no sign-up. Switch any time.", "wp-google-maps"); ?></span>
+					</div>
+					<label for="wpgmza-maps-engine-gotiles" class="wpgmza-button wpgmza-button-primary"><?php echo esc_html__("Switch to Go Tiles", "wp-google-maps"); ?></label>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-row" data-required-maps-engine="leaflet-maptiler">
+			<div class="title"></div>
+			<div class="wpgmza-engine-usage">
+				<table class="wpgmza-engine-usage-table">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__("Free each month", "wp-google-maps"); ?></th><td><?php echo esc_html__("5,000 map sessions (about 5,000 map views)", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("API key needed", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Commercial use", "wp-google-maps"); ?></th><td><?php echo esc_html__("No, non-commercial only", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Paid plans", "wp-google-maps"); ?></th><td><?php echo esc_html__("From $30 a month for 25,000 map sessions", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Cost per 1,000 map views", "wp-google-maps"); ?></th><td><?php echo esc_html__("From about $1.20", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Busy sites", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes, on a paid plan", "wp-google-maps"); ?></td></tr>
+					</tbody>
+				</table>
+				<div class="wpgmza-engine-usage-footer">
+					<a href="https://www.maptiler.com/cloud/pricing/" target="_BLANK"><?php echo esc_html__("MapTiler pricing", "wp-google-maps"); ?></a>
+					<span><?php echo esc_html__("Figures as of November 2026 and may change. Monthly plan costs assume the whole plan is used.", "wp-google-maps"); ?></span>
+				</div>
+				<div class="wpgmza-engine-usage-promo">
+					<div class="wpgmza-engine-usage-promo-text">
+						<strong><?php echo esc_html__("Try Go Tiles by WP Go Maps, free on every site.", "wp-google-maps"); ?></strong>
+						<span><?php echo esc_html__("15,000 map tiles a month with no API key, no billing account and no sign-up. Switch any time.", "wp-google-maps"); ?></span>
+					</div>
+					<label for="wpgmza-maps-engine-gotiles" class="wpgmza-button wpgmza-button-primary"><?php echo esc_html__("Switch to Go Tiles", "wp-google-maps"); ?></label>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-row" data-required-maps-engine="leaflet-locationiq">
+			<div class="title"></div>
+			<div class="wpgmza-engine-usage">
+				<table class="wpgmza-engine-usage-table">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__("Free each month", "wp-google-maps"); ?></th><td><?php echo esc_html__("5,000 requests a day, shared with geocoding (about 5,000 map views a day)", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("API key needed", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Commercial use", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes, with a link back", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Paid plans", "wp-google-maps"); ?></th><td><?php echo esc_html__("From $45 a month for 10,000 map views a day", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Cost per 1,000 map views", "wp-google-maps"); ?></th><td><?php echo esc_html__("From about $0.19", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Busy sites", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes, on a paid plan", "wp-google-maps"); ?></td></tr>
+					</tbody>
+				</table>
+				<div class="wpgmza-engine-usage-footer">
+					<a href="https://locationiq.com/pricing" target="_BLANK"><?php echo esc_html__("LocationIQ pricing", "wp-google-maps"); ?></a>
+					<span><?php echo esc_html__("Figures as of November 2026 and may change. Monthly plan costs assume the whole plan is used.", "wp-google-maps"); ?></span>
+				</div>
+				<div class="wpgmza-engine-usage-promo">
+					<div class="wpgmza-engine-usage-promo-text">
+						<strong><?php echo esc_html__("Try Go Tiles by WP Go Maps, free on every site.", "wp-google-maps"); ?></strong>
+						<span><?php echo esc_html__("15,000 map tiles a month with no API key, no billing account and no sign-up. Switch any time.", "wp-google-maps"); ?></span>
+					</div>
+					<label for="wpgmza-maps-engine-gotiles" class="wpgmza-button wpgmza-button-primary"><?php echo esc_html__("Switch to Go Tiles", "wp-google-maps"); ?></label>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-row" data-required-maps-engine="leaflet-mapiron">
+			<div class="title"></div>
+			<div class="wpgmza-engine-usage">
+				<table class="wpgmza-engine-usage-table">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__("Free each month", "wp-google-maps"); ?></th><td><?php echo esc_html__("10,000 map tiles (about 500 map views)", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("API key needed", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Commercial use", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Paid plans", "wp-google-maps"); ?></th><td><?php echo esc_html__("From $19 a month for 1 million tiles", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Cost per 1,000 map views", "wp-google-maps"); ?></th><td><?php echo esc_html__("From about $0.38", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Busy sites", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes, on a paid plan", "wp-google-maps"); ?></td></tr>
+					</tbody>
+				</table>
+				<div class="wpgmza-engine-usage-footer">
+					<a href="https://mapiron.com/pricing" target="_BLANK"><?php echo esc_html__("MapIron pricing", "wp-google-maps"); ?></a>
+					<span><?php echo esc_html__("Figures as of November 2026 and may change. Monthly plan costs assume the whole plan is used.", "wp-google-maps"); ?></span>
+				</div>
+				<div class="wpgmza-engine-usage-promo">
+					<div class="wpgmza-engine-usage-promo-text">
+						<strong><?php echo esc_html__("Try Go Tiles by WP Go Maps, free on every site.", "wp-google-maps"); ?></strong>
+						<span><?php echo esc_html__("15,000 map tiles a month with no API key, no billing account and no sign-up. Switch any time.", "wp-google-maps"); ?></span>
+					</div>
+					<label for="wpgmza-maps-engine-gotiles" class="wpgmza-button wpgmza-button-primary"><?php echo esc_html__("Switch to Go Tiles", "wp-google-maps"); ?></label>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-row" data-required-maps-engine="leaflet-zerocost">
+			<div class="title"></div>
+			<div class="wpgmza-engine-usage">
+				<table class="wpgmza-engine-usage-table">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__("Free each month", "wp-google-maps"); ?></th><td><?php echo esc_html__("No stated limit", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("API key needed", "wp-google-maps"); ?></th><td><?php echo esc_html__("No", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Commercial use", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes, with attribution", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Paid plans", "wp-google-maps"); ?></th><td><?php echo esc_html__("None, funded by donations", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Cost per 1,000 map views", "wp-google-maps"); ?></th><td><?php echo esc_html__("Free", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Busy sites", "wp-google-maps"); ?></th><td><?php echo esc_html__("Not recommended, no uptime guarantee", "wp-google-maps"); ?></td></tr>
+					</tbody>
+				</table>
+				<div class="wpgmza-engine-usage-footer">
+					<a href="https://openfreemap.org/tos/" target="_BLANK"><?php echo esc_html__("OpenFreeMap terms", "wp-google-maps"); ?></a>
+					<span><?php echo esc_html__("Figures as of November 2026 and may change.", "wp-google-maps"); ?></span>
+				</div>
+				<div class="wpgmza-engine-usage-promo">
+					<div class="wpgmza-engine-usage-promo-text">
+						<strong><?php echo esc_html__("Try Go Tiles by WP Go Maps, free on every site.", "wp-google-maps"); ?></strong>
+						<span><?php echo esc_html__("15,000 map tiles a month with no API key, no billing account and no sign-up. Switch any time.", "wp-google-maps"); ?></span>
+					</div>
+					<label for="wpgmza-maps-engine-gotiles" class="wpgmza-button wpgmza-button-primary"><?php echo esc_html__("Switch to Go Tiles", "wp-google-maps"); ?></label>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-row" data-required-maps-engine="leaflet|open-layers-latest|open-layers">
+			<div class="title"></div>
+			<div class="wpgmza-engine-usage">
+				<table class="wpgmza-engine-usage-table">
+					<tbody>
+						<tr><th scope="row"><?php echo esc_html__("Free each month", "wp-google-maps"); ?></th><td><?php echo esc_html__("Light, fair use only", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("API key needed", "wp-google-maps"); ?></th><td><?php echo esc_html__("No", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Commercial use", "wp-google-maps"); ?></th><td><?php echo esc_html__("Yes, with attribution", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Paid plans", "wp-google-maps"); ?></th><td><?php echo esc_html__("None", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Cost per 1,000 map views", "wp-google-maps"); ?></th><td><?php echo esc_html__("No paid plan", "wp-google-maps"); ?></td></tr>
+						<tr><th scope="row"><?php echo esc_html__("Busy sites", "wp-google-maps"); ?></th><td><?php echo esc_html__("Not recommended, heavy use can be blocked", "wp-google-maps"); ?></td></tr>
+					</tbody>
+				</table>
+				<div class="wpgmza-engine-usage-footer">
+					<a href="https://operations.osmfoundation.org/policies/tiles/" target="_BLANK"><?php echo esc_html__("OpenStreetMap tile usage policy", "wp-google-maps"); ?></a>
+					<span><?php echo esc_html__("Figures as of November 2026 and may change.", "wp-google-maps"); ?></span>
+				</div>
+				<div class="wpgmza-engine-usage-promo">
+					<div class="wpgmza-engine-usage-promo-text">
+						<strong><?php echo esc_html__("Try Go Tiles by WP Go Maps, free on every site.", "wp-google-maps"); ?></strong>
+						<span><?php echo esc_html__("15,000 map tiles a month with no API key, no billing account and no sign-up. Switch any time.", "wp-google-maps"); ?></span>
+					</div>
+					<label for="wpgmza-maps-engine-gotiles" class="wpgmza-button wpgmza-button-primary"><?php echo esc_html__("Switch to Go Tiles", "wp-google-maps"); ?></label>
+				</div>
+			</div>
+		</div>
+
+		<!-- /Map engine usage and pricing -->
+
 		<!-- Map behavior settings -->
 		<div class="tab-row">
 			<div class="title">

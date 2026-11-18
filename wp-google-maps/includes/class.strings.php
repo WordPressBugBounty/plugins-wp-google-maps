@@ -42,6 +42,15 @@ class Strings
 			'pro_checkout_plan_1site'	=> __('1 site', 'wp-google-maps'),
 			'pro_checkout_plan_5site'	=> __('5 sites', 'wp-google-maps'),
 			'pro_checkout_plan_unlimited'	=> __('Unlimited sites', 'wp-google-maps'),
+			'gotiles_limit_title'		=> __('Go Tiles: monthly map tile limit reached', 'wp-google-maps'),
+			'gotiles_limit_free'		=> __('This site has used its free 15,000 map tiles for this month, so the map can\'t load more until the 1st (UTC).', 'wp-google-maps'),
+			'gotiles_limit_keyed'		=> __('This site has used its free tiles for this month, and your Go Tiles allowance or monthly spending limit is used up too. The map can\'t load more until the 1st (UTC).', 'wp-google-maps'),
+			'gotiles_limit_claim'		=> __('Claim the Go Tiles allowance included with your Pro licence', 'wp-google-maps'),
+			'gotiles_limit_more'		=> __('Get more map tiles with Go Tiles', 'wp-google-maps'),
+			'gotiles_limit_payg'		=> __('Turn on pay-as-you-go or raise your limit', 'wp-google-maps'),
+			'gotiles_limit_switch'		=> __('Choose a different map provider', 'wp-google-maps'),
+			'gotiles_limit_admins'		=> __('Only admins see this message.', 'wp-google-maps'),
+			'gotiles_limit_dismiss'		=> __('Dismiss', 'wp-google-maps'),
 			/* translators: 1: discount percentage, e.g. 45, 2: country name */
 			'pro_checkout_regional_title'	=> __('%1$s%% regional discount applied for %2$s', 'wp-google-maps'),
 			/* translators: %s: amount saved, e.g. $44.55 */

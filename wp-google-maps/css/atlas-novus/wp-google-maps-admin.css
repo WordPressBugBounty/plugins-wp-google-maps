@@ -5787,6 +5787,96 @@
 }
 
 
+/* Map engine usage and pricing card (Settings, General) */
+.wpgmza-engine-usage {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 640px;
+    padding: 14px 16px;
+    background: var(--wpgmza-color-white);
+    border: 1px solid var(--wpgmza-color-light-alt);
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--wpgmza-color-charcoal);
+}
+
+.wpgmza-engine-usage-featured {
+    border-color: var(--wpgmza-color-blue);
+}
+
+.wpgmza-engine-usage-badge {
+    align-self: flex-start;
+    padding: 2px 10px;
+    border-radius: 10px;
+    background: var(--wpgmza-color-blue);
+    color: var(--wpgmza-color-white);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.wpgmza-engine-usage-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.wpgmza-engine-usage-table th,
+.wpgmza-engine-usage-table td {
+    padding: 7px 0;
+    border-bottom: 1px solid var(--wpgmza-color-grey-100);
+    text-align: left;
+    vertical-align: top;
+    font-size: 13px;
+}
+
+.wpgmza-engine-usage-table tr:last-child th,
+.wpgmza-engine-usage-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.wpgmza-engine-usage-table th {
+    width: 38%;
+    padding-right: 16px;
+    font-weight: 600;
+    color: var(--wpgmza-color-dark);
+}
+
+.wpgmza-engine-usage-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 12px;
+    color: var(--wpgmza-color-dark);
+}
+
+.wpgmza-engine-usage-promo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: var(--wpgmza-color-blue-light);
+    border: 1px solid var(--wpgmza-color-blue-light-alt);
+}
+
+.wpgmza-engine-usage-promo-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1 1 280px;
+    min-width: 0;
+}
+
+.wpgmza-engine-usage-promo .wpgmza-button {
+    flex: 0 0 auto;
+    cursor: pointer;
+}
+
 
 /* Tile Preview */
 .wpgmza-tile-server-preview-container {

@@ -752,7 +752,7 @@ function wpgmaps_tag_basic( $atts )
 	if(isset($res->other_settings) && is_string($res->other_settings))
 	{
 		$temp = clone $res;
-		$temp->other_settings = unserialize($res->other_settings);
+		$temp->other_settings = WPGMZA\Crud::safeUnserialize($res->other_settings);
 		
 		$el->setAttribute('data-settings', json_encode($temp));
 	}
@@ -811,7 +811,7 @@ function wpgmaps_tag_basic( $atts )
 	
     $map_style = "style=\"display:block; overflow:auto; width:".$res->map_width."".$map_width_type."; height:".$res->map_height."".$map_height_type."; $map_align\"";
 	
-    $map_other_settings = maybe_unserialize($res->other_settings);
+    $map_other_settings = WPGMZA\Crud::safeUnserialize($res->other_settings);
     
 	// NB: "False" represents above, this should really be changed to something clearer or constants should be used in the very least
 	if($map->storeLocator && empty($map->wpgmza_store_locator_position))

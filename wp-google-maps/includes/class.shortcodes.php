@@ -103,7 +103,7 @@ class Shortcodes extends Factory {
 
 		$attributes = (object) $attributes;
 		
-		$id = !empty($attributes->id) && !empty(intval($attributes->id)) ? intval($attributes->id) : 1;
+		$id = !empty($attributes->id) && intval($attributes->id) > 0 ? intval($attributes->id) : 1; /* never -1, which would create a map */
 
 		$map = Map::createInstance($id, $rawAttributes);
 
@@ -129,8 +129,8 @@ class Shortcodes extends Factory {
 
 		    $styles = array(
 		    	"display" => "block",
-		    	"width" => !empty($attributes->width) ? $attributes->width : "{$options->width}{$options->widthType}",
-		    	"height" => !empty($attributes->height) ? $attributes->height :"{$options->height}{$options->heightType}",
+		    	"width" => !empty($attributes->width) && preg_match('/^(\d+(\.\d+)?(px|%|em|rem|vh|vw)?|auto)$/', trim((string) $attributes->width)) ? trim($attributes->width) : "{$options->width}{$options->widthType}", /* only a CSS length */
+		    	"height" => !empty($attributes->height) && preg_match('/^(\d+(\.\d+)?(px|%|em|rem|vh|vw)?|auto)$/', trim((string) $attributes->height)) ? trim($attributes->height) : "{$options->height}{$options->heightType}", /* only a CSS length */
 				"overflow" => "hidden",
 				"position" => "relative"
 		    );
@@ -289,7 +289,7 @@ class Shortcodes extends Factory {
 
 		$attributes = (object) $attributes;
 		
-		$id = !empty($attributes->id) && !empty(intval($attributes->id)) ? intval($attributes->id) : 1;
+		$id = !empty($attributes->id) && intval($attributes->id) > 0 ? intval($attributes->id) : 1; /* never -1, which would create a map */
 
 		$map = Map::createInstance($id);
 		if($map->element !== null){

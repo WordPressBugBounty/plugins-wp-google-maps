@@ -13,9 +13,14 @@ jQuery(function($) {
 		var self = this;
 		
 		Parent.call(this, element);
-		
+
+		/* GDPR: the base Map has placed the consent notice in the element and stopped. Stop here too, so the notice is not cleared */
+		if(WPGMZA.googleAPIStatus && WPGMZA.googleAPIStatus.code == "USER_CONSENT_NOT_GIVEN"){
+			return;
+		}
+
 		this.setOptions(options);
-		
+
 		$(this.element).html("");
 
 		let mapOptions = this.settings.toLeafletViewOptions();
@@ -372,8 +377,10 @@ jQuery(function($) {
 				url = WPGMZA.settings.tile_server_url_leaflet_zerocost ? WPGMZA.settings.tile_server_url_leaflet_zerocost : url;
 				break;
 			case 'leaflet-gotiles':
-				/* Remap to Go Tiles settings: no key needed (free tier), defaults to the light style */
+				/* Remap to Go Tiles settings, defaults to the light style. The key is optional: without one the site
+				 * uses its free monthly tiles; a licence key (from a Pro licence or pay-as-you-go) adds its allowance. */
 				url = WPGMZA.settings.tile_server_url_leaflet_gotiles ? WPGMZA.settings.tile_server_url_leaflet_gotiles : "https://tiles.wpgmaps.com/styles/light/{z}/{x}/{y}.png";
+				tileKey = WPGMZA.settings.gotiles_key ? WPGMZA.settings.gotiles_key : false;
 				break;
 			case 'leaflet-mapiron':
 				/* Remap to MapIron settings */
@@ -484,33 +491,55 @@ jQuery(function($) {
 			+ 'background:#fff;color:#1b2230;border-left:4px solid #e8473f;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.25);'
 			+ 'padding:10px 34px 10px 12px;font:13px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;';
 
+		const strings = WPGMZA.localized_strings || {};
+		const text = function(name, fallback){ return strings[name] ? strings[name] : fallback; };
+
 		const title = document.createElement('strong');
-		title.textContent = 'Go Tiles: monthly map tile limit reached';
+		title.textContent = text('gotiles_limit_title', 'Go Tiles: monthly map tile limit reached');
 		notice.appendChild(title);
 
 		const body = document.createElement('div');
 		body.textContent = keyed
-			? 'This site\'s key has used its map tiles for this month, so the map can\'t load more until the 1st.'
-			: 'This site has used its free 10,000 map tiles for this month, so the map can\'t load more until the 1st.';
+			? text('gotiles_limit_keyed', 'This site has used its free tiles for this month, and your Go Tiles allowance or monthly spending limit is used up too. The map can\'t load more until the 1st (UTC).')
+			: text('gotiles_limit_free', 'This site has used its free 15,000 map tiles for this month, so the map can\'t load more until the 1st (UTC).');
 		notice.appendChild(body);
 
-		if(!keyed){
+		const links = document.createElement('div');
+		links.style.cssText = 'margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 14px;';
+		const addLink = function(href, label, newTab){
 			const link = document.createElement('a');
-			link.href = 'https://www.wpgmaps.com/purchase-professional-version/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit';
-			link.target = '_blank';
-			link.rel = 'noopener';
-			link.textContent = 'Upgrade to Pro for higher limits';
-			notice.appendChild(link);
+			link.href = href;
+			link.textContent = label;
+			if(newTab){
+				link.target = '_blank';
+				link.rel = 'noopener';
+			}
+			links.appendChild(link);
+		};
+
+		/* Get more tiles: pay-as-you-go for keyed sites, the Pro allowance claim for unclaimed Pro sites, otherwise the Go Tiles page */
+		if(keyed){
+			addLink('https://www.wpgmaps.com/my-account/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit', text('gotiles_limit_payg', 'Turn on pay-as-you-go or raise your limit'), true);
+		} else if(WPGMZA.isProVersion()){
+			addLink('https://www.wpgmaps.com/my-account/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit', text('gotiles_limit_claim', 'Claim the Go Tiles allowance included with your Pro licence'), true);
+		} else {
+			addLink('https://www.wpgmaps.com/go-tiles/?utm_source=plugin&utm_medium=link&utm_campaign=gotiles-limit', text('gotiles_limit_more', 'Get more map tiles with Go Tiles'), true);
 		}
+
+		/* Go Tiles is optional: point to the map provider setting */
+		if(WPGMZA.adminurl){
+			addLink(WPGMZA.adminurl + 'admin.php?page=wp-google-maps-menu-settings', text('gotiles_limit_switch', 'Choose a different map provider'), false);
+		}
+		notice.appendChild(links);
 
 		const hint = document.createElement('div');
 		hint.style.cssText = 'color:#5b6678;font-size:12px;margin-top:4px;';
-		hint.textContent = 'Only admins see this message.';
+		hint.textContent = text('gotiles_limit_admins', 'Only admins see this message.');
 		notice.appendChild(hint);
 
 		const close = document.createElement('button');
 		close.type = 'button';
-		close.setAttribute('aria-label', 'Dismiss');
+		close.setAttribute('aria-label', text('gotiles_limit_dismiss', 'Dismiss'));
 		close.textContent = '×';
 		close.style.cssText = 'position:absolute;top:4px;right:6px;border:0;background:none;font-size:18px;line-height:1;cursor:pointer;color:#5b6678;';
 		close.addEventListener('click', function(){ notice.remove(); });

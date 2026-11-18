@@ -295,6 +295,14 @@ class GlobalSettings extends Settings
 			unset($data->markerXmlLocation);
 		}
 
+		/* Licence keys never go to the browser. Pro strips these too, but the in-editor Pro checkout stores the key
+		 * before Pro is installed (and it stays if Pro is deactivated), so Basic must remove them itself. */
+		foreach(array_keys(get_object_vars($data)) as $name){
+			if(preg_match('/^(license_?key|licen[cs]e_key|licenseKey)/i', $name)){
+				unset($data->{$name});
+			}
+		}
+
 		/*
 		 * Obscure Google API keys 
 		 * 

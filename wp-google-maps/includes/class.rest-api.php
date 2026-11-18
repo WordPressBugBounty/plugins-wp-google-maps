@@ -759,6 +759,13 @@ class RestAPI extends Factory
 
 		
 		$feature_type = $m[1];
+
+		/* Security: only the feature types this route serves. The type comes from the request path, and the
+		 * fallback router matches loosely, so e.g. /Marker/5/polygons/ must not load a Marker (no approval check) or a Map */
+		$allowedFeatureTypes = array_merge(array('features'), array_keys($this->getFeatureTables()));
+		if(!in_array($feature_type, $allowedFeatureTypes, true))
+			return new \WP_Error('wpgmza_invalid_route', 'Invalid route', array('status' => 404));
+
 		$qualified = "WPGMZA\\" . rtrim( ucwords($feature_type), 's' );
 
 		$this->checkRequestContext();
@@ -1044,6 +1051,12 @@ class RestAPI extends Factory
 								/* Permission re-assertion */
 								return new \WP_Error('wpgmza_permission_denied', 'You do not have permission to access this resource');
 							}
+
+							/* Security: this deletes markers from a GET request, so it needs the REST nonce (the AJAX fallback gets no other nonce for GET) */
+							$deleteNonce = !empty($_SERVER['HTTP_X_WP_NONCE']) ? $_SERVER['HTTP_X_WP_NONCE'] : (!empty($_GET['_wpnonce']) ? $_GET['_wpnonce'] : '');
+							if(!wp_verify_nonce(sanitize_text_field(wp_unslash($deleteNonce)), 'wp_rest')){
+								return new \WP_Error('wpgmza_action_not_allowed', 'You do not have permission to perform this action', array('status' => 403));
+							}
 							
 							$allowed	= $wpdb->get_col("SELECT MIN(id) FROM $wpgmza_tblname GROUP BY map_id, lat, lng, address, title, link, description");
 							if(empty($allowed)){
@@ -1265,6 +1278,12 @@ class RestAPI extends Factory
 		if(!$reflection->isSubclassOf('\\WPGMZA\\DataTable') && !$isMarkerListingSubclass)
 			return new \WP_Error('wpgmza_invalid_datatable_class', 'Specified PHP class must extend WPGMZA\\DataTable', array('status' => 403));
 
+		/* Security: the admin tables (AdminMapDataTable, ProAdminMarkerDataTable, ...) list everything, including
+		 * every map title, so only map editors may use them. This route is public for the front-end tables. */
+		global $wpgmza;
+		if(strpos($reflection->getShortName(), 'Admin') !== false && !$wpgmza->isUserAllowedToEdit())
+			return new \WP_Error('wpgmza_invalid_datatable_class', 'You do not have permission to view this table', array('status' => 403));
+
 		if($isMarkerListingSubclass){
 			$map_id = $request['map_id'];
 			$instance = $class::createInstance($map_id);
@@ -1302,9 +1321,26 @@ class RestAPI extends Factory
 
 		if(!empty($params) && !empty($params['data'])){
 			$query = (object) $params['data'];
+
+			/* Security: this route is public, so limit how often one visitor can relay searches to OpenStreetMap */
+			$rateKey = 'wpgmza_nominatim_rate_' . md5(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
+			$rateCount = (int) get_transient($rateKey);
+			if($rateCount >= 30){
+				return (object) array('error' => __('Too many address searches, please try again in a minute.', 'wp-google-maps'));
+			}
+			set_transient($rateKey, $rateCount + 1, MINUTE_IN_SECONDS);
+
 			$results = $cache->queryNominatimProxy($query);
 			if(!empty($results)){
-				if(!empty($query->_query) && empty($results->error)){
+				/* Security: only cache under a key that describes this exact search (the key comes from the caller,
+				 * so without this check one address's results could be filed under another address) */
+				$cacheKeyMatches = false;
+				if(!empty($query->_query) && !empty($query->q) && is_string($query->_query)){
+					$keyData = json_decode(stripslashes($query->_query));
+					$cacheKeyMatches = is_object($keyData) && isset($keyData->location) && is_string($keyData->location) && trim($keyData->location) === trim((string) $query->q);
+				}
+
+				if($cacheKeyMatches && empty($results->error)){
 					/* Cache key passed */
 					try{
 						$cache->set(sanitize_text_field($query->_query), $results);

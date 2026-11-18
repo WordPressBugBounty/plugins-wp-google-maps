@@ -17,9 +17,11 @@ class MarkerFilter extends Factory
 	
 	public function __construct($options=null)
 	{
+		/* Always go through __set: assigning inside the class would write protected properties directly
+		 * (e.g. _includeUnapproved) and skip the checks, and option keys come from the request */
 		if($options)
 			foreach($options as $key => $value)
-				$this->{$key} = $value;
+				$this->__set($key, $value);
 	}
 	
 	public function __get($name)

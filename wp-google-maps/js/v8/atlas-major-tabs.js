@@ -446,7 +446,7 @@ jQuery(function($) {
 			var index = $(this).data('id');
 			var lat = $(this).data('lat');
 			var lng = $(this).data('lng');
-			var name = $(this).find('[id^="wpgmza_item_address_"]').html() || $(this).text();
+			var name = $(this).find('[id^="wpgmza_item_address_"]').text() || $(this).text(); /* plain text, the suggestion HTML is escaped */
 			quickInput.val(name.trim());
 			resultsContainer.hide();
 		});

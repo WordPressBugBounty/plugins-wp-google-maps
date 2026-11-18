@@ -306,7 +306,8 @@ jQuery(function($) {
 			entry_point: this.entryPoint || '',
 			plugin_version: this.element.attr('data-plugin-version') || ''
 		}).done(function(response){
-			if(!response || !response.url || !response.session_id){
+			/* Only open a secure checkout address (same rule as the download and My Account links) */
+			if(!response || !response.url || !response.session_id || !/^https:\/\//i.test(response.url)){
 				if(stripeTab){ stripeTab.close(); }
 				self.setStep('error');
 				return;

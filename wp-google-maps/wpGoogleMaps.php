@@ -3,7 +3,7 @@
 Plugin Name: WP Go Maps (formerly WP Google Maps)
 Plugin URI: https://www.wpgmaps.com
 Description: The easiest to use Google Maps plugin! Create custom Google Maps or a map block with high quality markers containing locations, descriptions, images and links. Add your customized map to your WordPress posts and/or pages quickly and easily with the supplied shortcode. No fuss.
-Version: 10.2.00
+Version: 10.2.01
 Author: WP Go Maps (formerly WP Google Maps)
 Author URI: https://www.wpgmaps.com
 Text Domain: wp-google-maps
@@ -14,6 +14,23 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 
 /*
+ * 10.2.01 - 2026-11-18
+ * Added an optional Go Tiles key setting. A key adds the Go Tiles allowance included with WP Go Maps Pro, or pay-as-you-go tiles, once a site has used its free tiles for the month (Atlas Novus, Atlas Major).
+ * Added a pricing table below each map engine's settings, showing the same details for every engine: free monthly usage, whether an API key is needed, commercial use, paid plans, cost per 1,000 map views and suitability for busy sites, with a link to the provider's pricing page. Other engines also show a Switch to Go Tiles option (Atlas Novus, Atlas Major).
+ * Improved the Go Tiles monthly limit notice. It now says when the map resumes and offers to claim the Pro allowance, get more tiles, or choose a different map provider, and its text can be translated.
+ * Changed the Go Tiles free allowance to 15,000 map tiles a month on every site (about 750 map views), up from 10,000, and fixed the settings, which said 10,000 tiles was about 1,000 map views.
+ * Fixed issue where maps using Go Tiles or another Leaflet based engine showed nothing, instead of the GDPR consent notice, when consent is required before the map loads.
+ * Fixed an issue where a Pro licence key saved by the in-editor Pro checkout could be included in the settings sent to the browser before Pro was activated. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where stored map settings and marker data could be turned into PHP objects when loaded (object injection). Security issue, thanks to Christopher Miller.
+ * Fixed an issue where anonymous requests could read unapproved markers through marker filters or feature routes. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where anonymous requests or a map shortcode with a map ID of -1 could create empty maps. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where anonymous visitors could list every map title through the admin map table. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where address search results could be cached under a different address, and address suggestions showed search results as HTML. Address searches through the site are now also rate limited. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where the remove duplicate markers tool and the create map page link could be triggered without a security token. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where the map shortcode width and height accepted values other than CSS lengths. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where address suggestions in the map editor and the Atlas Major marker list did not fully escape third-party data. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where the in-editor Pro checkout could open a checkout address that was not https. Security issue, thanks to Christopher Miller.
+ *
  * 10.2.00 - 2026-11-16
  * Added Go Tiles by WP Go Maps, our own free map tile engine and now the first option in the map engine list. No API key needed: every site gets 10,000 free map tiles a month, in light and dark styles. Site admins are told inside the map if the monthly limit is reached.
  * Changed new installs to use Go Tiles as the default map engine. Existing sites keep their current engine.

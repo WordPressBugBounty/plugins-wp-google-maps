@@ -513,7 +513,8 @@ class MapEditPage extends Page
 	}
 
 	public static function createMapPage() {
-		if (isset($_GET) && $_GET['action'] == 'create-map-page' && isset($_GET['map_id'])) {
+		/* Security: publishing a page needs the nonce from the editor's link */
+		if (isset($_GET) && $_GET['action'] == 'create-map-page' && isset($_GET['map_id']) && isset($_GET['_wpnonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'wpgmza_create_map_page')) {
 			
 			// NB: Suggest using $this->map->id, global functions should be dropped
 	    	$res = wpgmza_get_map_data(intval($_GET['map_id']));
@@ -579,8 +580,10 @@ class MapEditPage extends Page
 				echo "There was a problem creating the map page.";
 				return;
 			}
-	            
+
 	        return;
+	    } else if (isset($_GET['action']) && $_GET['action'] == 'create-map-page') {
+	    	echo esc_html__("This link has expired. Please go back to the map editor and click the link to create a map page again.", "wp-google-maps");
 	    }
 	}
 	

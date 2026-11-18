@@ -1114,9 +1114,12 @@ jQuery(function($) {
 	}
 
 	WPGMZA.AtlasMajorMarkerList.prototype.esc = function(str){
+		/* Self-contained on purpose: this file is loaded on its own next to whichever Pro bundle is installed, and
+		 * older Pro bundles carry an older core without WPGMZA.escapeHTML. Also used inside attribute values,
+		 * so quotes are escaped too. */
 		var d = document.createElement('div');
-		d.textContent = str;
-		return d.innerHTML;
+		d.textContent = (str === undefined || str === null) ? '' : str;
+		return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 	}
 
 	/* Init */

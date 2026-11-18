@@ -1605,7 +1605,7 @@ function wpgmaps_user_javascript_basic() {
     
 	$api_version_string = 'quarterly';
     
-    $map_other_settings = maybe_unserialize($res[$wpgmza_current_map_id]->other_settings);
+    $map_other_settings = \WPGMZA\Crud::safeUnserialize($res[$wpgmza_current_map_id]->other_settings);
     $res[$wpgmza_current_map_id]->other_settings = $map_other_settings;
     $res[$wpgmza_current_map_id]->map_width_type = stripslashes($res[$wpgmza_current_map_id]->map_width_type);
 
@@ -1782,7 +1782,7 @@ function wpgmaps_return_markers($mapid = false,$marker_id = false) {
             'retina' => $retina,
             'category' => $category,
             'infoopen' => $infoopen,
-            'other_data'=> maybe_unserialize($other_data),
+            'other_data'=> \WPGMZA\Crud::safeUnserialize($other_data),
             'infoopen' => $infoopen
         );
 		

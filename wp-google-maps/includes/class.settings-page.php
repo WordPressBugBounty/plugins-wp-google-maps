@@ -108,6 +108,12 @@ class SettingsPage extends Page {
 
 			$data			= $this->form->serializeFormData();
 
+			/* Go Tiles key: keep only a well-formed key (it is added to tile URLs) */
+			if(isset($data['gotiles_key'])){
+				$goTilesKey = trim((string) $data['gotiles_key']);
+				$data['gotiles_key'] = preg_match('/^gt_[A-Za-z0-9_-]{20,64}$/', $goTilesKey) ? $goTilesKey : '';
+			}
+
 			/* Developer Hook (Filter) - Add data to be saved to global storage, reduxed */
 			$data = apply_filters("wpgmza_global_settings_save_redux", $data);
 			

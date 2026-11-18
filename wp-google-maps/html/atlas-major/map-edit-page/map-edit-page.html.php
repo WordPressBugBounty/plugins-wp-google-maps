@@ -310,7 +310,7 @@ global $wpgmza;
 								<?php
 								
 								// NB: I recommend adding a unique ID or class to this link and using the DOM to set the href rather than mixing content with logic here. - Perry
-								echo sprintf(__("<a href='%s' target='BLANK'>Click here to automatically create a Map Page now</a>.", "wp-google-maps"), "admin.php?page=wp-google-maps-menu&amp;action=create-map-page&amp;map_id=". (!empty($_REQUEST['map_id']) ? intval($_REQUEST['map_id']) : ''));
+								echo sprintf(__("<a href='%s' target='BLANK'>Click here to automatically create a Map Page now</a>.", "wp-google-maps"), "admin.php?page=wp-google-maps-menu&amp;action=create-map-page&amp;map_id=". (!empty($_REQUEST['map_id']) ? intval($_REQUEST['map_id']) : '') . "&amp;_wpnonce=" . wp_create_nonce('wpgmza_create_map_page'));
 
 							?>
 						</div>
