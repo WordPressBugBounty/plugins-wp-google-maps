@@ -70,7 +70,11 @@ jQuery(function($) {
 		
 		if(!message)
 			return;
-		
+
+		/* Thrown errors (not console strings) also arrive here, for example a Google InvalidValueError */
+		if(typeof message !== 'string')
+			message = (message && message.message) ? String(message.message) : String(message);
+
 		if((m = message.match(/You have exceeded your (daily )?request quota for this API/)) || (m = message.match(/This API project is not authorized to use this API/)) || (m = message.match(/^Geocoding Service: .+/)))
 		{
 			var urls = message.match(regexURL);

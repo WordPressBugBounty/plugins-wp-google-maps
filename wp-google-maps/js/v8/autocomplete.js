@@ -324,7 +324,31 @@ jQuery(function($) {
      * @return string
      */
     WPGMZA.Autocomplete.prototype.escape = function(value){
-        return WPGMZA.escapeHTML(value);
+        return WPGMZA.escapeHTML(WPGMZA.Autocomplete.toText(value));
+    }
+
+    /**
+     * Converts a geocoder value to plain text. Some providers return formatted HTML (Google's adr_address, for
+     * example <span class="locality">Newport</span>), which used to be rendered and must now show as its text, not
+     * as markup. Parsed into an inert document, so nothing in it runs.
+     *
+     * @param {*} value
+     *
+     * @return string
+     */
+    WPGMZA.Autocomplete.toText = function(value){
+        if(value === null || value === undefined)
+            return '';
+
+        value = String(value);
+        if(value.indexOf('<') === -1 && value.indexOf('&') === -1)
+            return value;
+
+        try{
+            return new DOMParser().parseFromString(value, 'text/html').body.textContent || '';
+        } catch (e) {
+            return value.replace(/<[^>]*>/g, '');
+        }
     }
 
     WPGMZA.Autocomplete.prototype.present = function(){

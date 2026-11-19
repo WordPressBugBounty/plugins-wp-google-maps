@@ -127,7 +127,15 @@ class RestAPI extends Factory
 		$args['callback'] = function($request) use ($route, $args, $callback, $methodIsOnlyGET)
 		{
 			global $wpgmza;
-			
+
+			/* Refuse REST method override (?_method= or X-HTTP-Method-Override). WordPress picks the route and its
+			 * permission check by the overridden method, but our callbacks act on the real method in
+			 * $_SERVER['REQUEST_METHOD'], so a real POST declared as GET reached write branches through a public
+			 * GET route. The plugin never uses method override (deletes are simulated with simulateDelete).
+			 * The admin-ajax fallback passes no request object and is not affected. */
+			if($request instanceof \WP_REST_Request && !empty($_SERVER['REQUEST_METHOD']) && strtoupper($request->get_method()) !== strtoupper($_SERVER['REQUEST_METHOD']))
+				return new \WP_Error('wpgmza_method_override_not_allowed', 'This request method is not allowed', array('status' => 405));
+
 			$doActionNonceCheck = 
 				empty($args['skipNonceCheck']) &&
 				!$methodIsOnlyGET && 

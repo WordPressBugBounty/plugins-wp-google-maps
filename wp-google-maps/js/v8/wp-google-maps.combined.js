@@ -5249,8 +5249,18 @@ jQuery(function($) {
 		/* Self-contained on purpose: this file is loaded on its own next to whichever Pro bundle is installed, and
 		 * older Pro bundles carry an older core without WPGMZA.escapeHTML. Also used inside attribute values,
 		 * so quotes are escaped too. */
+		str = (str === undefined || str === null) ? '' : String(str);
+
+		/* Stored titles can already hold HTML entities (older saves stored "&" as "&amp;"), so decode to plain text
+		 * first, otherwise the list shows "&amp;". Parsed in an inert document, so nothing in the value runs. */
+		if(str.indexOf('&') !== -1 || str.indexOf('<') !== -1){
+			try{
+				str = new DOMParser().parseFromString(str, 'text/html').body.textContent || '';
+			} catch (e) {}
+		}
+
 		var d = document.createElement('div');
-		d.textContent = (str === undefined || str === null) ? '' : str;
+		d.textContent = str;
 		return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 	}
 
@@ -6516,7 +6526,31 @@ jQuery(function($) {
      * @return string
      */
     WPGMZA.Autocomplete.prototype.escape = function(value){
-        return WPGMZA.escapeHTML(value);
+        return WPGMZA.escapeHTML(WPGMZA.Autocomplete.toText(value));
+    }
+
+    /**
+     * Converts a geocoder value to plain text. Some providers return formatted HTML (Google's adr_address, for
+     * example <span class="locality">Newport</span>), which used to be rendered and must now show as its text, not
+     * as markup. Parsed into an inert document, so nothing in it runs.
+     *
+     * @param {*} value
+     *
+     * @return string
+     */
+    WPGMZA.Autocomplete.toText = function(value){
+        if(value === null || value === undefined)
+            return '';
+
+        value = String(value);
+        if(value.indexOf('<') === -1 && value.indexOf('&') === -1)
+            return value;
+
+        try{
+            return new DOMParser().parseFromString(value, 'text/html').body.textContent || '';
+        } catch (e) {
+            return value.replace(/<[^>]*>/g, '');
+        }
     }
 
     WPGMZA.Autocomplete.prototype.present = function(){
@@ -10135,7 +10169,11 @@ jQuery(function($) {
 		
 		if(!message)
 			return;
-		
+
+		/* Thrown errors (not console strings) also arrive here, for example a Google InvalidValueError */
+		if(typeof message !== 'string')
+			message = (message && message.message) ? String(message.message) : String(message);
+
 		if((m = message.match(/You have exceeded your (daily )?request quota for this API/)) || (m = message.match(/This API project is not authorized to use this API/)) || (m = message.match(/^Geocoding Service: .+/)))
 		{
 			var urls = message.match(regexURL);
@@ -12686,18 +12724,8 @@ jQuery(function($) {
 			options.maxZoom = Math.max(this.map_min_zoom, this.map_max_zoom);
 		}
 
-		// Leaflet's EPSG3857 projection breaks marker positioning below zoom 3 due to
-		// world-copy wrapping. Enforce a safe floor for standard tile maps only —
-		// custom tile mode uses L.CRS.Simple which does not have this constraint.
-		if(!this.customTileMode) {
-			const safeMinZoom = 3;
-			if(!options.minZoom || options.minZoom < safeMinZoom) {
-				options.minZoom = safeMinZoom;
-			}
-			if(options.zoom < options.minZoom) {
-				options.zoom = options.minZoom;
-			}
-		}
+		/* The Leaflet safe minimum zoom floor is applied in LeafletMap, once the tile layers are built and it is known
+		 * whether this is a custom image map */
 
 		function isSettingDisabled(value) {
 			if(value === "yes")
@@ -23974,6 +24002,9 @@ jQuery(function($) {
 		this.createGoogleInfoWindow();
 		this.setFeature(feature);
 
+		/* Opened automatically on page load (the marker's "open by default" setting), not by the visitor */
+		var openedAutomatically = (feature._osDisableAutoPan === true);
+
 		/* Handle one shot auto pan disabler */
 		if(typeof feature._osDisableAutoPan !== 'undefined'){
 			if(feature._osDisableAutoPan){
@@ -23986,10 +24017,20 @@ jQuery(function($) {
 			}
 		}
 		
-		this.googleInfoWindow.open(
-			this.feature.map.googleMap,
-			this.googleObject
-		);
+		if(openedAutomatically){
+			/* Don't move keyboard focus into an info window the visitor didn't open: Google then draws a focus outline
+			 * round it on page load, and the page's focus jumps to the map */
+			this.googleInfoWindow.open({
+				map: this.feature.map.googleMap,
+				anchor: this.googleObject,
+				shouldFocus: false
+			});
+		} else {
+			this.googleInfoWindow.open(
+				this.feature.map.googleMap,
+				this.googleObject
+			);
+		}
 
 		var guid = WPGMZA.guid();
 		var eaBtn = !WPGMZA.isProVersion() ? this.addEditButton() : '';
@@ -25322,6 +25363,18 @@ jQuery(function($) {
 		};
 	}
 	
+	WPGMZA.GoogleModernStoreLocatorCircle.prototype.draw = function()
+	{
+		/* The canvas layer has no position until Google has drawn it once (getTopLeft() is null). A first store locator
+		 * search can ask for the circle before that, and projecting the null corner threw, which stopped the filtering
+		 * complete event before the marker listing updated. Skip until positioned: the layer's update handler calls
+		 * draw again as soon as it is. */
+		if(!this.canvasLayer || !this.canvasLayer.getTopLeft())
+			return;
+
+		WPGMZA.ModernStoreLocatorCircle.prototype.draw.apply(this, arguments);
+	}
+
 	WPGMZA.GoogleModernStoreLocatorCircle.prototype.getWorldOriginOffset = function()
 	{
 		var projection = this.map.googleMap.getProjection();
@@ -26815,6 +26868,18 @@ jQuery(function($) {
 		this.tileLayers = this.getTileLayers();
 
         mapOptions.layers = this.tileLayers;
+
+		/* Leaflet's EPSG3857 projection breaks marker positioning below zoom 3 due to world-copy wrapping, so standard
+		 * tile maps get a safe minimum zoom. Custom image maps use L.CRS.Simple, which has no such limit. This has to run
+		 * after getTileLayers, which is what sets customTileMode */
+		if(!this.customTileMode){
+			const safeMinZoom = 3;
+			if(!mapOptions.minZoom || mapOptions.minZoom < safeMinZoom)
+				mapOptions.minZoom = safeMinZoom;
+
+			if(mapOptions.zoom < mapOptions.minZoom)
+				mapOptions.zoom = mapOptions.minZoom;
+		}
 
 		if(this.customTileMode){
 			mapOptions.crs = L.extend({}, L.CRS.Simple, {
@@ -33631,6 +33696,11 @@ jQuery(function($) {
 			
 			var isRight;
 			event = event || window.event;
+
+			/* A simulated click (eg a panel info window's close button triggering a click that bubbles up here) has no
+			 * pointer position, so there is no point on the map to act on */
+			if(typeof event.offsetX === 'undefined' || typeof event.offsetY === 'undefined')
+				return;
 
 			var latLng = self.pixelsToLatLng(event.offsetX, event.offsetY);
 			

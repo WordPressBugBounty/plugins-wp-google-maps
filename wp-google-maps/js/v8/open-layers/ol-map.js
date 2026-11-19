@@ -304,6 +304,11 @@ jQuery(function($) {
 			var isRight;
 			event = event || window.event;
 
+			/* A simulated click (eg a panel info window's close button triggering a click that bubbles up here) has no
+			 * pointer position, so there is no point on the map to act on */
+			if(typeof event.offsetX === 'undefined' || typeof event.offsetY === 'undefined')
+				return;
+
 			var latLng = self.pixelsToLatLng(event.offsetX, event.offsetY);
 			
 			if("which" in event)

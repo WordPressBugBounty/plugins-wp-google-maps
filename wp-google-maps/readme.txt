@@ -5,7 +5,7 @@ Tags: google maps, maps, map, leaflet map, store locator
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 10.2.01
+Stable tag: 10.2.02
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -307,6 +307,9 @@ To display Leaflet and OpenLayers maps, the visitor's browser loads open source 
 
 == Upgrade Notice ==
 
+= 10.2.02 =
+Security update: please update to 10.2.02. Fixes a security issue in the REST API and a store locator listing issue.
+
 = 10.2.01 =
 Security update: please update to 10.2.01. Fixes several security issues and adds the optional Go Tiles key.
 
@@ -347,6 +350,18 @@ Please update to 10.0.08 or above for the latest stability improvements.
 Please update to 10.0.07 or above to ensure you are using the latest architecture, and latest features.
 
 == Changelog ==
+
+= 10.2.02 - 2026-11-19 =
+* Fixed issue where the Atlas Major marker list showed "&amp;" in marker titles that contain "&".
+* Fixed issue where address suggestions showed the address's formatting code (for example <span class="locality">) instead of plain text. This came from a 10.2.01 security change.
+* Fixed issue where a Google map info window set to open on page load showed a blue focus outline.
+* Fixed an issue where any visitor could make the site rebuild the plugin's script files and readme from a link. Rebuilding now needs an administrator and a security token. Security issue, thanks to Christopher Miller.
+* Fixed an issue where the developer mode cookie worked for any visitor, adding database queries to table responses and rebuilding scripts on map pages. It now only works for administrators. Security issue, thanks to Christopher Miller.
+* Fixed an issue where a REST request that declared a different method (method override) could reach plugin actions through a public route. Every WP Go Maps route now refuses such requests, which also protects sites on older Pro versions. Security issue, thanks to Christopher Miller.
+* Fixed issue where the first store locator search on a Google map did not update the marker listing, because the radius circle was drawn before the map was ready.
+* Fixed issue where the Google Maps error handler stopped with an error when it was given an error object instead of a message.
+* Fixed issue where custom image maps (Leaflet) opened at zoom level 3, with markers off screen, instead of at their saved start zoom.
+* Fixed issue where closing a panel info window on an OpenLayers map logged an error in the browser console.
 
 = 10.2.01 - 2026-11-18 =
 * Added an optional Go Tiles key setting. A key adds the Go Tiles allowance included with WP Go Maps Pro, or pay-as-you-go tiles, once a site has used its free tiles for the month (Atlas Novus, Atlas Major).
@@ -559,117 +574,5 @@ Please update to 10.0.07 or above to ensure you are using the latest architectur
 * Updated internal CTA buttons and controls from gold to blue (UX Improvement)
 * Removed a console log within the map initialization controller, it is not relevant with delayed loading
 * Removed the disable dynamic translation, instead we now allow this via an opt in instead
-
-= 10.0.02 - 2025-11-17 =
-* Added shapes and overlays sub-section to map editor, moving all relevant datasets into that panel (UX Improvement)
-* Added ability to click on a map from the map list to open the editor (UX Improvement)
-* Added primary button color to edit map button within map list (UX Improvement)
-* Added blue highlight to primary dataset creation buttons to make it clearer how to add datasets (UX Improvement)
-* Added button to marker quick tip notice to jump straight to marker creation (UX Improvement)
-* Added conditional checks for major version mismatches in compiler, preventing mismatched major versions from throwing build errors
-* Added a one time hint tool to our internal map editor tour system, which will show helpful usage hints after the main tour is completed.
-* Fixed issue where Google Maps logo would not display on some installations, within the engine selector
-* Fixed issue where plugins that load bootstrap in our editor might cause editor placement issues, plugin conflict
-* Fixed issue where map preview would not generate on some themes. We now generate a draft page, which is reused and pruned when new previews are created
-* Moved save map notice in map editor to top anchor
-* Moved add marker quick tip notice in map editor to bottom left anchor
-* Removed bounds reset system when adding a marker to a map, to allow multiple markers to be added to the same region without reset
-
-= 10.0.01 - 2025-11-10 =
-* Fixed issue with compatibility layer for older versions of Pro add-on (V8 and below)
-
-= 10.0.00 - 2025-11-10 =
-* Added Leaflet engine support
-* Added Azure engine, powered by Leaflet
-* Added Stadia engine, powered by Leaflet
-* Added Maptiler engine, powered by Leaflet
-* Added LocationIQ engine, powered by Leaflet
-* Added support for OpenLayers V10
-* Added ability to use legacy (V6) OpenLayers, should be considered deprecated. Will be removed in the future
-* Added ability to change address providers, for autocomplete and client side geocoding
-* Added additional address providers including Google Maps, Azure Maps, Nominatim, LocationIQ and engine default
-* Added ability to provide a supplementary address provider API key if needed
-* Added ability to switch tile servers, with another from the same provider, on a per map basis
-* Added additional tile server options, with providers and automated groupings
-* Added ability to set line thickness on both rectangles and circles
-* Added tile server previews for improved customization
-* Added support for dynamic content translations with WPML
-* Added Atlas Novus as the default internal build
-* Added danger zone tool to reindex any spatial coordinate data for markers, where a spatial coordinate has gone missing
-* Added ability to adjust rectangle boundaries with  boundary input
-* Added ability to bulk delete shapes
-* Added ability to center on shapes and datasets within the editor
-* Added dropdown context meny to shape datatables
-* Added option to cachebust REST API requests
-* Added improved GDPR styling, it becomes the new default
-* Added quick delete button to info-window within the map editor
-* Added ability to override any HTML template part via a child theme override
-* Added map preview system, allowing maps to be previewed on frontpage
-* Added default indexes to all tables to improve performance
-* Added spatial indexes to tables where applicable to improve performance
-* Added fullscreen map editor panel mode, for dataset listings, allowing more data to be viewed
-* Added extended maximum zoom level (22) which is supported by all map engines
-* Added mobile settings tab to editor
-* Added ability to set a different map width/height for mobile devices
-* Added new default engine/installer preset for zero cost mapping, for all new installations
-* Added ability to reduce marker editor geocoder usage. Skips geocoding if lat/lng coordinates are present, opt in available in settings
-* Added ability to select store locator button style (Icons (default), or Text) on a per map basis
-* Added accessibility support, with the goal of being WCAG Level AA compliant
-* - Aria labels and roles added where needed
-* - Improved focus cues and managing of indexing
-* - Keyboard navigation added (tab, enter, space, and escape for panels)
-* - Hierarchy restructuring where needed to better support navigation
-* - Tested with various tools:
-* - - Microsoft Accessibility Insights: Pass (FastPass)
-* - - Axe DevTools: Pass (WCAG Level AA)
-* - - Google Lighthouse: Pass (100% Accessible)
-* - - Wave Tools: Pass
-* - Manual testing completed for navigation with a keyboard
-* - We will continue to improve this over time
-* - Known Issues
-* - - Only supported on the frontend
-* - - Does not allow marker selection via the map container (Marker listings supported, and encouraged for accessibility focused installations)
-* - - Although a substantial rework has been implemented, this has not been verified by 3rd party compliance testers at this stage
-* - - - We know that accessibility is more nuanced than simple machine driven tests, we'd like to work with our community to ensure we improve this further
-* - - - Please reach out to us if you find anything that you feel should be improved as a priority!
-* Improved internal autocomplete modules for better user experience and management
-* Improved theme preset user interface
-* Improved theme CSS editor
-* Improved tile server system to handle params and authentication more efficiently
-* Improved tile server system to properly attribute various service providers
-* Improved settings user interface, adding sections and descriptors for better clarity
-* Improved Google Maps Advanced Marker render mode support
-* Improved Google Async support
-* Improved zoom sliders within editor
-* Improved map initialization state control
-* Improved map initialization error correction
-* Improved map initialization automatic delayed retry module
-* Improved info-window open calls to include data-props in container for styling
-* Improved styling system to allow native info-windows to inherit brand styling
-* Improved open layers native info-window, now includes border radius and shadows
-* Improved checkbox styling within the map viewport
-* Improved available WP filters within our AjaxTable class, allowing count values to be filtered
-* Improved internal shape architecture
-* Improved batch loader logic and modularized method
-* Improved welcome page to include new features
-* Improved all option management by disabling autoloading, reducing impact on server resources
-* Improved Legacy to Atlas Novus migration flow by introducing automatic map settings migration modules
-* Improved DomDocument param handlers where needed
-* Fixed issue where marker labels would not render & symbols correctly
-* Fixed issue where major version mismatch would cause UI error to be thrown in REST API requests
-* Fixed issue where shape datatables within the editor couldn't be searched fully
-* Fixed issue where touch events would not dispatch on OpenLayers shapes
-* Fixed issue with error suppression in DomDocument class, added LIBXML_NOERROR when
-* Fixed issue where some overlays would overlap info-windows in Open Layers (Example clusters)
-* Fixed issue with clustering translations in DE language files
-* Fixed issue where engine switch notice would show even if the user has already switched to Atlas Novus (manually)
-* Moved build selection Danger Zone
-* Moved optimization options out of beta
-* Moved map mobile zoom level control to mobile panel section
-* Removed Stamen Design tile servers, as they have moved to Stadia
-* Removed OpenPtMap tile server due to missing SSL
-* Removed duplicate map fetch methods, which were unused
-* Archived V9 changelogs
-
 
 For more, please view the WP Go Maps site.

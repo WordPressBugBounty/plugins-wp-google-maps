@@ -31,6 +31,18 @@ jQuery(function($) {
 
         mapOptions.layers = this.tileLayers;
 
+		/* Leaflet's EPSG3857 projection breaks marker positioning below zoom 3 due to world-copy wrapping, so standard
+		 * tile maps get a safe minimum zoom. Custom image maps use L.CRS.Simple, which has no such limit. This has to run
+		 * after getTileLayers, which is what sets customTileMode */
+		if(!this.customTileMode){
+			const safeMinZoom = 3;
+			if(!mapOptions.minZoom || mapOptions.minZoom < safeMinZoom)
+				mapOptions.minZoom = safeMinZoom;
+
+			if(mapOptions.zoom < mapOptions.minZoom)
+				mapOptions.zoom = mapOptions.minZoom;
+		}
+
 		if(this.customTileMode){
 			mapOptions.crs = L.extend({}, L.CRS.Simple, {
 				scale: (zoom) => {

@@ -118,6 +118,18 @@ jQuery(function($) {
 		};
 	}
 	
+	WPGMZA.GoogleModernStoreLocatorCircle.prototype.draw = function()
+	{
+		/* The canvas layer has no position until Google has drawn it once (getTopLeft() is null). A first store locator
+		 * search can ask for the circle before that, and projecting the null corner threw, which stopped the filtering
+		 * complete event before the marker listing updated. Skip until positioned: the layer's update handler calls
+		 * draw again as soon as it is. */
+		if(!this.canvasLayer || !this.canvasLayer.getTopLeft())
+			return;
+
+		WPGMZA.ModernStoreLocatorCircle.prototype.draw.apply(this, arguments);
+	}
+
 	WPGMZA.GoogleModernStoreLocatorCircle.prototype.getWorldOriginOffset = function()
 	{
 		var projection = this.map.googleMap.getProjection();

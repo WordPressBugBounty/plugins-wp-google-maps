@@ -1780,8 +1780,10 @@ if(!function_exists('wpgmza_enqueue_fontawesome'))
 }
 
 add_action('plugins_loaded', function() {
-	
-	if(!empty($_GET['wpgmza-build']))
+
+	/* Rebuilding rewrites the plugin's script files and readme, so it needs an administrator and a nonce.
+	 * Anyone could trigger it before, and simultaneous rebuilds could leave a half-written script file */
+	if(!empty($_GET['wpgmza-build']) && function_exists('current_user_can') && current_user_can('manage_options') && !empty($_GET['_wpnonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'wpgmza-build'))
 	{
 		$scriptLoader = new WPGMZA\ScriptLoader(false);
 		$scriptLoader->build();

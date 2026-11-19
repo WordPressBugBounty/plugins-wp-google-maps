@@ -3,7 +3,7 @@
 Plugin Name: WP Go Maps (formerly WP Google Maps)
 Plugin URI: https://www.wpgmaps.com
 Description: The easiest to use Google Maps plugin! Create custom Google Maps or a map block with high quality markers containing locations, descriptions, images and links. Add your customized map to your WordPress posts and/or pages quickly and easily with the supplied shortcode. No fuss.
-Version: 10.2.01
+Version: 10.2.02
 Author: WP Go Maps (formerly WP Google Maps)
 Author URI: https://www.wpgmaps.com
 Text Domain: wp-google-maps
@@ -14,6 +14,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 
 /*
+ * 10.2.02 - 2026-11-19
+ * Fixed issue where the Atlas Major marker list showed "&amp;" in marker titles that contain "&".
+ * Fixed issue where address suggestions showed the address's formatting code (for example <span class="locality">) instead of plain text. This came from a 10.2.01 security change.
+ * Fixed issue where a Google map info window set to open on page load showed a blue focus outline.
+ * Fixed an issue where any visitor could make the site rebuild the plugin's script files and readme from a link. Rebuilding now needs an administrator and a security token. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where the developer mode cookie worked for any visitor, adding database queries to table responses and rebuilding scripts on map pages. It now only works for administrators. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where a REST request that declared a different method (method override) could reach plugin actions through a public route. Every WP Go Maps route now refuses such requests, which also protects sites on older Pro versions. Security issue, thanks to Christopher Miller.
+ * Fixed issue where the first store locator search on a Google map did not update the marker listing, because the radius circle was drawn before the map was ready.
+ * Fixed issue where the Google Maps error handler stopped with an error when it was given an error object instead of a message.
+ * Fixed issue where custom image maps (Leaflet) opened at zoom level 3, with markers off screen, instead of at their saved start zoom.
+ * Fixed issue where closing a panel info window on an OpenLayers map logged an error in the browser console.
+ *
  * 10.2.01 - 2026-11-18
  * Added an optional Go Tiles key setting. A key adds the Go Tiles allowance included with WP Go Maps Pro, or pay-as-you-go tiles, once a site has used its free tiles for the month (Atlas Novus, Atlas Major).
  * Added a pricing table below each map engine's settings, showing the same details for every engine: free monthly usage, whether an API key is needed, commercial use, paid plans, cost per 1,000 map views and suitability for busy sites, with a link to the provider's pricing page. Other engines also show a Switch to Go Tiles option (Atlas Novus, Atlas Major).

@@ -80,6 +80,9 @@ jQuery(function($) {
 		this.createGoogleInfoWindow();
 		this.setFeature(feature);
 
+		/* Opened automatically on page load (the marker's "open by default" setting), not by the visitor */
+		var openedAutomatically = (feature._osDisableAutoPan === true);
+
 		/* Handle one shot auto pan disabler */
 		if(typeof feature._osDisableAutoPan !== 'undefined'){
 			if(feature._osDisableAutoPan){
@@ -92,10 +95,20 @@ jQuery(function($) {
 			}
 		}
 		
-		this.googleInfoWindow.open(
-			this.feature.map.googleMap,
-			this.googleObject
-		);
+		if(openedAutomatically){
+			/* Don't move keyboard focus into an info window the visitor didn't open: Google then draws a focus outline
+			 * round it on page load, and the page's focus jumps to the map */
+			this.googleInfoWindow.open({
+				map: this.feature.map.googleMap,
+				anchor: this.googleObject,
+				shouldFocus: false
+			});
+		} else {
+			this.googleInfoWindow.open(
+				this.feature.map.googleMap,
+				this.googleObject
+			);
+		}
 
 		var guid = WPGMZA.guid();
 		var eaBtn = !WPGMZA.isProVersion() ? this.addEditButton() : '';

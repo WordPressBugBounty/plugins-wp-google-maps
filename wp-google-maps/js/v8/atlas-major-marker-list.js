@@ -1117,8 +1117,18 @@ jQuery(function($) {
 		/* Self-contained on purpose: this file is loaded on its own next to whichever Pro bundle is installed, and
 		 * older Pro bundles carry an older core without WPGMZA.escapeHTML. Also used inside attribute values,
 		 * so quotes are escaped too. */
+		str = (str === undefined || str === null) ? '' : String(str);
+
+		/* Stored titles can already hold HTML entities (older saves stored "&" as "&amp;"), so decode to plain text
+		 * first, otherwise the list shows "&amp;". Parsed in an inert document, so nothing in the value runs. */
+		if(str.indexOf('&') !== -1 || str.indexOf('<') !== -1){
+			try{
+				str = new DOMParser().parseFromString(str, 'text/html').body.textContent || '';
+			} catch (e) {}
+		}
+
 		var d = document.createElement('div');
-		d.textContent = (str === undefined || str === null) ? '' : str;
+		d.textContent = str;
 		return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 	}
 

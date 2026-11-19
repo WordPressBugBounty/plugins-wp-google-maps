@@ -710,7 +710,12 @@ class Plugin extends Factory
 	 */
 	public function isInDeveloperMode()
 	{
-		return !(empty($this->settings->wpgmza_developer_mode) && !isset($_COOKIE['wpgmza-developer-mode']));
+		if(!empty($this->settings->wpgmza_developer_mode))
+			return true;
+
+		/* The developer mode cookie only counts for administrators. For anyone else it added SQL statements to table
+		 * responses and made every map page rebuild the plugin's scripts */
+		return isset($_COOKIE['wpgmza-developer-mode']) && function_exists('current_user_can') && current_user_can('manage_options');
 	}
 	
 	public static function preloadIsInDeveloperMode()

@@ -221,18 +221,8 @@ jQuery(function($) {
 			options.maxZoom = Math.max(this.map_min_zoom, this.map_max_zoom);
 		}
 
-		// Leaflet's EPSG3857 projection breaks marker positioning below zoom 3 due to
-		// world-copy wrapping. Enforce a safe floor for standard tile maps only —
-		// custom tile mode uses L.CRS.Simple which does not have this constraint.
-		if(!this.customTileMode) {
-			const safeMinZoom = 3;
-			if(!options.minZoom || options.minZoom < safeMinZoom) {
-				options.minZoom = safeMinZoom;
-			}
-			if(options.zoom < options.minZoom) {
-				options.zoom = options.minZoom;
-			}
-		}
+		/* The Leaflet safe minimum zoom floor is applied in LeafletMap, once the tile layers are built and it is known
+		 * whether this is a custom image map */
 
 		function isSettingDisabled(value) {
 			if(value === "yes")
