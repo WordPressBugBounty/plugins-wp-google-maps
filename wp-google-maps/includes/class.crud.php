@@ -47,8 +47,10 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 			{
 				if($key == "id")
 					continue;
-				
-				$this->fields[$key] = $value;
+
+				/* Creating from an array stores the values, so sanitise them by field type as set() and __set() do. Bulk
+				 * reads are rows already in the database and are left as they are */
+				$this->fields[$key] = ($read_mode == Crud::BULK_READ) ? $value : static::sanitizeFieldValue($key, $value);
 			}
 			
 			$obj = (object)$id_or_fields;
@@ -711,7 +713,7 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 	/**
 	 * Sanitises a value by field type before it is stored or served: 'link' is a URL
 	 * (esc_url_raw, which also strips dangerous schemes such as javascript:), 'title'
-	 * is plain text (sanitize_text_field), and every other string field keeps the
+	 * and 'map_title' are plain text (sanitize_text_field), and every other string field keeps the
 	 * post-level KSES filter. Non-string values pass through unchanged.
 	 *
 	 * Also used for values that reach the front end without passing through a save,
@@ -729,8 +731,18 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		if($name === 'link')
 			return esc_url_raw($value);
 
+		/* A marker's picture is an address, or several separated by commas. The post-level filter below turned "&" into
+		 * "&amp;", which broke picture addresses that carry more than one parameter */
+		if($name === 'pic')
+			return implode(',', array_filter(array_map('esc_url_raw', array_map('trim', explode(',', $value))), 'strlen'));
+
 		if($name === 'title')
 			return sanitize_text_field($value);
+
+		/* A map's title is plain text too. The post-level filter below stored "&" as "&amp;", which the map editor then
+		 * showed literally in the map name fields. Decoding first also repairs a title that was saved that way */
+		if($name === 'map_title')
+			return sanitize_text_field(wp_specialchars_decode($value, ENT_QUOTES));
 
 		return wp_kses_post($value);
 	}

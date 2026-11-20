@@ -66,7 +66,7 @@ class InstallerPage extends Page {
 			 * This is based on a class constant, which will hold the current installer procedure, and we assume these can only run on `auto-skip` 
 			 * which means they came from the welcome/credits page, which is usually right after an installation
 			*/
-			if(empty(get_option('wpgmza-installer-initial-procedure'))){
+			if(empty(get_option('wpgmza-installer-initial-procedure')) && !InstallerPage::isExistingSite()){
 				/* New installs default to Go Tiles, or to the previous default (Zero Cost) when an older Pro can't run Go Tiles */
 				$wrapper->setAttribute('data-auto-onboarding-procedure', $wpgmza->isGoTilesAvailable() ? 'engine_gt_2026_11' : 'enging_zc_2025_11');
 			}
@@ -74,6 +74,34 @@ class InstallerPage extends Page {
 
 	    /* Developer Hook (Action) - Alter output of the installer page, passes DOMDocument for mutation */     
 		do_action("wpgmza_installer_page_created", $this->document);
+	}
+
+	/**
+	 * Whether this site was already set up before reaching the installer, so the auto onboarding procedures
+	 * (which switch the map engine) must not run. Sites installed before 2024-05 never stored an initial
+	 * procedure, so that option alone can't tell a new install from an existing one: opening the installer
+	 * from the welcome page (shown again after reactivating the plugin) used to switch them to the default engine.
+	 *
+	 * A new install has exactly one map and one marker (Database::onFirstRun) and no Google key.
+	 *
+	 * @return bool
+	 */
+	public static function isExistingSite(){
+		global $wpdb, $WPGMZA_TABLE_NAME_MAPS, $WPGMZA_TABLE_NAME_MARKERS;
+
+		if(!empty(get_option('wpgmza_google_maps_api_key'))){
+			return true;
+		}
+
+		if(!empty($WPGMZA_TABLE_NAME_MAPS) && intval($wpdb->get_var("SELECT COUNT(*) FROM `$WPGMZA_TABLE_NAME_MAPS`")) > 1){
+			return true;
+		}
+
+		if(!empty($WPGMZA_TABLE_NAME_MARKERS) && intval($wpdb->get_var("SELECT COUNT(*) FROM `$WPGMZA_TABLE_NAME_MARKERS`")) > 1){
+			return true;
+		}
+
+		return false;
 	}
 
 	public static function post(){
@@ -113,8 +141,8 @@ class InstallerPage extends Page {
 			delete_option('wpgmza-installer-retrigger-event');
 
 		} else if($action === 'wpgmza_installer_page_auto_onboarding_procedure'){
-			/* Apply an auto onboarding procedure */
-			$procedure = !empty($_POST['procedure']) ? $_POST['procedure'] : false;
+			/* Apply an auto onboarding procedure - these set the map engine, so they are for new installs only, never an existing site */
+			$procedure = !empty($_POST['procedure']) && !InstallerPage::isExistingSite() ? $_POST['procedure'] : false;
 			switch($procedure){
 				case 'engine_ol_2024_05':
 					/* Procedure: OpenLayers default engine

@@ -573,6 +573,9 @@ class Plugin extends Factory
 			'is_admin'				=> (is_admin() ? 1 : 0),
 			'locale'				=> get_locale(),
 				'wpml_language'			=> defined('ICL_LANGUAGE_CODE') ? ICL_LANGUAGE_CODE : null,
+				/* WPML's default language. REST calls leave "lang" off for it: WPML redirects ?lang=<default> to the bare URL,
+				 * and the browser repeats a redirected POST as a GET, so saves were silently lost */
+				'wpml_default_language'	=> defined('ICL_LANGUAGE_CODE') ? apply_filters('wpml_default_language', null) : null,
 			
 			'isServerIIS'			=> (isset($_SERVER["SERVER_SOFTWARE"]) && preg_match('/microsoft-iis/i', $_SERVER["SERVER_SOFTWARE"])),
 			'labelpointIcon'		=> plugin_dir_url(WPGMZA_FILE) . 'images/label-point.png',

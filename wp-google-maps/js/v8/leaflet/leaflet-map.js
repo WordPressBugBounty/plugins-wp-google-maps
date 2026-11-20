@@ -560,6 +560,17 @@ jQuery(function($) {
 		this.element.appendChild(notice);
 	}
 
+	/**
+	 * Called when the map's element changes size (eg. an editor sidebar panel widens). Leaflet keeps the size it measured,
+	 * so without this, markers and tiles were drawn against the old width until the page was reloaded. Same role as the
+	 * Google (resize event) and OpenLayers (updateSize) versions; invalidateSize does nothing when the size is unchanged.
+	 */
+	WPGMZA.LeafletMap.prototype.onElementResized = function(event){
+		if(this.leafletMap && typeof this.leafletMap.invalidateSize === 'function'){
+			this.leafletMap.invalidateSize();
+		}
+	}
+
 	WPGMZA.LeafletMap.prototype.wrapLongitude = function(){
 		let center = this.leafletMap.getCenter();
 		if(center.lng >= -180 && center.lng <= 180){

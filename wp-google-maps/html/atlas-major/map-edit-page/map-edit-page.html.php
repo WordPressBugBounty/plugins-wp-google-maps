@@ -4915,7 +4915,7 @@ global $wpgmza;
 						 * user's setting is 'text'. The reverse (text → SVG)
 						 * isn't possible client-side without a template copy,
 						 * so we keep the icons as the single source of truth. */
-						$lp_map_id = !empty($_REQUEST['map_id']) ? intval($_REQUEST['map_id']) : 1;
+						$lp_map_id = !empty($_REQUEST['map_id']) && is_scalar($_REQUEST['map_id']) && intval($_REQUEST['map_id']) > 0 ? intval($_REQUEST['map_id']) : 1; /* never -1, which would create a map */
 						$lp_map = \WPGMZA\Map::createInstance($lp_map_id);
 						$lp_map->store_locator_button_style = '';
 						$lp_store_locator = \WPGMZA\StoreLocator::createInstance($lp_map);

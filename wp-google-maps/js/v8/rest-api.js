@@ -256,7 +256,27 @@ jQuery(function($) {
 			params = {};
 		
 		this.addNonce(route, params, WPGMZA.RestAPI.CONTEXT_REST);
-		
+
+		/* Some hosts and firewalls block the DELETE request type. The default error handler below retries those as a
+		 * POST (simulateDelete), but a caller with its own error handler (eg. the Atlas Major marker list) skipped that
+		 * retry, so the delete failed silently and the item stayed in the list. Retry here first for those callers too */
+		if(params.error && params.method === "DELETE"){
+			var callerErrorHandler = params.error;
+
+			params.error = function(xhr, status, message) {
+				if(status != "abort" && xhr && (xhr.status == 401 || xhr.status == 403 || xhr.status == 405)){
+					console.warn("The REST API rejected a DELETE request, attempting again with POST fallback");
+
+					var retryParams = $.extend({}, fallbackParams, {method: "POST"});
+					retryParams.data = $.extend({}, fallbackParams.data, {simulateDelete: 'yes'});
+
+					return WPGMZA.restAPI.call(fallbackRoute, retryParams);
+				}
+
+				return callerErrorHandler.apply(this, arguments);
+			};
+		}
+
 		if(!params.error)
 			params.error = function(xhr, status, message) {
 				if(status == "abort")
@@ -372,14 +392,22 @@ jQuery(function($) {
 		if(WPGMZA.RestAPI.URL.match(/\?/))
 			route = route.replace(/\?/, "&");
 		
+		/* The separator depends on the whole URL: with plain permalinks the base URL already has "?rest_route=", so a
+		 * second "?" became part of the route and the request failed (404) */
+		var querySeparator = function(){
+			return (WPGMZA.RestAPI.URL + route).indexOf('?') !== -1 ? "&" : "?";
+		};
+
 		if(this.enableAntiCache){
 			if(route.indexOf('cachebust') === -1){
-				route += (route.indexOf('?') !== -1 ? "&" : "?") + "cachebust=" + (Date.now());
+				route += querySeparator() + "cachebust=" + (Date.now());
 			}
 		}
 
-		if(WPGMZA.wpml_language && route.indexOf('lang=') === -1){
-			route += (route.indexOf('?') !== -1 ? "&" : "?") + "lang=" + encodeURIComponent(WPGMZA.wpml_language);
+		/* Not for WPML's default language: WPML redirects ?lang=<default> to the URL without it, and the browser repeats a
+		 * redirected POST/DELETE as a GET, so the change was silently lost. Without "lang" WPML uses the default anyway */
+		if(WPGMZA.wpml_language && WPGMZA.wpml_language !== WPGMZA.wpml_default_language && route.indexOf('lang=') === -1){
+			route += querySeparator() + "lang=" + encodeURIComponent(WPGMZA.wpml_language);
 		}
 
 		return $.ajax(WPGMZA.RestAPI.URL + route, params);

@@ -205,7 +205,7 @@
 		<!-- Go Tiles key (optional): free without a key; a key adds a Pro allowance or pay-as-you-go tiles -->
 		<div class="tab-row has-hint" data-required-maps-engine="leaflet-gotiles">
 			<div class="title"><?php _e('Go Tiles Key (optional)', 'wp-google-maps'); ?></div>
-			<input name="gotiles_key" id="gotiles_key" type="text" style="width: 40%;" autocomplete="off" spellcheck="false" pattern="gt_[A-Za-z0-9_\-]{20,64}" />
+			<input name="gotiles_key" id="gotiles_key" type="text" style="width: 40%;" autocomplete="off" spellcheck="false" />
 		</div>
 
 		<!-- Go Tiles key hint -->

@@ -27,6 +27,7 @@ jQuery(function($) {
 
 		$(this.element).on('click', '.grouping .grouping-toggle-fullscreen', function(event){
 			$('.sidebar').toggleClass('as-fullscreen');
+			self.onSidebarResized();
 		});
 
 		$('.quick-actions .actions').on('click', '.icon', function(event){
@@ -111,11 +112,19 @@ jQuery(function($) {
 		this.openTabByGroupId(groupId);
 
 		if(WPGMZA.mapEditPage && WPGMZA.mapEditPage.map){
-			/* Trigger resize events as panels may extend/retract from screen space */
-			WPGMZA.mapEditPage.map.onElementResized();
-
 			/* Temporary placement: Hide any tips, because we can assume user interaction has taken place */
 			$('.wpgmza-quick-tip-container').hide();
+		}
+	}
+
+	/**
+	 * Tells the editor map that the sidebar may have changed width (panels extend/retract from screen space), so the map
+	 * re-measures its element. Called from every path that changes the sidebar's width, not only tab clicks: opening the
+	 * marker editor from a marker's info window "Edit" link widens the sidebar too
+	 */
+	WPGMZA.SidebarGroupings.prototype.onSidebarResized = function(){
+		if(WPGMZA.mapEditPage && WPGMZA.mapEditPage.map){
+			WPGMZA.mapEditPage.map.onElementResized();
 		}
 	}
 
@@ -162,6 +171,8 @@ jQuery(function($) {
 			$(element).trigger('grouping-opened', [groupId]);
 
 			this.updateActionBar(element);
+
+			this.onSidebarResized();
 		}
 	}
 

@@ -53,8 +53,38 @@ class Upgrader
 			if(version_compare($fromVersion, '9.0.34', '<')){
 				add_action('init', array($this, 'mitigateExploitVulnerability9034'), 11, 11);
 			}
+
+			if(version_compare($fromVersion, '10.2.03', '<')){
+				/* Runs immediately: it only needs the database, and a request that exits during 'init' (an early
+				 * redirect, for example) would otherwise skip it for good, as the version is recorded straight away */
+				$this->decodeMapTitleEntities();
+			}
 		}
 
+	}
+
+	/**
+	 * Map titles are plain text, but 10.2.01 and 10.2.02 stored "&" as "&amp;" (and similar), which the map editor
+	 * showed literally. Titles are saved as plain text from 10.2.03 (Crud::sanitizeFieldValue), this corrects the
+	 * titles saved before that.
+	 */
+	public function decodeMapTitleEntities(){
+		global $wpdb;
+		global $WPGMZA_TABLE_NAME_MAPS;
+
+		if(empty($WPGMZA_TABLE_NAME_MAPS))
+			return;
+
+		$rows = $wpdb->get_results("SELECT id, map_title FROM `$WPGMZA_TABLE_NAME_MAPS` WHERE map_title LIKE '%&%;%'");
+		if(empty($rows))
+			return;
+
+		foreach($rows as $row){
+			$title = Crud::sanitizeFieldValue('map_title', $row->map_title);
+
+			if($title !== $row->map_title)
+				$wpdb->update($WPGMZA_TABLE_NAME_MAPS, array('map_title' => $title), array('id' => $row->id));
+		}
 	}
 
 	public function assertVersionTag($version){

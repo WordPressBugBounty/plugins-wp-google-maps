@@ -69,6 +69,56 @@ jQuery(function($) {
 	 * @memberof WPGMZA.MapSettings
 	 * @return {object} The map settings, in a format understood by OpenLayers
 	 */
+	/**
+	 * Leaflet and OpenLayers insert attribution text into the page as HTML, and a stored map setting may not have been
+	 * through the editor's save filter. Keeps the text (escaped) and plain http(s) links only, so "© <a href>...</a>"
+	 * attributions still work but no other markup or script can be inserted.
+	 * @static
+	 * @param {string} html
+	 * @return {string}
+	 */
+	WPGMZA.MapSettings.sanitizeAttribution = function(html)
+	{
+		var result = "";
+		var root;
+
+		try{
+			/* DOMParser builds an inert document: nothing in it runs or loads */
+			root = new DOMParser().parseFromString("<div>" + String(html) + "</div>", "text/html").body.firstChild;
+		} catch(e) {
+			return WPGMZA.escapeHTML(html);
+		}
+
+		var walk = function(node){
+			for(var i = 0; i < node.childNodes.length; i++){
+				var child = node.childNodes[i];
+
+				if(child.nodeType === 3){
+					result += WPGMZA.escapeHTML(child.textContent);
+				} else if(child.nodeType === 1){
+					if(/^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT|IFRAME|OBJECT)$/.test(child.nodeName))
+						continue;
+
+					var href = child.nodeName === "A" ? (child.getAttribute("href") || "").trim() : "";
+
+					if(/^https?:\/\//i.test(href)){
+						result += '<a href="' + WPGMZA.escapeHTML(href) + '" target="_blank" rel="noopener noreferrer">';
+						walk(child);
+						result += "</a>";
+					} else {
+						/* Any other element: keep its text, drop the element */
+						walk(child);
+					}
+				}
+			}
+		};
+
+		if(root)
+			walk(root);
+
+		return result;
+	}
+
 	WPGMZA.MapSettings.prototype.toOLViewOptions = function()
 	{
 		var self = this;
@@ -660,7 +710,7 @@ jQuery(function($) {
 					config.url = this.custom_tile_image;
 
 					if(this.custom_tile_image_attribution){
-						config.custom.attribution = this.custom_tile_image_attribution;
+						config.custom.attribution = WPGMZA.MapSettings.sanitizeAttribution(this.custom_tile_image_attribution);
 					}
 				}
 			}

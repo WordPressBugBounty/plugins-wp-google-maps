@@ -12572,6 +12572,56 @@ jQuery(function($) {
 	 * @memberof WPGMZA.MapSettings
 	 * @return {object} The map settings, in a format understood by OpenLayers
 	 */
+	/**
+	 * Leaflet and OpenLayers insert attribution text into the page as HTML, and a stored map setting may not have been
+	 * through the editor's save filter. Keeps the text (escaped) and plain http(s) links only, so "© <a href>...</a>"
+	 * attributions still work but no other markup or script can be inserted.
+	 * @static
+	 * @param {string} html
+	 * @return {string}
+	 */
+	WPGMZA.MapSettings.sanitizeAttribution = function(html)
+	{
+		var result = "";
+		var root;
+
+		try{
+			/* DOMParser builds an inert document: nothing in it runs or loads */
+			root = new DOMParser().parseFromString("<div>" + String(html) + "</div>", "text/html").body.firstChild;
+		} catch(e) {
+			return WPGMZA.escapeHTML(html);
+		}
+
+		var walk = function(node){
+			for(var i = 0; i < node.childNodes.length; i++){
+				var child = node.childNodes[i];
+
+				if(child.nodeType === 3){
+					result += WPGMZA.escapeHTML(child.textContent);
+				} else if(child.nodeType === 1){
+					if(/^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT|IFRAME|OBJECT)$/.test(child.nodeName))
+						continue;
+
+					var href = child.nodeName === "A" ? (child.getAttribute("href") || "").trim() : "";
+
+					if(/^https?:\/\//i.test(href)){
+						result += '<a href="' + WPGMZA.escapeHTML(href) + '" target="_blank" rel="noopener noreferrer">';
+						walk(child);
+						result += "</a>";
+					} else {
+						/* Any other element: keep its text, drop the element */
+						walk(child);
+					}
+				}
+			}
+		};
+
+		if(root)
+			walk(root);
+
+		return result;
+	}
+
 	WPGMZA.MapSettings.prototype.toOLViewOptions = function()
 	{
 		var self = this;
@@ -13163,7 +13213,7 @@ jQuery(function($) {
 					config.url = this.custom_tile_image;
 
 					if(this.custom_tile_image_attribution){
-						config.custom.attribution = this.custom_tile_image_attribution;
+						config.custom.attribution = WPGMZA.MapSettings.sanitizeAttribution(this.custom_tile_image_attribution);
 					}
 				}
 			}
@@ -17542,7 +17592,27 @@ jQuery(function($) {
 			params = {};
 		
 		this.addNonce(route, params, WPGMZA.RestAPI.CONTEXT_REST);
-		
+
+		/* Some hosts and firewalls block the DELETE request type. The default error handler below retries those as a
+		 * POST (simulateDelete), but a caller with its own error handler (eg. the Atlas Major marker list) skipped that
+		 * retry, so the delete failed silently and the item stayed in the list. Retry here first for those callers too */
+		if(params.error && params.method === "DELETE"){
+			var callerErrorHandler = params.error;
+
+			params.error = function(xhr, status, message) {
+				if(status != "abort" && xhr && (xhr.status == 401 || xhr.status == 403 || xhr.status == 405)){
+					console.warn("The REST API rejected a DELETE request, attempting again with POST fallback");
+
+					var retryParams = $.extend({}, fallbackParams, {method: "POST"});
+					retryParams.data = $.extend({}, fallbackParams.data, {simulateDelete: 'yes'});
+
+					return WPGMZA.restAPI.call(fallbackRoute, retryParams);
+				}
+
+				return callerErrorHandler.apply(this, arguments);
+			};
+		}
+
 		if(!params.error)
 			params.error = function(xhr, status, message) {
 				if(status == "abort")
@@ -17658,14 +17728,22 @@ jQuery(function($) {
 		if(WPGMZA.RestAPI.URL.match(/\?/))
 			route = route.replace(/\?/, "&");
 		
+		/* The separator depends on the whole URL: with plain permalinks the base URL already has "?rest_route=", so a
+		 * second "?" became part of the route and the request failed (404) */
+		var querySeparator = function(){
+			return (WPGMZA.RestAPI.URL + route).indexOf('?') !== -1 ? "&" : "?";
+		};
+
 		if(this.enableAntiCache){
 			if(route.indexOf('cachebust') === -1){
-				route += (route.indexOf('?') !== -1 ? "&" : "?") + "cachebust=" + (Date.now());
+				route += querySeparator() + "cachebust=" + (Date.now());
 			}
 		}
 
-		if(WPGMZA.wpml_language && route.indexOf('lang=') === -1){
-			route += (route.indexOf('?') !== -1 ? "&" : "?") + "lang=" + encodeURIComponent(WPGMZA.wpml_language);
+		/* Not for WPML's default language: WPML redirects ?lang=<default> to the URL without it, and the browser repeats a
+		 * redirected POST/DELETE as a GET, so the change was silently lost. Without "lang" WPML uses the default anyway */
+		if(WPGMZA.wpml_language && WPGMZA.wpml_language !== WPGMZA.wpml_default_language && route.indexOf('lang=') === -1){
+			route += querySeparator() + "lang=" + encodeURIComponent(WPGMZA.wpml_language);
 		}
 
 		return $.ajax(WPGMZA.RestAPI.URL + route, params);
@@ -18650,6 +18728,7 @@ jQuery(function($) {
 
 		$(this.element).on('click', '.grouping .grouping-toggle-fullscreen', function(event){
 			$('.sidebar').toggleClass('as-fullscreen');
+			self.onSidebarResized();
 		});
 
 		$('.quick-actions .actions').on('click', '.icon', function(event){
@@ -18734,11 +18813,19 @@ jQuery(function($) {
 		this.openTabByGroupId(groupId);
 
 		if(WPGMZA.mapEditPage && WPGMZA.mapEditPage.map){
-			/* Trigger resize events as panels may extend/retract from screen space */
-			WPGMZA.mapEditPage.map.onElementResized();
-
 			/* Temporary placement: Hide any tips, because we can assume user interaction has taken place */
 			$('.wpgmza-quick-tip-container').hide();
+		}
+	}
+
+	/**
+	 * Tells the editor map that the sidebar may have changed width (panels extend/retract from screen space), so the map
+	 * re-measures its element. Called from every path that changes the sidebar's width, not only tab clicks: opening the
+	 * marker editor from a marker's info window "Edit" link widens the sidebar too
+	 */
+	WPGMZA.SidebarGroupings.prototype.onSidebarResized = function(){
+		if(WPGMZA.mapEditPage && WPGMZA.mapEditPage.map){
+			WPGMZA.mapEditPage.map.onElementResized();
 		}
 	}
 
@@ -18785,6 +18872,8 @@ jQuery(function($) {
 			$(element).trigger('grouping-opened', [groupId]);
 
 			this.updateActionBar(element);
+
+			this.onSidebarResized();
 		}
 	}
 
@@ -27396,6 +27485,17 @@ jQuery(function($) {
 		notice.appendChild(close);
 
 		this.element.appendChild(notice);
+	}
+
+	/**
+	 * Called when the map's element changes size (eg. an editor sidebar panel widens). Leaflet keeps the size it measured,
+	 * so without this, markers and tiles were drawn against the old width until the page was reloaded. Same role as the
+	 * Google (resize event) and OpenLayers (updateSize) versions; invalidateSize does nothing when the size is unchanged.
+	 */
+	WPGMZA.LeafletMap.prototype.onElementResized = function(event){
+		if(this.leafletMap && typeof this.leafletMap.invalidateSize === 'function'){
+			this.leafletMap.invalidateSize();
+		}
 	}
 
 	WPGMZA.LeafletMap.prototype.wrapLongitude = function(){

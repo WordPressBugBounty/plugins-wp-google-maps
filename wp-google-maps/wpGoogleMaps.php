@@ -3,7 +3,7 @@
 Plugin Name: WP Go Maps (formerly WP Google Maps)
 Plugin URI: https://www.wpgmaps.com
 Description: The easiest to use Google Maps plugin! Create custom Google Maps or a map block with high quality markers containing locations, descriptions, images and links. Add your customized map to your WordPress posts and/or pages quickly and easily with the supplied shortcode. No fuss.
-Version: 10.2.02
+Version: 10.2.03
 Author: WP Go Maps (formerly WP Google Maps)
 Author URI: https://www.wpgmaps.com
 Text Domain: wp-google-maps
@@ -14,6 +14,18 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 
 /*
+ * 10.2.03 - 2026-11-20
+ * Fixed an issue where a map could be created with settings that had not been cleaned, by sending a map ID in an unexpected form. Map settings are now cleaned whenever a map is created, the marker listing route only accepts a valid map ID, and custom image attributions only allow plain text and links. Security issue, thanks to Christopher Miller.
+ * Fixed an issue where the map editor could create a new map when its page address carried an invalid map ID. Security issue, thanks to Christopher Miller.
+ * Fixed issue where a map name containing "&" showed as "&amp;" in the map editor. Map names are stored as plain text again, and names saved by 10.2.01 or 10.2.02 are corrected on update.
+ * Fixed issue where the public table route raised PHP warnings when called without a table class.
+ * Fixed issue where marker changes (for example a new icon) were not saved on WPML sites when the admin language was WPML's default language. WPML redirected the save request and the change was silently lost.
+ * Fixed issue where sites using plain permalinks (no pretty URLs) could not save or load map data when a language (WPML) or cache busting value was added to the request, because the request address got a second "?" and failed.
+ * Fixed issue where the Settings page could not be saved when the browser filled a saved login into the Go Tiles key field ("Please match the requested format"). The field no longer blocks saving, and an invalid key is still ignored.
+ * Fixed issue where opening the setup wizard from the welcome page (shown again after reactivating the plugin) could switch an existing site's map engine to Go Tiles, even when a Google Maps API key was saved. The automatic engine setup now only runs on new installs.
+ * Fixed issue where markers were drawn in the wrong place on Leaflet based maps (including Go Tiles) after the map changed size, for example when the Atlas Novus map editor's sidebar widened to show the marker editor, or when a map in a hidden tab became visible. Saved positions were not affected.
+ * Fixed issue where deleting a marker from the Atlas Major marker list did nothing on hosts that block DELETE requests. The delete is now retried in the way those hosts allow, as the other editor panels already did. Deleting a marker that no longer exists also returns a clean "not found" instead of a server error.
+ *
  * 10.2.02 - 2026-11-19
  * Fixed issue where the Atlas Major marker list showed "&amp;" in marker titles that contain "&".
  * Fixed issue where address suggestions showed the address's formatting code (for example <span class="locality">) instead of plain text. This came from a 10.2.01 security change.

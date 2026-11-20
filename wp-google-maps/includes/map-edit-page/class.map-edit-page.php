@@ -10,8 +10,9 @@ class MapEditPage extends Page
 	public function __construct($map_id = null) {
 		global $wpgmza;
 
+		/* Never below 0: -1 means "create a map", and this value comes from the page address */
 		if($map_id === null)
-			$map_id = intval($_REQUEST['map_id']);
+			$map_id = isset($_REQUEST['map_id']) && is_scalar($_REQUEST['map_id']) ? max(0, intval($_REQUEST['map_id'])) : 0;
 
 		$map = $this->map = Map::createInstance($map_id);
 		$map->element->setInlineStyle('min-height', '400px');	// Safeguard for map edit page zero height

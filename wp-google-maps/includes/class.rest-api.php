@@ -1218,8 +1218,13 @@ class RestAPI extends Factory
 					$id = $m[1];
 					
 				if($id){
-					$marker = Marker::createInstance($id);
-					
+					/* A marker that no longer exists (already deleted elsewhere) used to end in a fatal error (HTTP 500) */
+					try{
+						$marker = Marker::createInstance($id);
+					} catch(\Exception $e) {
+						return new \WP_Error('wpgmza_marker_not_found', 'Marker does not exist', array('status' => 404));
+					}
+
 					$mapId = $marker->map_id;
 
 					$marker->trash();
@@ -1255,9 +1260,12 @@ class RestAPI extends Factory
 		$request = $this->getRequestParameters();
 		
 		// NB: Legacy support
-		if(isset($request['wpgmzaDataTableRequestData']))
+		if(isset($request['wpgmzaDataTableRequestData']) && is_array($request['wpgmzaDataTableRequestData']))
 			$request = $request['wpgmzaDataTableRequestData'];
 
+		/* This route is public: a request without a (text) class name is refused here instead of raising PHP warnings */
+		if(empty($request['phpClass']) || !is_string($request['phpClass']))
+			return new \WP_Error('wpgmza_invalid_datatable_class', 'Invalid class specified', array('status' => 403));
 
 		if(RestAPI::isRequestURIUsingCompressedPathVariable())
 			$class = '\\' . $request['phpClass'];
@@ -1293,7 +1301,9 @@ class RestAPI extends Factory
 			return new \WP_Error('wpgmza_invalid_datatable_class', 'You do not have permission to view this table', array('status' => 403));
 
 		if($isMarkerListingSubclass){
-			$map_id = $request['map_id'];
+			/* Security: only a positive integer map ID. Map::createInstance() treats an array as "create a map with these
+			 * fields", and this route is public */
+			$map_id = isset($request['map_id']) && is_scalar($request['map_id']) && intval($request['map_id']) > 0 ? intval($request['map_id']) : null;
 			$instance = $class::createInstance($map_id);
 		} else {
 			$instance = $class::createInstance();
