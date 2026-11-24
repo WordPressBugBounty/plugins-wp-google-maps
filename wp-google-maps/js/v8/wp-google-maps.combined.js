@@ -2109,9 +2109,15 @@ jQuery(function($) {
 		setTimeout(initFeatureLists, 1000);
 	});
 
-	$(window).on('load', function(){
+	/* Fallback initialization (see atlas-major-tabs.js). This file runs once the document is ready, and on a fast or cached page the window
+	 * "load" event can already have fired by then, so a listener added here would never run and the editor stayed
+	 * empty. When the page has already loaded, start straight after the other ready handlers instead */
+	if(document.readyState === 'complete')
 		setTimeout(initFeatureLists, 1500);
-	});
+	else
+		$(window).on('load', function(){
+			setTimeout(initFeatureLists, 1500);
+		});
 });
 
 
@@ -5277,9 +5283,15 @@ jQuery(function($) {
 		setTimeout(initMarkerList, 1000);
 	});
 
-	$(window).on('load', function(){
+	/* Fallback initialization (see atlas-major-tabs.js). This file runs once the document is ready, and on a fast or cached page the window
+	 * "load" event can already have fired by then, so a listener added here would never run and the editor stayed
+	 * empty. When the page has already loaded, start straight after the other ready handlers instead */
+	if(document.readyState === 'complete')
 		setTimeout(initMarkerList, 1500);
-	});
+	else
+		$(window).on('load', function(){
+			setTimeout(initMarkerList, 1500);
+		});
 
 	$(document.body).on('markersfetched', function(){
 		if(WPGMZA.atlasMajorMarkerList){
@@ -12564,6 +12576,22 @@ jQuery(function($) {
 		if(json && json.other_settings)
 			addSettings(json.other_settings);
 
+		/* Security: a map element's settings can be written by anyone who can save post content, so a per map tile
+		 * server definition is not taken from the element. Only the chosen server's name is, and its definition
+		 * comes from the list the plugin prints into the page itself (TileServers::printRequestedOverrides), which
+		 * post authors cannot write.
+		 *
+		 * When there is no list at all (a WP Go Maps older than 10.2.04 next to a newer Pro, an editor preview, or
+		 * content loaded into the page afterwards) the element's copy is still used, so the map keeps its tiles.
+		 * Its attribution is cleaned in configureTileServer either way */
+		var overrides = window.WPGMZA_tile_server_overrides;
+		if(overrides && typeof overrides === "object"){
+			delete self.tile_server_override_config;
+
+			if(self.tile_server_override && Object.prototype.hasOwnProperty.call(overrides, self.tile_server_override))
+				self.tile_server_override_config = overrides[self.tile_server_override];
+		}
+
 	}
 	
 	/**
@@ -13074,7 +13102,7 @@ jQuery(function($) {
 
 				/* Definition - Attributions */
 				if(config.definition.attribution){
-					let attribution = config.definition.attribution;
+					let attribution = String(config.definition.attribution);
 					let attrReplace = {
 						YEAR : new Date().getFullYear()
 					};
@@ -13082,6 +13110,11 @@ jQuery(function($) {
 					for(let replaceK in attrReplace){
 						attribution = attribution.replace(`{{${replaceK}}}`, attrReplace[replaceK]);
 					}
+
+					/* Security: Leaflet and OpenLayers write this into the page as HTML. Every definition ends up here
+					 * (the site's tile server, a per map override, and each layer of a multi layer server), so it is
+					 * cleaned at this one point: text and plain http(s) links only */
+					attribution = WPGMZA.MapSettings.sanitizeAttribution(attribution);
 
 					config.options.attributions = attribution;
 					config.options.attribution = attribution;
@@ -19614,14 +19647,21 @@ jQuery(function($) {
 		}
 	});
 
-	/* Fallback initialization */
-	$(window).on('load', function(){
+	/* Fallback initialization. This file runs once the document is ready, and on a fast or cached page the window
+	 * "load" event can already have fired by then, so a listener added here would never run and the editor stayed
+	 * empty. When the page has already loaded, start straight after the other ready handlers instead */
+	function startAfterLoad(){
 		if(!WPGMZA.atlasMajorTabs && document.querySelector('.wpgmza-atlas-major')){
 			WPGMZA.atlasMajorTabs = new WPGMZA.AtlasMajorTabs();
 			WPGMZA.atlasMajorTabs.initQuickAddMarker();
 		}
 		initDualZoomSliders();
-	});
+	}
+
+	if(document.readyState === 'complete')
+		setTimeout(startAfterLoad, 0);
+	else
+		$(window).on('load', startAfterLoad);
 
 	/* ========================================================
 	   DUAL-HANDLE ZOOM RANGE SLIDER
@@ -31225,15 +31265,25 @@ jQuery(function($) {
 			});
 		
 			this.rightClickMarker.on("dragend", function(event) {
-				$(".wpgmza-marker-panel [data-ajax-name='address']").val(event.latLng.lat + ", " + event.latLng.lng);
+				self.rightClickMarkerAddress = event.latLng.lat + ", " + event.latLng.lng;
+				$(".wpgmza-marker-panel [data-ajax-name='address']").val(self.rightClickMarkerAddress);
 			});
-			
+
 			this.map.on("click", function(event) {
+				/* This listener stays for the whole editor session. Once the right click marker has been removed there
+				 * is nothing to undo, so leave the address alone: it used to be cleared on every later click on the map,
+				 * including while an existing marker was being edited, and saving then stored an empty address */
+				if(!self.rightClickMarker.getMap())
+					return;
+
 				/* Remove the marker on left click*/
 				self.rightClickMarker.setMap(null);
 
-				/* Seeing as we are removing the marker, clear the lat/lng combo as well */
-				$(".wpgmza-marker-panel [data-ajax-name='address']").val("");
+				/* Seeing as we are removing the marker, clear the lat/lng combo as well, but only if the box still holds
+				 * the position this marker put there (not an address typed in, or an existing marker's address) */
+				var $address = $(".wpgmza-marker-panel [data-ajax-name='address']");
+				if($address.val() === self.rightClickMarkerAddress)
+					$address.val("");
 			});
 		}
 		
@@ -31241,8 +31291,9 @@ jQuery(function($) {
 		
 		marker.setPosition(event.latLng);
 		marker.setMap(this.map);
-		
-		$(".wpgmza-marker-panel [data-ajax-name='address']").val(event.latLng.lat+', '+event.latLng.lng);
+
+		this.rightClickMarkerAddress = event.latLng.lat+', '+event.latLng.lng;
+		$(".wpgmza-marker-panel [data-ajax-name='address']").val(this.rightClickMarkerAddress);
 	}
 	
 	WPGMZA.MapEditPage.prototype.onDeletePolygon = function(event)
@@ -33534,7 +33585,9 @@ jQuery(function($) {
 			const attributionOptions = { collapsible: true };
 			if(typeof WPGMZA.tileServer !== 'undefined' && WPGMZA.tileServer instanceof Object){
 				if(WPGMZA.tileServer.attribution && WPGMZA.tileServer.type === 'xyz'){
-					attributionOptions.attributions = WPGMZA.tileServer.attribution;
+					/* Cleaned the same way as the tile layer's own attribution (MapSettings.configureTileServer).
+					 * OpenLayers shows identical attributions once, so the two must stay the same text */
+					attributionOptions.attributions = WPGMZA.MapSettings.sanitizeAttribution(String(WPGMZA.tileServer.attribution).replace("{{YEAR}}", new Date().getFullYear()));
 				}
 			}
 			const attribution = new ol.control.Attribution(attributionOptions);

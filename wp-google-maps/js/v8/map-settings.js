@@ -61,6 +61,22 @@ jQuery(function($) {
 		if(json && json.other_settings)
 			addSettings(json.other_settings);
 
+		/* Security: a map element's settings can be written by anyone who can save post content, so a per map tile
+		 * server definition is not taken from the element. Only the chosen server's name is, and its definition
+		 * comes from the list the plugin prints into the page itself (TileServers::printRequestedOverrides), which
+		 * post authors cannot write.
+		 *
+		 * When there is no list at all (a WP Go Maps older than 10.2.04 next to a newer Pro, an editor preview, or
+		 * content loaded into the page afterwards) the element's copy is still used, so the map keeps its tiles.
+		 * Its attribution is cleaned in configureTileServer either way */
+		var overrides = window.WPGMZA_tile_server_overrides;
+		if(overrides && typeof overrides === "object"){
+			delete self.tile_server_override_config;
+
+			if(self.tile_server_override && Object.prototype.hasOwnProperty.call(overrides, self.tile_server_override))
+				self.tile_server_override_config = overrides[self.tile_server_override];
+		}
+
 	}
 	
 	/**
@@ -571,7 +587,7 @@ jQuery(function($) {
 
 				/* Definition - Attributions */
 				if(config.definition.attribution){
-					let attribution = config.definition.attribution;
+					let attribution = String(config.definition.attribution);
 					let attrReplace = {
 						YEAR : new Date().getFullYear()
 					};
@@ -579,6 +595,11 @@ jQuery(function($) {
 					for(let replaceK in attrReplace){
 						attribution = attribution.replace(`{{${replaceK}}}`, attrReplace[replaceK]);
 					}
+
+					/* Security: Leaflet and OpenLayers write this into the page as HTML. Every definition ends up here
+					 * (the site's tile server, a per map override, and each layer of a multi layer server), so it is
+					 * cleaned at this one point: text and plain http(s) links only */
+					attribution = WPGMZA.MapSettings.sanitizeAttribution(attribution);
 
 					config.options.attributions = attribution;
 					config.options.attribution = attribution;

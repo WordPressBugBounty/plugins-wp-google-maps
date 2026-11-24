@@ -557,15 +557,25 @@ jQuery(function($) {
 			});
 		
 			this.rightClickMarker.on("dragend", function(event) {
-				$(".wpgmza-marker-panel [data-ajax-name='address']").val(event.latLng.lat + ", " + event.latLng.lng);
+				self.rightClickMarkerAddress = event.latLng.lat + ", " + event.latLng.lng;
+				$(".wpgmza-marker-panel [data-ajax-name='address']").val(self.rightClickMarkerAddress);
 			});
-			
+
 			this.map.on("click", function(event) {
+				/* This listener stays for the whole editor session. Once the right click marker has been removed there
+				 * is nothing to undo, so leave the address alone: it used to be cleared on every later click on the map,
+				 * including while an existing marker was being edited, and saving then stored an empty address */
+				if(!self.rightClickMarker.getMap())
+					return;
+
 				/* Remove the marker on left click*/
 				self.rightClickMarker.setMap(null);
 
-				/* Seeing as we are removing the marker, clear the lat/lng combo as well */
-				$(".wpgmza-marker-panel [data-ajax-name='address']").val("");
+				/* Seeing as we are removing the marker, clear the lat/lng combo as well, but only if the box still holds
+				 * the position this marker put there (not an address typed in, or an existing marker's address) */
+				var $address = $(".wpgmza-marker-panel [data-ajax-name='address']");
+				if($address.val() === self.rightClickMarkerAddress)
+					$address.val("");
 			});
 		}
 		
@@ -573,8 +583,9 @@ jQuery(function($) {
 		
 		marker.setPosition(event.latLng);
 		marker.setMap(this.map);
-		
-		$(".wpgmza-marker-panel [data-ajax-name='address']").val(event.latLng.lat+', '+event.latLng.lng);
+
+		this.rightClickMarkerAddress = event.latLng.lat+', '+event.latLng.lng;
+		$(".wpgmza-marker-panel [data-ajax-name='address']").val(this.rightClickMarkerAddress);
 	}
 	
 	WPGMZA.MapEditPage.prototype.onDeletePolygon = function(event)

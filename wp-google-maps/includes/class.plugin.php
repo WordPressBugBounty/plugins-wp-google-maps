@@ -113,6 +113,11 @@ class Plugin extends Factory
 		// Style preload hoist - off unless wpgmza_enable_style_preload_hoist is set,
 		// see maybePreloadStyleHoist()
 		add_action('wp_enqueue_scripts', array($this, 'maybePreloadStyleHoist'));
+
+		// Per map tile server definitions (security: read from here by the map script, not from map elements).
+		// Printed as late as possible, so maps rendered in the footer (popups) are included
+		add_action('wp_footer', array('WPGMZA\TileServers', 'printRequestedOverrides'), PHP_INT_MAX);
+		add_action('admin_footer', array('WPGMZA\TileServers', 'printRequestedOverrides'), PHP_INT_MAX);
 		
 		// Spatial function prefixes
 		$this->mysqlVersion = $wpdb->get_var('SELECT VERSION()');

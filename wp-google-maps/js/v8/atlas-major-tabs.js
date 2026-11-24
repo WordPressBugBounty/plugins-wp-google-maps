@@ -485,14 +485,21 @@ jQuery(function($) {
 		}
 	});
 
-	/* Fallback initialization */
-	$(window).on('load', function(){
+	/* Fallback initialization. This file runs once the document is ready, and on a fast or cached page the window
+	 * "load" event can already have fired by then, so a listener added here would never run and the editor stayed
+	 * empty. When the page has already loaded, start straight after the other ready handlers instead */
+	function startAfterLoad(){
 		if(!WPGMZA.atlasMajorTabs && document.querySelector('.wpgmza-atlas-major')){
 			WPGMZA.atlasMajorTabs = new WPGMZA.AtlasMajorTabs();
 			WPGMZA.atlasMajorTabs.initQuickAddMarker();
 		}
 		initDualZoomSliders();
-	});
+	}
+
+	if(document.readyState === 'complete')
+		setTimeout(startAfterLoad, 0);
+	else
+		$(window).on('load', startAfterLoad);
 
 	/* ========================================================
 	   DUAL-HANDLE ZOOM RANGE SLIDER

@@ -5,6 +5,10 @@ namespace WPGMZA;
 class TileServers {
 	private static $cached;
 
+	/* Tile server definitions used as a per map override on this page, by slug */
+	private static $requestedOverrides = array();
+	private static $overridesPrinted = false;
+
     /**
      * Get the list of available servers
      * 
@@ -90,6 +94,58 @@ class TileServers {
     }
 
     /**
+     * Get a server by slug for use as a per map override, and remember it so it is printed with the page
+     *
+     * @param string $slug
+     *
+     * @return object|false
+     */
+    public static function registerOverride($slug){
+        $server = TileServers::getBySlug($slug);
+
+        if(!empty($server)){
+            TileServers::$requestedOverrides[trim($slug)] = $server;
+        }
+
+        return $server;
+    }
+
+    /**
+     * Print the per map tile server definitions used on this page
+     *
+     * Security: the map script reads these from here, never from a map element, because an element's attributes can
+     * be written by anyone who can save post content. The list is printed whenever the plugin's scripts are on the
+     * page, also when it is empty, so the script can tell "no override" from "no list" (an older WP Go Maps)
+     *
+     * @return void
+     */
+    public static function printRequestedOverrides(){
+        if(TileServers::$overridesPrinted){
+            return;
+        }
+
+        if(empty(TileServers::$requestedOverrides) && !wp_script_is('wpgmza', 'enqueued') && !wp_script_is('wpgmza', 'done')){
+            return;
+        }
+
+        TileServers::$overridesPrinted = true;
+
+        $overrides = TileServers::$requestedOverrides;
+
+        if(is_admin()){
+            /* Editors (block editor, page builders) add map previews to the page after this list has been printed,
+             * so in the admin area every definition is listed. The front end lists only what the page uses */
+            foreach(TileServers::getList() as $slug => $server){
+                if(empty($overrides[$slug])){
+                    $overrides[$slug] = TileServers::hydrate($server);
+                }
+            }
+        }
+
+        wp_print_inline_script_tag('window.WPGMZA_tile_server_overrides = ' . wp_json_encode((object) $overrides, JSON_HEX_TAG | JSON_HEX_AMP) . ';');
+    }
+
+    /**
      * Get the list, based on the settings object
      * 
      * More specifically, we check the engine and then determine the active setting option for
@@ -107,8 +163,12 @@ class TileServers {
 			switch($settings->engine){
 				case 'open-layers':
 				case 'open-layers-latest':
-				case 'leaflet':
 					$tileServer = TileServers::getByUrl(!empty($settings->tile_server_url) ? $settings->tile_server_url : false);
+					break;
+				case 'leaflet':
+					/* When nothing is saved yet the Leaflet map draws OpenStreetMap's standard tiles (see LeafletMap), so
+					 * use that definition: without one the map showed no attribution for those tiles */
+					$tileServer = !empty($settings->tile_server_url) ? TileServers::getByUrl($settings->tile_server_url) : TileServers::getBySlug('openstreetmap');
 					break;
 				case 'leaflet-azure':
 					$tileServer = TileServers::getByUrl(!empty($settings->tile_server_url_leaflet_azure) ? $settings->tile_server_url_leaflet_azure : false);
@@ -123,7 +183,8 @@ class TileServers {
 					$tileServer = TileServers::getByUrl(!empty($settings->tile_server_url_leaflet_locationiq) ? $settings->tile_server_url_leaflet_locationiq : false);
 					break;
                 case 'leaflet-zerocost':
-					$tileServer = TileServers::getByUrl(!empty($settings->tile_server_url_leaflet_zerocost) ? $settings->tile_server_url_leaflet_zerocost : false);
+					/* As for Leaflet above: with no style saved the map draws OpenStreetMap's standard tiles */
+					$tileServer = !empty($settings->tile_server_url_leaflet_zerocost) ? TileServers::getByUrl($settings->tile_server_url_leaflet_zerocost) : TileServers::getBySlug('openstreetmap');
 					break;
                 case 'leaflet-gotiles':
 					/* Go Tiles needs no setup, so fall back to the light style (as the map JS does) when nothing is saved yet */

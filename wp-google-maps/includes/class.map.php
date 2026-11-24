@@ -89,7 +89,10 @@ class Map extends Crud
 		$ignore = array('shortcode');
 
 		if(!empty($this->tile_server_override)){
-			$localized->tile_server_override_config = TileServers::getBySlug($this->tile_server_override);
+			/* The definition is printed into the page separately (TileServers::printRequestedOverrides), where post
+			 * authors cannot write, and current scripts read it from there. It is still added to the element for
+			 * script bundles older than 10.2.04 (an older Pro), which only read it from here */
+			$localized->tile_server_override_config = TileServers::registerOverride($this->tile_server_override);
 		}
 
 		foreach ($ignore as $key) {

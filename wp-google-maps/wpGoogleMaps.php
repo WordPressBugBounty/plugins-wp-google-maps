@@ -3,7 +3,7 @@
 Plugin Name: WP Go Maps (formerly WP Google Maps)
 Plugin URI: https://www.wpgmaps.com
 Description: The easiest to use Google Maps plugin! Create custom Google Maps or a map block with high quality markers containing locations, descriptions, images and links. Add your customized map to your WordPress posts and/or pages quickly and easily with the supplied shortcode. No fuss.
-Version: 10.2.03
+Version: 10.2.04
 Author: WP Go Maps (formerly WP Google Maps)
 Author URI: https://www.wpgmaps.com
 Text Domain: wp-google-maps
@@ -14,6 +14,13 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 
 /*
+ * 10.2.04 - 2026-11-23
+ * Fixed an issue where a map element added to post content could supply its own tile server definition, and the attribution text from it was shown without being cleaned. Tile server attributions are now always cleaned before they are shown, and a per map tile server is only read from the list the plugin prints into the page. Security issue, thanks to Santh (Patchstack).
+ * Fixed issue where a JSON import whose markers include stored marker data (other_data), for example a feed or a JSON export from this plugin with marker pictures, stopped after the first marker, and that map could then no longer load its markers. Introduced in 10.2.03. Markers affected load again after this update, with their pictures, without importing again.
+ * Fixed issue where, after right clicking the map in the map editor to place a marker, every later click on the map emptied the marker address box, including while editing an existing marker, so saving stored an empty address. The address is now only cleared when the right click marker itself is removed. This issue has been present since 9.0.0.
+ * Fixed issue where the Atlas Major map editor could open without its tabs, marker list and quick add box when the page loaded very quickly.
+ * Fixed issue where maps on the Zero Cost and Leaflet engines showed no OpenStreetMap attribution when no tile style had been saved yet.
+ *
  * 10.2.03 - 2026-11-20
  * Fixed an issue where a map could be created with settings that had not been cleaned, by sending a map ID in an unexpected form. Map settings are now cleaned whenever a map is created, the marker listing route only accepts a valid map ID, and custom image attributions only allow plain text and links. Security issue, thanks to Christopher Miller.
  * Fixed an issue where the map editor could create a new map when its page address carried an invalid map ID. Security issue, thanks to Christopher Miller.

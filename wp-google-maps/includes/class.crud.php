@@ -49,8 +49,18 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 					continue;
 
 				/* Creating from an array stores the values, so sanitise them by field type as set() and __set() do. Bulk
-				 * reads are rows already in the database and are left as they are */
-				$this->fields[$key] = ($read_mode == Crud::BULK_READ) ? $value : static::sanitizeFieldValue($key, $value);
+				 * reads are rows already in the database and are left as they are.
+				 *
+				 * The arbitrary data column (other_data, other_settings) is left alone too: it holds a serialized value,
+				 * not text. The text filter removed the NUL characters PHP writes for protected properties (a marker's
+				 * gallery), which corrupted it: JSON imports that carry other_data stopped after the first marker, and
+				 * that map's markers could no longer be listed. Its values are cleaned one by one instead, as set() does */
+				if($read_mode == Crud::BULK_READ)
+					$this->fields[$key] = $value;
+				else if($key === $this->get_arbitrary_data_column_name())
+					$this->fields[$key] = static::sanitizeArbitraryData($value, $key);
+				else
+					$this->fields[$key] = static::sanitizeFieldValue($key, $value);
 			}
 			
 			$obj = (object)$id_or_fields;
@@ -342,9 +352,95 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		if(!is_string($data) || !is_serialized($data))
 			return $data;
 
-		$result = @unserialize(trim($data), array('allowed_classes' => array('stdClass', 'WPGMZA\\MarkerGallery', 'WPGMZA\\MarkerGalleryItem')));
+		$allowed = array('allowed_classes' => array('stdClass', 'WPGMZA\\MarkerGallery', 'WPGMZA\\MarkerGalleryItem'));
+		$result = @unserialize(trim($data), $allowed);
 
-		return ($result === false && trim($data) !== 'b:0;') ? $data : $result;
+		if($result === false && trim($data) !== 'b:0;'){
+			/* 10.2.03 removed the NUL characters around protected property names from values created by an import
+			 * (the name "\0*\0items" was stored as "*items"). The length in front of the name still counts them, so
+			 * they can be put back exactly */
+			$repaired = preg_replace_callback('/s:(\d+):"\*([A-Za-z_][A-Za-z0-9_]*)";/', function($m){
+				return intval($m[1]) === strlen($m[2]) + 3 ? 's:' . $m[1] . ':"' . "\0*\0" . $m[2] . '";' : $m[0];
+			}, trim($data));
+
+			if($repaired !== trim($data))
+				$result = @unserialize($repaired, $allowed);
+
+			if($result === false){
+				/* The same filter also rewrote text inside the value ("&" became "&amp;", tags were removed), so the
+				 * lengths in front of those texts no longer match */
+				$relengthed = static::repairSerializedLengths($repaired);
+
+				if($relengthed !== $repaired)
+					$result = @unserialize($relengthed, $allowed);
+			}
+
+			if($result === false)
+				return $data;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Repairs the text lengths in a serialized value whose texts were altered after it was serialized (10.2.03 passed
+	 * imported values through a text filter). Each text is found by its closing quote instead of its stated length.
+	 * Where turning "&amp;", "&lt;" and "&gt;" back gives exactly the stated length, the original text is restored;
+	 * otherwise the text is kept as it now is, with its real length.
+	 * @param string $data
+	 * @return string The repaired value, or $data unchanged when it cannot be worked out
+	 */
+	protected static function repairSerializedLengths($data)
+	{
+		$out = '';
+		$pos = 0;
+		$total = strlen($data);
+
+		while(preg_match('/s:(\d+):"/', $data, $m, PREG_OFFSET_CAPTURE, $pos))
+		{
+			$start = $m[0][1];
+			$declared = (int) $m[1][0];
+			$body = $start + strlen($m[0][0]);
+
+			$out .= substr($data, $pos, $start - $pos);
+
+			if(substr($data, $body + $declared, 2) === '";')
+			{
+				$content = substr($data, $body, $declared);
+				$end = $body + $declared;
+			}
+			else
+			{
+				/* The text ends at the first closing quote that is followed by the next item, or by the end */
+				$end = false;
+				$scan = $body;
+
+				while(($quote = strpos($data, '";', $scan)) !== false)
+				{
+					if($quote + 2 >= $total || preg_match('/\G(?:\}|[aOsidb]:|N;)/', $data, $unused, 0, $quote + 2))
+					{
+						$end = $quote;
+						break;
+					}
+
+					$scan = $quote + 1;
+				}
+
+				if($end === false)
+					return $data;
+
+				$content = substr($data, $body, $end - $body);
+				$decoded = str_replace(array('&lt;', '&gt;', '&amp;'), array('<', '>', '&'), $content);
+
+				if(strlen($decoded) === $declared)
+					$content = $decoded;
+			}
+
+			$out .= 's:' . strlen($content) . ':"' . $content . '";';
+			$pos = $end + 2;
+		}
+
+		return $out . substr($data, $pos);
 	}
 
 	/**
@@ -747,6 +843,36 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		return wp_kses_post($value);
 	}
 
+	/**
+	 * Cleans a serialized arbitrary data value (other_data, other_settings) given when creating from an array. Each
+	 * text value in it is cleaned by its own name with sanitizeFieldValue(), exactly as set() and __set() would clean
+	 * it when stored one at a time, and the result is serialized again. The serialized string itself is never passed
+	 * through a text filter (see the constructor) when it can be read. Anything that is not a readable serialized array or
+	 * plain object (plain text, unreadable data) is cleaned as text, as 10.2.03 did
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	public static function sanitizeArbitraryData($value, $name = null)
+	{
+		if(!is_string($value))
+			return $value;
+
+		$data = Crud::safeUnserialize($value);
+		$isObject = $data instanceof \stdClass;
+
+		if($isObject)
+			$data = (array) $data;
+
+		/* Plain text, or serialized data that cannot be read: nothing to preserve, so it is cleaned as text */
+		if(!is_array($data))
+			return static::sanitizeFieldValue($name, $value);
+
+		foreach($data as $name => $item)
+			$data[$name] = static::sanitizeFieldValue($name, $item);
+
+		return serialize($isObject ? (object) $data : $data);
+	}
+
 	public function __set($name, $value)
 	{
 		global $wpdb;
@@ -790,10 +916,15 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		
 		$raw = $wpdb->get_var($stmt);
 		$data = Crud::safeUnserialize($raw);
-		
-		if(empty($data))
+
+		/* Stored data that cannot be read (corrupted) comes back as the raw string: start again from nothing instead
+		 * of failing, so the row can still be read, listed and saved */
+		if(is_object($data))
+			$data = (array) $data;
+
+		if(empty($data) || !is_array($data))
 			$data = array();
-		
+
 		$data[$name] = $value;
 		
 		$data = serialize($data);

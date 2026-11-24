@@ -41,7 +41,9 @@ jQuery(function($) {
 			const attributionOptions = { collapsible: true };
 			if(typeof WPGMZA.tileServer !== 'undefined' && WPGMZA.tileServer instanceof Object){
 				if(WPGMZA.tileServer.attribution && WPGMZA.tileServer.type === 'xyz'){
-					attributionOptions.attributions = WPGMZA.tileServer.attribution;
+					/* Cleaned the same way as the tile layer's own attribution (MapSettings.configureTileServer).
+					 * OpenLayers shows identical attributions once, so the two must stay the same text */
+					attributionOptions.attributions = WPGMZA.MapSettings.sanitizeAttribution(String(WPGMZA.tileServer.attribution).replace("{{YEAR}}", new Date().getFullYear()));
 				}
 			}
 			const attribution = new ol.control.Attribution(attributionOptions);

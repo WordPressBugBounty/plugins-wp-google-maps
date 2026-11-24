@@ -1145,9 +1145,15 @@ jQuery(function($) {
 		setTimeout(initMarkerList, 1000);
 	});
 
-	$(window).on('load', function(){
+	/* Fallback initialization (see atlas-major-tabs.js). This file runs once the document is ready, and on a fast or cached page the window
+	 * "load" event can already have fired by then, so a listener added here would never run and the editor stayed
+	 * empty. When the page has already loaded, start straight after the other ready handlers instead */
+	if(document.readyState === 'complete')
 		setTimeout(initMarkerList, 1500);
-	});
+	else
+		$(window).on('load', function(){
+			setTimeout(initMarkerList, 1500);
+		});
 
 	$(document.body).on('markersfetched', function(){
 		if(WPGMZA.atlasMajorMarkerList){
