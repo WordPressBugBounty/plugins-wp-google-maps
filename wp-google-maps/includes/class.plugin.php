@@ -118,6 +118,10 @@ class Plugin extends Factory
 		// Printed as late as possible, so maps rendered in the footer (popups) are included
 		add_action('wp_footer', array('WPGMZA\TileServers', 'printRequestedOverrides'), PHP_INT_MAX);
 		add_action('admin_footer', array('WPGMZA\TileServers', 'printRequestedOverrides'), PHP_INT_MAX);
+
+		/* Sites that show KML or GeoRSS files stay on the last Google Maps version that draws them. Early priority,
+		 * so a site's own filter can still choose a version */
+		add_filter('wpgmza_google_maps_api_params', array('WPGMZA\GoogleMapsLoader', 'keepKmlVersion'), 5);
 		
 		// Spatial function prefixes
 		$this->mysqlVersion = $wpdb->get_var('SELECT VERSION()');

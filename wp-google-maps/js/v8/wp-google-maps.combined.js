@@ -11139,6 +11139,10 @@ jQuery(function($) {
 			nonce: this.element.attr("data-ajax-nonce"),
 			wpgmza_maps_engine : this.engine,
 			tile_server_url : formData.tile_server_url,
+			/* The Zero Cost and Go Tiles steps have their own style pickers. Their choice was collected but never sent,
+			 * so the chosen style was not saved (undefined values are left out of the request) */
+			tile_server_url_leaflet_zerocost : formData.tile_server_url_leaflet_zerocost,
+			tile_server_url_leaflet_gotiles : formData.tile_server_url_leaflet_gotiles,
 			api_key : this.apiKey
 		};
 

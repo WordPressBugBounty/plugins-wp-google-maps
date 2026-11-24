@@ -59,8 +59,34 @@ class Upgrader
 				 * redirect, for example) would otherwise skip it for good, as the version is recorded straight away */
 				$this->decodeMapTitleEntities();
 			}
+
+			if(version_compare($fromVersion, '10.2.05', '<')){
+				/* Runs immediately, for the same reason as above */
+				$this->saveZeroCostDefaultStyle($settings);
+			}
 		}
 
+	}
+
+	/**
+	 * Before 10.2.05 the setup wizard did not save the tile style chosen for the Zero Cost engine, so a site set up
+	 * that way had no style saved. Its maps then drew OpenStreetMap's own tile servers and not OpenFreeMap, which
+	 * is what Zero Cost is. Saves the default Zero Cost style on such sites. Sites that have a style are not touched,
+	 * and running this again changes nothing.
+	 * @param GlobalSettings $settings
+	 * @return void
+	 */
+	public function saveZeroCostDefaultStyle($settings){
+		if(empty($settings) || empty($settings->wpgmza_maps_engine) || $settings->wpgmza_maps_engine !== 'leaflet-zerocost')
+			return;
+
+		if(!empty($settings->tile_server_url_leaflet_zerocost))
+			return;
+
+		$server = TileServers::getBySlug(TileServers::ZERO_COST_DEFAULT);
+
+		if(!empty($server) && !empty($server->url))
+			$settings->tile_server_url_leaflet_zerocost = $server->url;
 	}
 
 	/**

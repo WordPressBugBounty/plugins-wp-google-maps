@@ -14,6 +14,9 @@ class GoogleMapsLoader
 {
 	private static $googleAPILoadCalled = false;
 	const TEMPORARY_API_KEY	= "QUl6YVN5RG9fZkc3RFhCT1Z2ZGhsckxhLVBIUkV1RkRwVGtsV2hZ";
+
+	/* The last Maps JavaScript API version that draws KML and GeoRSS layers (see getGoogleMapsAPIParams) */
+	const LAST_VERSION_WITH_KML = "3.65";
 	
 	/**
 	 * This will be handled by the Factory class
@@ -127,10 +130,49 @@ class GoogleMapsLoader
 
 		/* Developer Hook (Filter) - Modify Googl Maps API params (URL) */
 		$params = apply_filters( 'wpgmza_google_maps_api_params', $params );
-		
+
 		return $params;
 	}
-	
+
+	/**
+	 * Keeps sites that show KML or GeoRSS files on the last Maps JavaScript API version that draws them.
+	 *
+	 * Google removed KML and GeoRSS layers in version 3.66 (the "quarterly" channel reached it in November 2026), so a
+	 * map with a KML file loaded but no longer showed the file. Version 3.65 still draws them, and Google keeps it
+	 * available until May 2027. Sites with a KML or GeoRSS file on any map get 3.65; every other site stays on
+	 * "quarterly". When Google retires 3.65 it serves the oldest version it still supports instead, so this needs no
+	 * end date, but KML then needs another renderer.
+	 *
+	 * Hooked on wpgmza_google_maps_api_params (see Plugin), which both Google loaders pass their parameters through,
+	 * at an early priority so a site's own filter can still choose a version.
+	 * @param array $params
+	 * @return array
+	 */
+	public static function keepKmlVersion($params)
+	{
+		if(is_array($params) && GoogleMapsLoader::siteHasKmlLayers())
+			$params['v'] = GoogleMapsLoader::LAST_VERSION_WITH_KML;
+
+		return $params;
+	}
+
+	/**
+	 * Whether any map on this site has a KML or GeoRSS file set (the map setting "kml", a comma separated list)
+	 * @return bool
+	 */
+	public static function siteHasKmlLayers()
+	{
+		global $wpdb, $WPGMZA_TABLE_NAME_MAPS;
+
+		if(empty($WPGMZA_TABLE_NAME_MAPS))
+			return false;
+
+		/* active = 0 is a map that has not been trashed */
+		$count = $wpdb->get_var("SELECT COUNT(id) FROM $WPGMZA_TABLE_NAME_MAPS WHERE active = 0 AND kml IS NOT NULL AND TRIM(kml) <> ''");
+
+		return !empty($count);
+	}
+
 	/**
 	 * This function loads the Google API if it hasn't been called already
 	 * @return void

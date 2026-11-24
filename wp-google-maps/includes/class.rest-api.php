@@ -70,6 +70,41 @@ class RestAPI extends Factory
 		$this->nonceTable[$route] = wp_create_nonce('wpgmza_' . $route);
 	}
 	
+	/**
+	 * Whether this request is an editor's own save of a marker or shape, by a user who may store unfiltered HTML.
+	 *
+	 * All of these must hold: the route is the marker or shape save route, the real request method is POST, the user
+	 * may edit maps and has WordPress's unfiltered_html capability (administrators and editors on a single site, only
+	 * super administrators on multisite), and the request has proved it comes from this site's own pages: either this
+	 * route's action nonce was verified just before (the editor sends it with every save, and it is the only nonce
+	 * sent in admin-ajax fallback mode, used where a security plugin blocks the REST API), or it carries a valid
+	 * REST nonce. Without one of the two, another site could make a logged in administrator's browser store markup
+	 * of its choosing, so such a request is saved filtered.
+	 * @param mixed $callback The route's own callback
+	 * @param bool $actionNonceVerified Whether this route's action nonce was required and has passed
+	 * @return bool
+	 */
+	protected function isTrustedHtmlSave($callback, $actionNonceVerified = false)
+	{
+		global $wpgmza;
+
+		if(!is_array($callback) || count($callback) < 2 || $callback[0] !== $this || !in_array($callback[1], array('markers', 'features'), true))
+			return false;
+
+		if(empty($_SERVER['REQUEST_METHOD']) || strtoupper($_SERVER['REQUEST_METHOD']) !== 'POST')
+			return false;
+
+		if(!current_user_can('unfiltered_html') || !$wpgmza->isUserAllowedToEdit())
+			return false;
+
+		if($actionNonceVerified === true)
+			return true;
+
+		$nonce = !empty($_SERVER['HTTP_X_WP_NONCE']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_X_WP_NONCE'])) : '';
+
+		return !empty($nonce) && (bool) wp_verify_nonce($nonce, 'wp_rest');
+	}
+
 	public function getNonceTable()
 	{
 		return $this->nonceTable;
@@ -145,6 +180,10 @@ class RestAPI extends Factory
 					version_compare($wpgmza->getProVersion(), '7.11.47', '>=')
 				);
 
+			/* NB: $route is the route's pattern (for example '/markers(\/\d+)?/'), so the marker and shape save
+			 * routes do not match this list and their action nonce IS required. isTrustedHtmlSave() relies on that
+			 * for saves made in admin-ajax fallback mode, where it is the only nonce sent. If this comparison is
+			 * ever changed so those routes skip the check, such saves are simply stored filtered again */
 			$skipNonceRoutes = array('features', 'markers', 'marker-listing', 'datatables');
 			if(in_array(str_replace('/', '', $route), $skipNonceRoutes)){
 				$doActionNonceCheck = false;
@@ -152,8 +191,18 @@ class RestAPI extends Factory
 				
 			if($doActionNonceCheck && !$this->checkActionNonce($route))
 				return new \WP_Error('wpgmza_action_not_allowed', 'You do not have permission to perform this action', array('status' => 403));
-			
-			return $callback($request);
+
+			/* A marker or shape saved from the editor by a user WordPress trusts with any HTML is stored as written */
+			if(!$this->isTrustedHtmlSave($callback, $doActionNonceCheck))
+				return $callback($request);
+
+			Crud::allowUnfilteredHtml(true);
+
+			try{
+				return $callback($request);
+			} finally {
+				Crud::allowUnfilteredHtml(false);
+			}
 		};
 		
 		if(defined('REST_REQUEST'))

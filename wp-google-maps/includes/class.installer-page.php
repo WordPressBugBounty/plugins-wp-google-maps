@@ -267,6 +267,15 @@ class InstallerPage extends Page {
 					$wpgmza->settings->set('tile_server_url_leaflet_gotiles', sanitize_text_field($_POST['tile_server_url_leaflet_gotiles']));
 				}
 
+				/* Zero Cost chosen but no style arrived (an older script bundle did not send it): save the default
+				 * style, as switching engine from the toolbar does, so the site is never left without one */
+				if(!empty($_POST['wpgmza_maps_engine']) && $_POST['wpgmza_maps_engine'] === 'leaflet-zerocost' && empty($wpgmza->settings->tile_server_url_leaflet_zerocost)){
+					$zeroCost = TileServers::getBySlug(TileServers::ZERO_COST_DEFAULT);
+					if(!empty($zeroCost) && !empty($zeroCost->url)){
+						$wpgmza->settings->set('tile_server_url_leaflet_zerocost', $zeroCost->url);
+					}
+				}
+
 				delete_option('wpgmza-installer-paused');
 
 				/* Delete retrigger events if stored */

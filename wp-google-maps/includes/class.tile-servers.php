@@ -3,6 +3,9 @@
 namespace WPGMZA;
 
 class TileServers {
+	/* The Zero Cost (OpenFreeMap) style saved when the user has not chosen one */
+	const ZERO_COST_DEFAULT = 'openfreemap-liberty';
+
 	private static $cached;
 
 	/* Tile server definitions used as a per map override on this page, by slug */
@@ -183,7 +186,9 @@ class TileServers {
 					$tileServer = TileServers::getByUrl(!empty($settings->tile_server_url_leaflet_locationiq) ? $settings->tile_server_url_leaflet_locationiq : false);
 					break;
                 case 'leaflet-zerocost':
-					/* As for Leaflet above: with no style saved the map draws OpenStreetMap's standard tiles */
+					/* As for Leaflet above: with no style saved the map draws OpenStreetMap's standard tiles. (That state
+					 * should no longer occur: the setup wizard saves a style from 10.2.05, and the upgrade to 10.2.05
+					 * saves the default style on sites it had left without one, see Upgrader) */
 					$tileServer = !empty($settings->tile_server_url_leaflet_zerocost) ? TileServers::getByUrl($settings->tile_server_url_leaflet_zerocost) : TileServers::getBySlug('openstreetmap');
 					break;
                 case 'leaflet-gotiles':

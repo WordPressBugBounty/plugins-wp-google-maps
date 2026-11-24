@@ -3,7 +3,7 @@
 Plugin Name: WP Go Maps (formerly WP Google Maps)
 Plugin URI: https://www.wpgmaps.com
 Description: The easiest to use Google Maps plugin! Create custom Google Maps or a map block with high quality markers containing locations, descriptions, images and links. Add your customized map to your WordPress posts and/or pages quickly and easily with the supplied shortcode. No fuss.
-Version: 10.2.04
+Version: 10.2.05
 Author: WP Go Maps (formerly WP Google Maps)
 Author URI: https://www.wpgmaps.com
 Text Domain: wp-google-maps
@@ -14,6 +14,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 
 /*
+ * 10.2.05 - 2026-11-24
+ * Fixed issue where KML and GeoRSS files stopped showing on Google Maps. Google removed KML layers from its newest Maps version in November 2026, so sites that have a KML or GeoRSS file on a map now load the last Google Maps version that still shows them. Google keeps that version available until May 2027.
+ * Fixed issue where an embedded video (or other embed) in a marker or shape description was removed when it was saved in the map editor. This now follows WordPress's own rule for post content: it is kept when saved by a user WordPress allows to save unfiltered HTML (administrators and editors, or super administrators on multisite). Descriptions from imports, scheduled imports and other users are still cleaned. Introduced in 10.2.00.
+ * Fixed issue where the setup wizard did not save the tile style chosen for the Zero Cost or Go Tiles engines. Sites the wizard left on Zero Cost with no style saved now get the default Zero Cost style, so their maps use OpenFreeMap tiles.
+ *
  * 10.2.04 - 2026-11-23
  * Fixed an issue where a map element added to post content could supply its own tile server definition, and the attribution text from it was shown without being cleaned. Tile server attributions are now always cleaned before they are shown, and a per map tile server is only read from the list the plugin prints into the page. Security issue, thanks to Santh (Patchstack).
  * Fixed issue where a JSON import whose markers include stored marker data (other_data), for example a feed or a JSON export from this plugin with marker pictures, stopped after the first marker, and that map could then no longer load its markers. Introduced in 10.2.03. Markers affected load again after this update, with their pictures, without importing again.

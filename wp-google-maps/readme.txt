@@ -5,7 +5,7 @@ Tags: google maps, maps, map, leaflet map, store locator
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 10.2.04
+Stable tag: 10.2.05
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -307,6 +307,9 @@ To display Leaflet and OpenLayers maps, the visitor's browser loads open source 
 
 == Upgrade Notice ==
 
+= 10.2.05 =
+KML and GeoRSS files show on Google Maps again. If your Google map has a KML file that stopped showing in November 2026, please update to 10.2.05.
+
 = 10.2.04 =
 Security update: please update to 10.2.04. Fixes a security issue with tile server attributions, and an issue in 10.2.03 where JSON imports with marker pictures could stop after the first marker. If you use WP Go Maps Pro, please update Pro to 10.2.04 as well.
 
@@ -356,6 +359,11 @@ Please update to 10.0.08 or above for the latest stability improvements.
 Please update to 10.0.07 or above to ensure you are using the latest architecture, and latest features.
 
 == Changelog ==
+
+= 10.2.05 - 2026-11-24 =
+* Fixed issue where KML and GeoRSS files stopped showing on Google Maps. Google removed KML layers from its newest Maps version in November 2026, so sites that have a KML or GeoRSS file on a map now load the last Google Maps version that still shows them. Google keeps that version available until May 2027.
+* Fixed issue where an embedded video (or other embed) in a marker or shape description was removed when it was saved in the map editor. This now follows WordPress's own rule for post content: it is kept when saved by a user WordPress allows to save unfiltered HTML (administrators and editors, or super administrators on multisite). Descriptions from imports, scheduled imports and other users are still cleaned. Introduced in 10.2.00.
+* Fixed issue where the setup wizard did not save the tile style chosen for the Zero Cost or Go Tiles engines. Sites the wizard left on Zero Cost with no style saved now get the default Zero Cost style, so their maps use OpenFreeMap tiles.
 
 = 10.2.04 - 2026-11-23 =
 * Fixed an issue where a map element added to post content could supply its own tile server definition, and the attribution text from it was shown without being cleaned. Tile server attributions are now always cleaned before they are shown, and a per map tile server is only read from the list the plugin prints into the page. Security issue, thanks to Santh (Patchstack).

@@ -819,6 +819,8 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 	 * @param mixed $value The value
 	 * @return mixed The sanitised value
 	 */
+	private static $unfilteredHtml = false;
+
 	public static function sanitizeFieldValue($name, $value)
 	{
 		if(!is_string($value))
@@ -840,7 +842,27 @@ class Crud extends Factory implements \IteratorAggregate, \JsonSerializable
 		if($name === 'map_title')
 			return sanitize_text_field(wp_specialchars_decode($value, ENT_QUOTES));
 
+		/* An editor's own save, by a user WordPress itself trusts with any HTML (see allowUnfilteredHtml) */
+		if(Crud::$unfilteredHtml)
+			return $value;
+
 		return wp_kses_post($value);
+	}
+
+	/**
+	 * Follows WordPress's own rule for post content: text saved by a user who has the unfiltered_html capability is
+	 * stored as they wrote it (so an embedded video in a marker description is kept), everyone else's is filtered.
+	 *
+	 * Off by default, and never decided here from the user alone: the same cleaning also runs for imported files,
+	 * scheduled imports and visitor submissions, where the text is not the user's own. Only RestAPI switches it on,
+	 * for the length of one marker or shape save that it has verified (see RestAPI::isTrustedHtmlSave), and switches
+	 * it off again straight after. Addresses, links, pictures and titles are still cleaned by type either way.
+	 * @param bool $allow
+	 * @return void
+	 */
+	public static function allowUnfilteredHtml($allow)
+	{
+		Crud::$unfilteredHtml = (bool) $allow;
 	}
 
 	/**
