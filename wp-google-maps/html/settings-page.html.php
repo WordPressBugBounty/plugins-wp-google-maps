@@ -1652,19 +1652,22 @@
 		</fieldset>
 		
 
+		<!-- Dynamic SQL Refactor: removed 2026-11-25 for security (see class.plugin.php). Kept, not rendered. -->
+		<?php if(false): ?>
 		<fieldset>
 			<legend><?php esc_html_e("Enable Dynamic SQL Refactors", "wp-google-maps"); ?></legend>
 			<label>
 				<input name="enable_dynamic_sql_refac_filter" type="checkbox"/>
-				
+
 					<small>
 						<?php
 						esc_html_e("Use this setting if your marker/map lists are not loading, or no results are being returned throughout the system. Commonly recommend in situations where single quote queries are not allowed. (WP Engine Users)", "wp-google-maps");
 						?>
 					</small>
-				
+
 			</label>
 		</fieldset>
+		<?php endif; ?>
 
 		<fieldset id="wpgmza-disable-automatic-backups" class="wpgmza-pro-feature">
 			<legend><?php esc_html_e("Disable Automatic Backups (beta)", "wp-google-maps"); ?></legend>

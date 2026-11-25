@@ -233,10 +233,16 @@ class Plugin extends Factory
 			}
 		}
 
-		if(!empty($this->settings->enable_dynamic_sql_refac_filter)){
-			/* The dynamic SQL refactor option has been enabled */
-			add_filter('query', array($this, 'dynamicQueryRefactor'), 99, 1);
-		}
+		/* SECURITY 2026-11-25: "Enable Dynamic SQL Refactors" is disabled. It registered dynamicQueryRefactor() on
+		 * WordPress's 'query' filter, which rewrote already-prepared SQL. On a database server running in
+		 * NO_BACKSLASH_ESCAPES mode that rewrite could undo prepare()'s escaping and allow unauthenticated SQL
+		 * injection through public routes such as /geocode-cache (reported by Wordfence). The option solved no
+		 * problem we could confirm in support history. Left commented out, with dynamicQueryRefactor() below, so the
+		 * old behaviour stays on record. */
+		// if(!empty($this->settings->enable_dynamic_sql_refac_filter)){
+		// 	/* The dynamic SQL refactor option has been enabled */
+		// 	add_filter('query', array($this, 'dynamicQueryRefactor'), 99, 1);
+		// }
 
 		if(!empty($this->settings->enable_google_csp_headers) && !empty($this->settings->wpgmza_maps_engine) && $this->settings->wpgmza_maps_engine === 'google-maps'){
 			/* Load the Google CSP headers to the site */
@@ -1185,19 +1191,19 @@ class Plugin extends Factory
 	 * 
 	 * @return string
 	 */
-	public function dynamicQueryRefactor($sql){
-		if(strpos($sql, 'wpgmza') !== FALSE){
-			/* This is a WPGMZA query */
-			if(strpos($sql, "REPLACE(map_width_type, '\\\\', '')") !== FALSE){
-				/* Specifically for map params, which is a big cause of the issue */
-				$sql = str_replace("'\\\\'", "''", $sql);
-			}
-			
-			/* General replacement statement */
-			$sql = str_replace("\'", "''", $sql);
-		}
-		return $sql;
-	}
+	/* SECURITY 2026-11-25: disabled, no longer registered on the 'query' filter (see onInit above). Rewriting
+	 * fully-prepared SQL is unsafe; left commented out for reference only. Do not re-enable without replacing it
+	 * with a safe approach (set the connection sql_mode, or fix the specific query before prepare()).
+	// public function dynamicQueryRefactor($sql){
+	// 	if(strpos($sql, 'wpgmza') !== FALSE){
+	// 		if(strpos($sql, "REPLACE(map_width_type, '\\\\', '')") !== FALSE){
+	// 			$sql = str_replace("'\\\\'", "''", $sql);
+	// 		}
+	// 		$sql = str_replace("\'", "''", $sql);
+	// 	}
+	// 	return $sql;
+	// }
+	*/
 
 	/**
 	 * Configures the temporary admin only key for first time usage

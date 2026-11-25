@@ -3261,15 +3261,16 @@
 			</div>
 		</div>
 
-		<!-- Dynamic SQL Refactor -->
+		<!-- Dynamic SQL Refactor: removed 2026-11-25 for security (see class.plugin.php). Kept, not rendered. -->
+		<?php if(false): ?>
 		<div class="tab-row has-hint">
 			<div class="title"><?php esc_html_e("Enable Dynamic SQL Refactors", "wp-google-maps"); ?></div>
 			<div class="switch switch-inline">
 				<input name="enable_dynamic_sql_refac_filter"
 						id="enable_dynamic_sql_refac_filter"
-						class="cmn-toggle cmn-toggle-round-flat" 
+						class="cmn-toggle cmn-toggle-round-flat"
 						type="checkbox"/>
-				
+
 				<label for="enable_dynamic_sql_refac_filter"></label>
 				<label for="enable_dynamic_sql_refac_filter">
 					<small>
@@ -3278,9 +3279,10 @@
 						?>
 					</small>
 				</label>
-				
+
 			</div>
 		</div>
+		<?php endif; ?>
 
 		<!-- Anit Cache -->
 		<div class="tab-row has-hint">

@@ -266,12 +266,27 @@ jQuery(function($) {
 	/**
 	 * Get the filtered marker list based on search term
 	 */
+	/**
+	 * The map's saved markers. The map can also hold markers that exist only in this browser, such as the "user
+	 * location" marker the live preview adds when Show User Location is on (it has a random id and no saved row, and
+	 * showed in this list as an undeletable "California"). Those are left out of the list and the count
+	 * @return {Array}
+	 */
+	WPGMZA.AtlasMajorMarkerList.prototype.getListableMarkers = function(){
+		var map = WPGMZA.maps[0];
+		if(!map || !map.markers) return [];
+
+		return map.markers.filter(function(m){
+			return !m.user_location && m !== map.userLocationMarker;
+		});
+	}
+
 	WPGMZA.AtlasMajorMarkerList.prototype.getFilteredMarkers = function(){
 		var self = this;
 		var map = WPGMZA.maps[0];
 		if(!map) return [];
 
-		var markers = map.markers || [];
+		var markers = this.getListableMarkers();
 		var term = this.searchTerm.toLowerCase().trim();
 
 		if(!term)
@@ -644,8 +659,7 @@ jQuery(function($) {
 	WPGMZA.AtlasMajorMarkerList.prototype.updateCount = function(filteredCount){
 		if(!this.countBadge) return;
 
-		var map = WPGMZA.maps[0];
-		var total = (map && map.markers) ? map.markers.length : 0;
+		var total = this.getListableMarkers().length;
 
 		if(this.searchTerm){
 			this.countBadge.textContent = filteredCount + ' / ' + total;
