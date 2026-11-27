@@ -247,6 +247,22 @@ class AjaxTable extends Table
 		return "";
 	}
 	
+	/**
+	 * Rewrites quotes escaped as \' inside a plugin-written SQL expression as '', which every SQL mode reads as a
+	 * quote, including NO_BACKSLASH_ESCAPES (where \' ends the string). A quote after an escaped backslash (\\') is
+	 * left alone, so expressions such as REPLACE(map_width_type, '\\', '') keep working. Only for SQL the plugin
+	 * writes itself: values from a request must go through $wpdb->prepare(), never through this
+	 * @param mixed $sql
+	 * @return mixed
+	 */
+	public static function portableSqlQuotes($sql)
+	{
+		if(!is_string($sql) || strpos($sql, "\\'") === false)
+			return $sql;
+
+		return preg_replace("/(?<!\\\\)\\\\'/", "''", $sql);
+	}
+
 	protected function buildQueryString($columns, $where, $having, $input_params, &$query_params)
 	{
 		$imploded = implode(',', $columns);
@@ -300,6 +316,14 @@ class AjaxTable extends Table
 		
 		// Columns to select
 		$columns = $this->filterColumns($keys, $input_params);
+
+		/* The admin lists build some columns (action buttons, checkboxes) as HTML inside a quoted SQL string, with
+		 * single quotes written as \'. A database server in NO_BACKSLASH_ESCAPES mode reads that as a backslash
+		 * followed by the end of the string, so the whole list query failed and the list came back empty. Write
+		 * them as '', which every SQL mode reads as a quote. This only touches the column expressions the plugin
+		 * (or an add-on) writes itself, never values from the request, which are passed through prepare() */
+		if(is_array($columns))
+			$columns = array_map(array('WPGMZA\\AjaxTable', 'portableSqlQuotes'), $columns);
 		
 		// Build query string
 		$qstr = $this->buildQueryString($columns, $where, $having, $input_params, $query_params);

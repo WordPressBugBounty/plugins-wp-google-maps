@@ -233,12 +233,8 @@ class Plugin extends Factory
 			}
 		}
 
-		/* SECURITY 2026-11-25: "Enable Dynamic SQL Refactors" is disabled. It registered dynamicQueryRefactor() on
-		 * WordPress's 'query' filter, which rewrote already-prepared SQL. On a database server running in
-		 * NO_BACKSLASH_ESCAPES mode that rewrite could undo prepare()'s escaping and allow unauthenticated SQL
-		 * injection through public routes such as /geocode-cache (reported by Wordfence). The option solved no
-		 * problem we could confirm in support history. Left commented out, with dynamicQueryRefactor() below, so the
-		 * old behaviour stays on record. */
+		/* The "Enable Dynamic SQL Refactors" option was removed in 10.2.06 for security reasons. Left commented out,
+		 * with dynamicQueryRefactor() below, for reference. Do not re-enable. */
 		// if(!empty($this->settings->enable_dynamic_sql_refac_filter)){
 		// 	/* The dynamic SQL refactor option has been enabled */
 		// 	add_filter('query', array($this, 'dynamicQueryRefactor'), 99, 1);
@@ -1191,9 +1187,7 @@ class Plugin extends Factory
 	 * 
 	 * @return string
 	 */
-	/* SECURITY 2026-11-25: disabled, no longer registered on the 'query' filter (see onInit above). Rewriting
-	 * fully-prepared SQL is unsafe; left commented out for reference only. Do not re-enable without replacing it
-	 * with a safe approach (set the connection sql_mode, or fix the specific query before prepare()).
+	/* Disabled in 10.2.06 for security reasons; left commented out for reference only. Do not re-enable.
 	// public function dynamicQueryRefactor($sql){
 	// 	if(strpos($sql, 'wpgmza') !== FALSE){
 	// 		if(strpos($sql, "REPLACE(map_width_type, '\\\\', '')") !== FALSE){

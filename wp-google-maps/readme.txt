@@ -3,9 +3,9 @@ Contributors: WPGMaps, NickDuncan, CodeCabin_, DylanAuty
 Donate link: https://www.wpgmaps.com
 Tags: google maps, maps, map, leaflet map, store locator
 Requires at least: 6.0
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.0
-Stable tag: 10.2.06
+Stable tag: 10.2.07
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -307,6 +307,9 @@ To display Leaflet and OpenLayers maps, the visitor's browser loads open source 
 
 == Upgrade Notice ==
 
+= 10.2.07 =
+Fixes empty maps, markers and shapes lists in the admin area on some database servers. Recommended for all users.
+
 = 10.2.06 =
 Security update: please update to 10.2.06. Removes an option that could allow SQL injection on some server configurations, and fixes a map editor marker list issue.
 
@@ -362,6 +365,9 @@ Please update to 10.0.08 or above for the latest stability improvements.
 Please update to 10.0.07 or above to ensure you are using the latest architecture, and latest features.
 
 == Changelog ==
+
+= 10.2.07 - 2026-11-26 =
+* Fixed issue where the maps, markers and shapes lists in the admin area showed no entries on sites whose database server uses the NO_BACKSLASH_ESCAPES SQL mode. Since 10.2.06 this affected sites that had relied on the option removed in that version; the lists now work on these servers without it.
 
 = 10.2.06 - 2026-11-25 =
 * Security fix: removed the "Enable Dynamic SQL Refactors" option. On database servers configured in a particular way it could allow SQL injection, including through requests that need no login. The option is no longer available; most sites were unaffected as it was turned off by default. Reported by Wordfence.
